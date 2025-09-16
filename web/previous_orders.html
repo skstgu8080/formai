@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Orders - Kpr Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="../static/css/input.css">
+    <link rel="stylesheet" href="../static/css/dashboard.css">
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+            --radius: 0.5rem;
+        }
+        
+        .dark {
+            --background: 0 0% 0%;
+            --foreground: 0 0% 100%;
+            --card: 0 0% 3%;
+            --card-foreground: 0 0% 100%;
+            --popover: 0 0% 3%;
+            --popover-foreground: 0 0% 100%;
+            --primary: 0 0% 100%;
+            --primary-foreground: 0 0% 0%;
+            --secondary: 0 0% 9%;
+            --secondary-foreground: 0 0% 100%;
+            --muted: 0 0% 9%;
+            --muted-foreground: 0 0% 63%;
+            --accent: 0 0% 9%;
+            --accent-foreground: 0 0% 100%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 0 0% 100%;
+            --border: 0 0% 15%;
+            --input: 0 0% 15%;
+            --ring: 0 0% 100%;
+        }
+    </style>
+</head>
+<body class="h-full bg-background text-foreground">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-sidebar border-r border-sidebar-border flex-shrink-0 flex flex-col h-full transition-all duration-300">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-sidebar-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h1 class="text-lg font-semibold text-sidebar-foreground sidebar-text tracking-tight">Kpr</h1>
+                    </div>
+                    <button id="sidebar-toggle" class="p-2 rounded-md text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
+                        <!-- Expanded state - collapse icon -->
+                        <svg id="collapse-icon" class="h-4 w-4 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <!-- Collapsed state - expand icon -->
+                        <svg id="expand-icon" class="h-4 w-4 transition-all duration-300 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar Content -->
+            <div class="flex-1 overflow-y-auto">
+                <!-- Navigation Groups -->
+                <div class="p-2 space-y-6">
+                    <!-- Main Navigation Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Main</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Dashboard">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>
+                                </svg>
+                                <span class="sidebar-text">Dashboard</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Automation Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Automation</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/profiles" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Profiles">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                <span class="sidebar-text">Profiles</span>
+                            </a>
+                            <a href="/automation" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Automation">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/>
+                                </svg>
+                                <span class="sidebar-text">Automation</span>
+                            </a>
+                            <a href="/saved_pages" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Saved Pages">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14,2 14,8 20,8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10,9 9,9 8,9"/>
+                                </svg>
+                                <span class="sidebar-text">Saved Pages</span>
+                            </a>
+                            <a href="/previous-orders" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground bg-sidebar-accent rounded-md sidebar-nav-item active" data-tooltip="Previous Orders">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                    <path d="M9 14l2 2 4-4"/>
+                                </svg>
+                                <span class="sidebar-text">Previous Orders</span>
+                            </a>
+                            <a href="/recorder" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Recorder">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+                                </svg>
+                                <span class="sidebar-text">Recorder</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Data Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Data</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/saved-urls" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="URLs">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/>
+                                </svg>
+                                <span class="sidebar-text">URLs</span>
+                            </a>
+                            <a href="/saved-pages" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Saved Pages">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>
+                                </svg>
+                                <span class="sidebar-text">Saved Pages</span>
+                            </a>
+                            <a href="/previous-orders" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Orders">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                </svg>
+                                <span class="sidebar-text">Orders</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Account Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Account</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/account" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Account">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span class="sidebar-text">Account</span>
+                            </a>
+                            <a href="/settings" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Settings">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
+                                <span class="sidebar-text">Settings</span>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-sidebar-border">
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center">
+                        <span class="text-sm font-medium text-sidebar-primary-foreground">K</span>
+                    </div>
+                    <div class="flex-1 min-w-0 sidebar-user-info">
+                        <p class="text-sm font-medium text-sidebar-foreground truncate">Admin</p>
+                        <p class="text-xs text-sidebar-muted-foreground truncate">Premium User</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Backdrop for Mobile -->
+        <div id="sidebar-overlay" class="sidebar-backdrop hidden"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-background" id="main-content">
+            <!-- Header -->
+            <header class="bg-card/50 border-b border-gray-200 backdrop-blur-sm sticky top-0 z-10">
+                <div class="px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold text-card-foreground tracking-tight">Previous Orders</h2>
+                            <p class="text-sm text-muted-foreground">Track and manage your completed automation orders</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div id="sidebar-status" class="text-xs text-muted-foreground hidden">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-accent text-accent-foreground">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                                    Auto-collapse enabled
+                                </span>
+                            </div>
+                            <div id="keyboard-hint" class="text-xs text-muted-foreground hidden">
+                                <kbd class="px-2 py-1 bg-muted rounded text-xs">Ctrl+B</kbd> to toggle
+                            </div>
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            </button>
+                            <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div class="h-2 w-2 bg-green-500 rounded-full"></div>
+                                <span>Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <div class="p-6">
+                <!-- Previous Orders Management -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-card-foreground">Order History</h3>
+                            <p class="text-sm text-muted-foreground">View and track your completed automation orders</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="refresh-orders-btn" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 inline">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                    <path d="M21 3v5h-5"/>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                    <path d="M3 21v-5h5"/>
+                                </svg>
+                                Refresh
+                            </button>
+                            <button id="export-orders-btn" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 inline">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="bg-card border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-muted/50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Order ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Target</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Forms Filled</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Duration</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body" class="divide-y divide-border">
+                                <!-- Order rows will be dynamically generated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="text-center py-12 hidden">
+                    <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                        <path d="M9 14l2 2 4-4"/>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-card-foreground">No previous orders</h3>
+                    <p class="mt-1 text-sm text-muted-foreground">Complete some automation tasks to see your order history.</p>
+                    <div class="mt-6">
+                        <a href="/automation" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors inline-flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/>
+                            </svg>
+                            Start Automation
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-card rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-lg font-semibold text-card-foreground">Create New Profile</h3>
+                <button id="close-modal" class="text-muted-foreground hover:text-card-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="profile-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="profile-name" class="block text-sm font-medium text-card-foreground mb-2">Profile Name</label>
+                        <input type="text" id="profile-name" name="name" required class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="e.g., Personal Profile">
+                    </div>
+                    <div>
+                        <label for="profile-email" class="block text-sm font-medium text-card-foreground mb-2">Email</label>
+                        <input type="email" id="profile-email" name="email" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="your@email.com">
+                    </div>
+                    <div>
+                        <label for="profile-first-name" class="block text-sm font-medium text-card-foreground mb-2">First Name</label>
+                        <input type="text" id="profile-first-name" name="firstName" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="John">
+                    </div>
+                    <div>
+                        <label for="profile-last-name" class="block text-sm font-medium text-card-foreground mb-2">Last Name</label>
+                        <input type="text" id="profile-last-name" name="lastName" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Doe">
+                    </div>
+                    <div>
+                        <label for="profile-phone" class="block text-sm font-medium text-card-foreground mb-2">Phone</label>
+                        <input type="tel" id="profile-phone" name="phone" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div>
+                        <label for="profile-company" class="block text-sm font-medium text-card-foreground mb-2">Company</label>
+                        <input type="text" id="profile-company" name="company" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Company Name">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="cancel-profile" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">Save Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../static/js/dashboard.js"></script>
+    <script src="../static/js/dashboard-enhanced.js"></script>
+    <script>
+        class PreviousOrdersManager {
+            constructor() {
+                this.orders = [];
+                this.init();
+            }
+
+            init() {
+                this.loadOrders();
+                this.bindEvents();
+                this.renderOrders();
+            }
+
+            bindEvents() {
+                document.getElementById('refresh-orders-btn').addEventListener('click', () => this.loadOrders());
+                document.getElementById('export-orders-btn').addEventListener('click', () => this.exportOrders());
+            }
+
+            async loadOrders() {
+                try {
+                    const response = await fetch('/api/previous-orders');
+                    if (response.ok) {
+                        this.orders = await response.json();
+                    }
+                } catch (error) {
+                    console.error('Failed to load orders:', error);
+                    this.orders = this.getDefaultOrders();
+                }
+                this.renderOrders();
+            }
+
+            getDefaultOrders() {
+                return [
+                    {
+                        id: 'ORD-001',
+                        status: 'completed',
+                        target: 'Facebook Registration',
+                        formsFilled: 1,
+                        duration: '2m 34s',
+                        date: new Date(Date.now() - 86400000).toISOString(),
+                        successRate: 100,
+                        profile: 'Demo Profile'
+                    },
+                    {
+                        id: 'ORD-002',
+                        status: 'completed',
+                        target: 'Macy\'s Account Creation',
+                        formsFilled: 2,
+                        duration: '4m 12s',
+                        date: new Date(Date.now() - 172800000).toISOString(),
+                        successRate: 100,
+                        profile: 'Demo Profile'
+                    },
+                    {
+                        id: 'ORD-003',
+                        status: 'failed',
+                        target: 'Victoria\'s Secret Registration',
+                        formsFilled: 0,
+                        duration: '1m 45s',
+                        date: new Date(Date.now() - 259200000).toISOString(),
+                        successRate: 0,
+                        profile: 'Demo Profile'
+                    },
+                    {
+                        id: 'ORD-004',
+                        status: 'completed',
+                        target: 'Amazon Account Setup',
+                        formsFilled: 3,
+                        duration: '6m 23s',
+                        date: new Date(Date.now() - 345600000).toISOString(),
+                        successRate: 100,
+                        profile: 'Demo Profile'
+                    }
+                ];
+            }
+
+            renderOrders() {
+                const tableBody = document.getElementById('orders-table-body');
+                const emptyState = document.getElementById('empty-state');
+
+                if (this.orders.length === 0) {
+                    tableBody.parentElement.parentElement.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                } else {
+                    tableBody.parentElement.parentElement.classList.remove('hidden');
+                    emptyState.classList.add('hidden');
+                    
+                    tableBody.innerHTML = this.orders.map(order => this.createOrderRow(order)).join('');
+                    this.bindRowEvents();
+                }
+            }
+
+            createOrderRow(order) {
+                const statusColor = order.status === 'completed' ? 'text-green-600' : order.status === 'failed' ? 'text-red-600' : 'text-yellow-600';
+                const statusBg = order.status === 'completed' ? 'bg-green-100 dark:bg-green-900/20' : order.status === 'failed' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20';
+                
+                return `
+                    <tr class="hover:bg-muted/50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-card-foreground">
+                            ${order.id}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBg} ${statusColor}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-card-foreground">
+                            ${order.target}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-card-foreground">
+                            ${order.formsFilled}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-card-foreground">
+                            ${order.duration}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                            ${new Date(order.date).toLocaleDateString()}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="view-order text-primary hover:text-primary/80 transition-colors" data-order-id="${order.id}">
+                                    View
+                                </button>
+                                <button class="retry-order text-secondary-foreground hover:text-card-foreground transition-colors" data-order-id="${order.id}">
+                                    Retry
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            bindRowEvents() {
+                document.querySelectorAll('.view-order').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const orderId = e.target.closest('.view-order').dataset.orderId;
+                        this.viewOrder(orderId);
+                    });
+                });
+
+                document.querySelectorAll('.retry-order').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const orderId = e.target.closest('.retry-order').dataset.orderId;
+                        this.retryOrder(orderId);
+                    });
+                });
+            }
+
+            viewOrder(orderId) {
+                const order = this.orders.find(o => o.id === orderId);
+                if (order) {
+                    // Open order details modal or navigate to details page
+                    alert(`Order Details:\nID: ${order.id}\nStatus: ${order.status}\nTarget: ${order.target}\nForms Filled: ${order.formsFilled}\nDuration: ${order.duration}\nSuccess Rate: ${order.successRate}%`);
+                }
+            }
+
+            retryOrder(orderId) {
+                const order = this.orders.find(o => o.id === orderId);
+                if (order) {
+                    if (confirm(`Retry order ${order.id}?`)) {
+                        // Store order data and navigate to automation page
+                        localStorage.setItem('retryOrder', JSON.stringify(order));
+                        window.location.href = '/automation';
+                    }
+                }
+            }
+
+            exportOrders() {
+                const csvContent = this.generateCSV();
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `previous-orders-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }
+
+            generateCSV() {
+                const headers = ['Order ID', 'Status', 'Target', 'Forms Filled', 'Duration', 'Date', 'Success Rate', 'Profile'];
+                const rows = this.orders.map(order => [
+                    order.id,
+                    order.status,
+                    order.target,
+                    order.formsFilled,
+                    order.duration,
+                    new Date(order.date).toLocaleDateString(),
+                    `${order.successRate}%`,
+                    order.profile
+                ]);
+                
+                return [headers, ...rows].map(row => 
+                    row.map(field => `"${field}"`).join(',')
+                ).join('\n');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new PreviousOrdersManager();
+        });
+    </script>
+</body>
+</html>

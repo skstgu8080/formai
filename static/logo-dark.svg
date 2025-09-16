@@ -1,0 +1,19 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Text "Kpr" -->
+  <g transform="translate(0, 0)">
+    <!-- Kpr text -->
+    <text x="0" y="20" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="700" fill="currentColor">
+      Kpr
+    </text>
+    
+    <!-- Subtitle -->
+    <text x="0" y="32" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="500" fill="currentColor" opacity="0.5">
+      AUTOMATION
+    </text>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="8" r="2" fill="currentColor" opacity="0.2"/>
+  <circle cx="110" cy="12" r="1.5" fill="currentColor" opacity="0.15"/>
+  <circle cx="105" cy="18" r="1" fill="currentColor" opacity="0.25"/>
+</svg>

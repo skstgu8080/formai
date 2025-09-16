@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for file in recorder.html saved_pages.html saved_urls.html settings.html)",
+      "Bash(do echo \"=== $file file size ===\")",
+      "Bash(wc:*)",
+      "Bash(timeout:*)",
+      "Bash(simple-start.bat)",
+      "Bash(find:*)",
+      "Bash(for file in web/settings.html web/saved_pages.html web/saved_urls.html web/index.html web/recorder.html)",
+      "Bash(for file in web/account.html web/automation.html web/index.html web/previous_orders.html web/user_data.html)",
+      "Bash(for file in web/recorder.html web/saved_pages.html web/saved_urls.html web/settings.html)",
+      "Bash(do echo \"=== $file scripts ===\")",
+      "Bash(del build-release.bat install-browser.bat quick-start.bat simple-start.bat)",
+      "Bash(for:*)",
+      "Bash(cmd:*)",
+      "Bash(dir:*)",
+      "Bash(python:*)",
+      "Bash(taskkill:*)",
+      "Bash(start http://localhost:5511/profiles)",
+      "Bash(start.bat)",
+      "Bash(cargo run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

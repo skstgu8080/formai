@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormAI Control Panel - Profiles</title>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-background text-foreground font-sans antialiased">
+    <div id="app" class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-card text-card-foreground border-r border-gray-200 flex-shrink-0 flex flex-col h-full">
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-foreground">FormAI</h1>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="/" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="/profiles" class="flex items-center px-4 py-3 text-sm font-medium text-primary-foreground bg-primary rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Profiles
+                </a>
+                <a href="/automation" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/>
+                    </svg>
+                    Automation
+                </a>
+                <a href="/saved-urls" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/>
+                    </svg>
+                    URLs
+                </a>
+                <a href="/recorder" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+                    </svg>
+                    Recorder
+                </a>
+                <a href="/account" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Account
+                </a>
+                <a href="/previous-orders" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Orders
+                </a>
+                <a href="/saved-pages" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Saved Pages
+                </a>
+                <a href="/settings" class="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Settings
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center p-3 bg-muted rounded-lg">
+                    <img class="w-10 h-10 rounded-full" src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User avatar">
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-foreground">Admin</p>
+                        <p class="text-xs text-muted-foreground">Premium User</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Backdrop for Mobile -->
+        <div id="sidebar-overlay" class="sidebar-backdrop hidden"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-card border-b border-gray-200">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="mobile-menu-btn" class="mr-4 text-muted-foreground hover:text-foreground md:hidden">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h1 id="view-title" class="text-xl font-bold text-foreground">Profiles</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <button id="theme-toggle" class="p-2 text-muted-foreground hover:text-foreground">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                   <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                               </svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2" id="connection-status">
+                            <div class="relative">
+                                <div class="absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75 animate-ping"></div>
+                                <div class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></div>
+                            </div>
+                            <span class="text-sm text-green-600 dark:text-green-400">Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main id="main-content" class="flex-1 overflow-y-auto p-6">
+                <!-- Profiles content -->
+                <div id="user-data-view" class="space-y-6">
+                    <!-- Header Section -->
+                    <div class="bg-card p-6 rounded-lg border border-gray-200 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-foreground">Profile Management</h2>
+                                <p class="text-muted-foreground mt-1">Create and manage user profiles for form automation</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button id="create-profile-btn" data-shadcn="button" data-variant="default" class="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md flex items-center transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                                        <path d="M12 5v14M5 12h14"/>
+                                    </svg>
+                                    Create Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile List Section -->
+                    <div class="bg-card rounded-lg border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-foreground">User Profiles</h3>
+                                <div class="flex items-center space-x-2">
+                                    <button class="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-3 rounded-md flex items-center text-sm transition-colors" data-sample-type="personal">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                        </svg>
+                                        Fill with Sample Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div id="profiles-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Profiles will be loaded here dynamically -->
+                                <div class="text-center text-muted-foreground py-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mx-auto mb-4 text-muted-foreground/50">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                    <p>No profiles created yet</p>
+                                    <p class="text-sm">Click "Create Profile" to get started</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Form Section -->
+                    <div class="bg-card rounded-lg border border-gray-200 shadow-sm hidden" id="profile-form-section">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h3 id="form-title" class="text-lg font-semibold text-foreground">Create New Profile</h3>
+                                <button id="cancel-form-btn" data-shadcn="button" data-variant="ghost" class="text-muted-foreground hover:text-foreground font-medium py-2 px-3 rounded-md flex items-center text-sm transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                                        <path d="M18 6 6 18M6 6l12 12"/>
+                                    </svg>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <form id="profile-form" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label for="profile-name" class="text-sm font-medium text-foreground">Profile Name *</label>
+                                        <input type="text" id="profile-name" name="name" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" required>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="first-name" class="text-sm font-medium text-foreground">First Name</label>
+                                        <input type="text" id="first-name" name="firstName" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="last-name" class="text-sm font-medium text-foreground">Last Name</label>
+                                        <input type="text" id="last-name" name="lastName" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="email" class="text-sm font-medium text-foreground">Email</label>
+                                        <input type="email" id="email" name="email" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="phone" class="text-sm font-medium text-foreground">Phone</label>
+                                        <input type="tel" id="phone" name="phone" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="address" class="text-sm font-medium text-foreground">Address</label>
+                                        <input type="text" id="address" name="address" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="city" class="text-sm font-medium text-foreground">City</label>
+                                        <input type="text" id="city" name="city" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="state" class="text-sm font-medium text-foreground">State</label>
+                                        <input type="text" id="state" name="state" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="zip" class="text-sm font-medium text-foreground">ZIP Code</label>
+                                        <input type="text" id="zip" name="zipCode" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="country" class="text-sm font-medium text-foreground">Country</label>
+                                        <input type="text" id="country" name="country" value="United States" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-4 pt-4">
+                                    <button type="submit" data-shadcn="button" data-variant="default" class="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors">
+                                        Save Profile
+                                    </button>
+                                    <button type="button" id="cancel-btn" data-shadcn="button" data-variant="outline" class="bg-background hover:bg-accent hover:text-accent-foreground text-foreground font-medium py-2 px-4 rounded-md border border-input transition-colors">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/js/shadcn-components.js"></script>
+    <script src="/static/js/user_data.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "id": "test-profile-001",
+  "name": "Test User",
+  "description": "Test profile for form automation",
+  "data": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john.smith@example.com",
+    "phone": "555-123-4567",
+    "address": "123 Main Street",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "company": "Test Company Inc",
+    "jobTitle": "Software Engineer",
+    "website": "https://example.com",
+    "age": "30",
+    "gender": "male",
+    "country": "United States"
+  },
+  "created_at": "2025-09-13T12:00:00Z",
+  "updated_at": "2025-09-13T12:00:00Z"
+}

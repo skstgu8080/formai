@@ -1,0 +1,57 @@
+# Rust build artifacts
+/target
+Cargo.lock
+
+# Node.js dependencies and build artifacts
+node_modules/
+package-lock.json
+
+# Generated CSS files
+static/css/tailwind.css
+
+# Logs and debugging files
+*.log
+debug.log
+*.pdb
+nul
+
+# Environment files (keep .env.example)
+.env
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Screenshots and recordings (unless specifically needed)
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Docker files (if not using Docker deployment)
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+docker-setup.sh
+
+# Backup files
+*_backup.*
+*_clean.*
+main_backup.rs
+main_clean.rs
+
+# Test artifacts
+test.pdb

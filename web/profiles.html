@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profiles - Kpr Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="../static/css/input.css">
+    <link rel="stylesheet" href="../static/css/dashboard.css">
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+            --radius: 0.5rem;
+        }
+        
+        .dark {
+            --background: 0 0% 0%;
+            --foreground: 0 0% 100%;
+            --card: 0 0% 3%;
+            --card-foreground: 0 0% 100%;
+            --popover: 0 0% 3%;
+            --popover-foreground: 0 0% 100%;
+            --primary: 0 0% 100%;
+            --primary-foreground: 0 0% 0%;
+            --secondary: 0 0% 9%;
+            --secondary-foreground: 0 0% 100%;
+            --muted: 0 0% 9%;
+            --muted-foreground: 0 0% 63%;
+            --accent: 0 0% 9%;
+            --accent-foreground: 0 0% 100%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 0 0% 100%;
+            --border: 0 0% 15%;
+            --input: 0 0% 15%;
+            --ring: 0 0% 100%;
+        }
+    </style>
+</head>
+<body class="h-full bg-background text-foreground">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-sidebar border-r border-sidebar-border flex-shrink-0 flex flex-col h-full transition-all duration-300">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-sidebar-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h1 class="text-lg font-semibold text-sidebar-foreground sidebar-text tracking-tight">Kpr</h1>
+                    </div>
+                    <button id="sidebar-toggle" class="p-2 rounded-md text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
+                        <!-- Expanded state - collapse icon -->
+                        <svg id="collapse-icon" class="h-4 w-4 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path>
+                        </svg>
+                        <!-- Collapsed state - expand icon -->
+                        <svg id="expand-icon" class="h-4 w-4 transition-all duration-300 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar Content -->
+            <div class="flex-1 overflow-y-auto">
+                <!-- Navigation Groups -->
+                <div class="p-2 space-y-6">
+                    <!-- Main Navigation Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Main</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground bg-sidebar-accent rounded-md sidebar-nav-item active" data-tooltip="Dashboard">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9,22 9,12 15,12 15,22"></polyline>
+                                </svg>
+                                <span class="sidebar-text">Dashboard</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Automation Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Automation</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/profiles" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Profiles">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                <span class="sidebar-text">Profiles</span>
+                            </a>
+                            <a href="/automation" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Automation">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M8 12h8"></path><path d="M12 8v8"></path>
+                                </svg>
+                                <span class="sidebar-text">Automation</span>
+                            </a>
+                            <a href="/saved_pages" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Saved Pages">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14,2 14,8 20,8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10,9 9,9 8,9"></polyline>
+                                </svg>
+                                <span class="sidebar-text">Saved Pages</span>
+                            </a>
+                            <a href="/previous-orders" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Previous Orders">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                    <path d="M9 14l2 2 4-4"></path>
+                                </svg>
+                                <span class="sidebar-text">Previous Orders</span>
+                            </a>
+                            <a href="/account" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Account">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span class="sidebar-text">Account</span>
+                            </a>
+                            <a href="/recorder" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Recorder">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle>
+                                </svg>
+                                <span class="sidebar-text">Recorder</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Data Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Data</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/saved-urls" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="URLs">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path>
+                                </svg>
+                                <span class="sidebar-text">URLs</span>
+                            </a>
+                            <a href="/saved-pages" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Saved Pages">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline>
+                                </svg>
+                                <span class="sidebar-text">Saved Pages</span>
+                            </a>
+                            <a href="/previous-orders" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Orders">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                </svg>
+                                <span class="sidebar-text">Orders</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Account Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Account</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/account" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Account">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span class="sidebar-text">Account</span>
+                            </a>
+                            <a href="/settings" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Settings">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                <span class="sidebar-text">Settings</span>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-sidebar-border">
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center">
+                        <span class="text-sm font-medium text-sidebar-primary-foreground">K</span>
+                    </div>
+                    <div class="flex-1 min-w-0 sidebar-user-info">
+                        <p class="text-sm font-medium text-sidebar-foreground truncate">Admin</p>
+                        <p class="text-xs text-sidebar-muted-foreground truncate">Premium User</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-background" id="main-content">
+            <!-- Header -->
+            <header class="bg-card/50 border-b border-gray-200 backdrop-blur-sm sticky top-0 z-10">
+                <div class="px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold text-card-foreground tracking-tight">Profiles</h2>
+                            <p class="text-sm text-muted-foreground">Manage your automation profiles and form data</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div id="sidebar-status" class="text-xs text-muted-foreground hidden">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-accent text-accent-foreground">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                                    Auto-collapse enabled
+                                </span>
+                            </div>
+                            <div id="keyboard-hint" class="text-xs text-muted-foreground hidden">
+                                <kbd class="px-2 py-1 bg-muted rounded text-xs">Ctrl+B</kbd> to toggle
+                            </div>
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            </button>
+                            <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div class="h-2 w-2 bg-green-500 rounded-full"></div>
+                                <span>Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <div class="p-6">
+                <!-- Profiles Management -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-card-foreground">Profile Management</h3>
+                            <p class="text-sm text-muted-foreground">Create and manage user profiles for form automation</p>
+                        </div>
+                        <button id="create-profile-btn" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 inline">
+                                <path d="M5 12h14"/><path d="M12 5v14"/>
+                            </svg>
+                            Create Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="w-full">
+                    <div class="flex items-center py-4">
+                        <input
+                            id="email-filter"
+                            placeholder="Filter emails..."
+                            class="max-w-sm bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                        />
+                        <div class="ml-auto relative">
+                            <button id="columns-toggle" class="px-4 py-2 bg-background border border-input text-foreground rounded-md hover:bg-accent flex items-center">
+                                Columns
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </button>
+                            <div id="columns-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-card border border-gray-200 rounded-md shadow-lg z-10">
+                                <div class="py-1">
+                                    <label class="flex items-center px-4 py-2 hover:bg-accent cursor-pointer">
+                                        <input type="checkbox" class="mr-3" data-column="select" checked>
+                                        <span class="text-sm">Select</span>
+                                    </label>
+                                    <label class="flex items-center px-4 py-2 hover:bg-accent cursor-pointer">
+                                        <input type="checkbox" class="mr-3" data-column="name" checked>
+                                        <span class="text-sm">Profile Name</span>
+                                    </label>
+                                    <label class="flex items-center px-4 py-2 hover:bg-accent cursor-pointer">
+                                        <input type="checkbox" class="mr-3" data-column="email" checked>
+                                        <span class="text-sm">Email</span>
+                                    </label>
+                                    <label class="flex items-center px-4 py-2 hover:bg-accent cursor-pointer">
+                                        <input type="checkbox" class="mr-3" data-column="phone" checked>
+                                        <span class="text-sm">Phone</span>
+                                    </label>
+                                    <label class="flex items-center px-4 py-2 hover:bg-accent cursor-pointer">
+                                        <input type="checkbox" class="mr-3" data-column="status" checked>
+                                        <span class="text-sm">Status</span>
+                                    </label>
+                                    <label class="flex items-center px-4 py-2 hover:bg-accent cursor-pointer">
+                                        <input type="checkbox" class="mr-3" data-column="actions" checked>
+                                        <span class="text-sm">Actions</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-hidden rounded-md border border-gray-200">
+                        <table class="w-full">
+                            <thead class="bg-muted">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                        <input type="checkbox" id="select-all" class="rounded">
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                        <button class="flex items-center hover:text-foreground" data-sort="name">
+                                            Profile Name
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                                                <path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>
+                                            </svg>
+                                        </button>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                        <button class="flex items-center hover:text-foreground" data-sort="email">
+                                            Email
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                                                <path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>
+                                            </svg>
+                                        </button>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                        Phone
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                        Status
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="divide-y divide-border">
+                                <!-- Table rows will be dynamically generated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex items-center justify-end space-x-2 py-4">
+                        <div class="text-muted-foreground flex-1 text-sm">
+                            <span id="selected-count">0</span> of <span id="total-count">0</span> row(s) selected.
+                        </div>
+                        <div class="space-x-2">
+                            <button id="prev-page" class="px-4 py-2 bg-background border border-input text-foreground rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Previous
+                            </button>
+                            <button id="next-page" class="px-4 py-2 bg-background border border-input text-foreground rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-card rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-lg font-semibold text-card-foreground">Create New Profile</h3>
+                <button id="close-modal" class="text-muted-foreground hover:text-card-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="profile-form" class="space-y-6">
+                <!-- Basic Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Basic Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label for="profile-name" class="block text-sm font-medium text-card-foreground mb-2">Profile Name *</label>
+                            <input type="text" id="profile-name" name="name" required class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="e.g., Personal Profile">
+                        </div>
+                        <div>
+                            <label for="profile-title" class="block text-sm font-medium text-card-foreground mb-2">Title</label>
+                            <select id="profile-title" name="title" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                <option value="">Select Title</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Miss">Miss</option>
+                                <option value="Dr">Dr</option>
+                                <option value="Prof">Prof</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="profile-first-name" class="block text-sm font-medium text-card-foreground mb-2">First Name</label>
+                            <input type="text" id="profile-first-name" name="firstName" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="John">
+                        </div>
+                        <div>
+                            <label for="profile-middle-initial" class="block text-sm font-medium text-card-foreground mb-2">Middle Initial</label>
+                            <input type="text" id="profile-middle-initial" name="middleInitial" maxlength="1" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="M">
+                        </div>
+                        <div>
+                            <label for="profile-last-name" class="block text-sm font-medium text-card-foreground mb-2">Last Name</label>
+                            <input type="text" id="profile-last-name" name="lastName" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Doe">
+                        </div>
+                        <div>
+                            <label for="profile-sex" class="block text-sm font-medium text-card-foreground mb-2">Gender</label>
+                            <select id="profile-sex" name="sex" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                <option value="">Select Gender</option>
+                                <option value="m">Male</option>
+                                <option value="f">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Contact Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="profile-email" class="block text-sm font-medium text-card-foreground mb-2">Email</label>
+                            <input type="email" id="profile-email" name="email" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label for="profile-website" class="block text-sm font-medium text-card-foreground mb-2">Website</label>
+                            <input type="url" id="profile-website" name="website" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="www.example.com">
+                        </div>
+                        <div>
+                            <label for="profile-home-phone" class="block text-sm font-medium text-card-foreground mb-2">Home Phone</label>
+                            <input type="tel" id="profile-home-phone" name="homePhone" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="(555) 123-4567">
+                        </div>
+                        <div>
+                            <label for="profile-work-phone" class="block text-sm font-medium text-card-foreground mb-2">Work Phone</label>
+                            <input type="tel" id="profile-work-phone" name="workPhone" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="(555) 987-6543">
+                        </div>
+                        <div>
+                            <label for="profile-cell-phone" class="block text-sm font-medium text-card-foreground mb-2">Cell Phone</label>
+                            <input type="tel" id="profile-cell-phone" name="cellPhone" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="(555) 456-7890">
+                        </div>
+                        <div>
+                            <label for="profile-fax" class="block text-sm font-medium text-card-foreground mb-2">Fax</label>
+                            <input type="tel" id="profile-fax" name="fax" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="(555) 555-5555">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Address Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="profile-address1" class="block text-sm font-medium text-card-foreground mb-2">Address Line 1</label>
+                            <input type="text" id="profile-address1" name="address1" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="123 Main Street">
+                        </div>
+                        <div>
+                            <label for="profile-address2" class="block text-sm font-medium text-card-foreground mb-2">Address Line 2</label>
+                            <input type="text" id="profile-address2" name="address2" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Apt 4B">
+                        </div>
+                        <div>
+                            <label for="profile-city" class="block text-sm font-medium text-card-foreground mb-2">City</label>
+                            <input type="text" id="profile-city" name="city" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="New York">
+                        </div>
+                        <div>
+                            <label for="profile-state" class="block text-sm font-medium text-card-foreground mb-2">State/Province</label>
+                            <input type="text" id="profile-state" name="state" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="NY">
+                        </div>
+                        <div>
+                            <label for="profile-zip" class="block text-sm font-medium text-card-foreground mb-2">ZIP/Postal Code</label>
+                            <input type="text" id="profile-zip" name="zip" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="10001">
+                        </div>
+                        <div>
+                            <label for="profile-country" class="block text-sm font-medium text-card-foreground mb-2">Country</label>
+                            <input type="text" id="profile-country" name="country" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="USA">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Work Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="profile-company" class="block text-sm font-medium text-card-foreground mb-2">Company</label>
+                            <input type="text" id="profile-company" name="company" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Tech Corp">
+                        </div>
+                        <div>
+                            <label for="profile-position" class="block text-sm font-medium text-card-foreground mb-2">Position/Title</label>
+                            <input type="text" id="profile-position" name="position" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Software Developer">
+                        </div>
+                        <div>
+                            <label for="profile-income" class="block text-sm font-medium text-card-foreground mb-2">Annual Income</label>
+                            <input type="number" id="profile-income" name="income" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="75000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Birth Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Birth Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="profile-birth-month" class="block text-sm font-medium text-card-foreground mb-2">Birth Month</label>
+                            <select id="profile-birth-month" name="birthMonth" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                <option value="">Month</option>
+                                <option value="Jan">January</option>
+                                <option value="Feb">February</option>
+                                <option value="Mar">March</option>
+                                <option value="Apr">April</option>
+                                <option value="May">May</option>
+                                <option value="Jun">June</option>
+                                <option value="Jul">July</option>
+                                <option value="Aug">August</option>
+                                <option value="Sep">September</option>
+                                <option value="Oct">October</option>
+                                <option value="Nov">November</option>
+                                <option value="Dec">December</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="profile-birth-day" class="block text-sm font-medium text-card-foreground mb-2">Birth Day</label>
+                            <input type="number" id="profile-birth-day" name="birthDay" min="1" max="31" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="11">
+                        </div>
+                        <div>
+                            <label for="profile-birth-year" class="block text-sm font-medium text-card-foreground mb-2">Birth Year</label>
+                            <input type="number" id="profile-birth-year" name="birthYear" min="1900" max="2024" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="1989">
+                        </div>
+                        <div>
+                            <label for="profile-age" class="block text-sm font-medium text-card-foreground mb-2">Age</label>
+                            <input type="number" id="profile-age" name="age" min="0" max="120" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="21">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label for="profile-birth-place" class="block text-sm font-medium text-card-foreground mb-2">Birth Place</label>
+                        <input type="text" id="profile-birth-place" name="birthPlace" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="New York, NY">
+                    </div>
+                </div>
+
+                <!-- Account/Login Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Account Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="profile-username" class="block text-sm font-medium text-card-foreground mb-2">Username</label>
+                            <input type="text" id="profile-username" name="username" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="cwatson">
+                        </div>
+                        <div>
+                            <label for="profile-password" class="block text-sm font-medium text-card-foreground mb-2">Password</label>
+                            <input type="password" id="profile-password" name="password" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="••••••••">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ID Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">ID Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="profile-ssn" class="block text-sm font-medium text-card-foreground mb-2">SSN</label>
+                            <input type="text" id="profile-ssn" name="ssn" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="123-45-6789">
+                        </div>
+                        <div>
+                            <label for="profile-driver-license" class="block text-sm font-medium text-card-foreground mb-2">Driver's License</label>
+                            <input type="text" id="profile-driver-license" name="driverLicense" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="D123456789">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credit Card Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Credit Card Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="profile-credit-card-type" class="block text-sm font-medium text-card-foreground mb-2">Card Type</label>
+                            <select id="profile-credit-card-type" name="creditCardType" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                <option value="">Select Card Type</option>
+                                <option value="Visa">Visa</option>
+                                <option value="Visa (Preferred)">Visa (Preferred)</option>
+                                <option value="MasterCard">MasterCard</option>
+                                <option value="American Express">American Express</option>
+                                <option value="Discover">Discover</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="profile-credit-card-number" class="block text-sm font-medium text-card-foreground mb-2">Card Number</label>
+                            <input type="text" id="profile-credit-card-number" name="creditCardNumber" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="4111111111111111">
+                        </div>
+                        <div>
+                            <label for="profile-credit-card-name" class="block text-sm font-medium text-card-foreground mb-2">Name on Card</label>
+                            <input type="text" id="profile-credit-card-name" name="creditCardName" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Chris P Watson">
+                        </div>
+                        <div>
+                            <label for="profile-credit-card-bank" class="block text-sm font-medium text-card-foreground mb-2">Bank</label>
+                            <input type="text" id="profile-credit-card-bank" name="creditCardBank" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="First National Bank">
+                        </div>
+                        <div>
+                            <label for="profile-credit-card-exp-month" class="block text-sm font-medium text-card-foreground mb-2">Exp Month</label>
+                            <select id="profile-credit-card-exp-month" name="creditCardExpMonth" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                <option value="">Month</option>
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="profile-credit-card-exp-year" class="block text-sm font-medium text-card-foreground mb-2">Exp Year</label>
+                            <input type="text" id="profile-credit-card-exp-year" name="creditCardExpYear" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="2027">
+                        </div>
+                        <div>
+                            <label for="profile-credit-card-cvc" class="block text-sm font-medium text-card-foreground mb-2">CVC</label>
+                            <input type="text" id="profile-credit-card-cvc" name="creditCardCVC" maxlength="4" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="123">
+                        </div>
+                        <div>
+                            <label for="profile-credit-card-service-phone" class="block text-sm font-medium text-card-foreground mb-2">Service Phone</label>
+                            <input type="tel" id="profile-credit-card-service-phone" name="creditCardServicePhone" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="1-800-123-4567">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div>
+                    <h4 class="text-md font-medium text-card-foreground mb-3">Additional Information</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="profile-custom-message" class="block text-sm font-medium text-card-foreground mb-2">Custom Message</label>
+                            <textarea id="profile-custom-message" name="customMessage" rows="3" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Thank you for this comprehensive form testing experience!"></textarea>
+                        </div>
+                        <div>
+                            <label for="profile-comments" class="block text-sm font-medium text-card-foreground mb-2">Comments</label>
+                            <textarea id="profile-comments" name="comments" rows="3" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="This form was filled automatically using FormAI"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="cancel-profile" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">Save Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../static/js/dashboard.js"></script>
+    <script src="../static/js/dashboard-enhanced.js"></script>
+    <script>
+        class ProfilesManager {
+            constructor() {
+                this.profiles = [];
+                this.currentProfile = null;
+                this.init();
+            }
+
+            init() {
+                this.loadProfiles();
+                this.bindEvents();
+                this.renderProfiles();
+            }
+
+            bindEvents() {
+                document.getElementById('create-profile-btn').addEventListener('click', () => this.openModal());
+                document.querySelector('.create-profile-btn')?.addEventListener('click', () => this.openModal());
+                document.getElementById('close-modal').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancel-profile').addEventListener('click', () => this.closeModal());
+                document.getElementById('profile-form').addEventListener('submit', (e) => this.saveProfile(e));
+                
+                document.getElementById('profile-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'profile-modal') this.closeModal();
+                });
+            }
+
+            async loadProfiles() {
+                try {
+                    const response = await fetch('/api/profiles');
+                    if (response.ok) {
+                        this.profiles = await response.json();
+                    }
+                } catch (error) {
+                    console.error('Failed to load profiles:', error);
+                    this.profiles = this.getDefaultProfiles();
+                }
+            }
+
+            getDefaultProfiles() {
+                return [
+                    {
+                        id: '1',
+                        name: 'Demo Profile',
+                        email: 'demo@example.com',
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        phone: '+1 (555) 123-4567',
+                        company: 'Demo Company',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+            }
+
+            renderProfiles() {
+                // Profiles are now rendered in the DataTable
+                // Reload the data table when profiles change
+                if (window.dataTable) {
+                    window.dataTable.loadProfiles();
+                }
+            }
+
+            createProfileCard(profile) {
+                return `
+                    <div class="card p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
+                                    <span class="text-lg font-medium text-primary-foreground">${profile.firstName?.charAt(0) || 'U'}</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-card-foreground">${profile.name}</h3>
+                                    <p class="text-sm text-muted-foreground">${profile.email || 'No email'}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="edit-profile p-2 text-muted-foreground hover:text-card-foreground hover:bg-accent rounded-md transition-colors" data-profile-id="${profile.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="delete-profile p-2 text-muted-foreground hover:text-destructive hover:bg-accent rounded-md transition-colors" data-profile-id="${profile.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 6h18"/>
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-muted-foreground">Name:</span>
+                                <span class="text-card-foreground">${profile.firstName || ''} ${profile.lastName || ''}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-muted-foreground">Phone:</span>
+                                <span class="text-card-foreground">${profile.phone || 'Not provided'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-muted-foreground">Company:</span>
+                                <span class="text-card-foreground">${profile.company || 'Not provided'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <button class="use-profile w-full px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors" data-profile-id="${profile.id}">
+                                Use Profile
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            bindCardEvents() {
+                document.querySelectorAll('.edit-profile').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const profileId = e.target.closest('.edit-profile').dataset.profileId;
+                        this.editProfile(profileId);
+                    });
+                });
+
+                document.querySelectorAll('.delete-profile').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const profileId = e.target.closest('.delete-profile').dataset.profileId;
+                        this.deleteProfile(profileId);
+                    });
+                });
+
+                document.querySelectorAll('.use-profile').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const profileId = e.target.closest('.use-profile').dataset.profileId;
+                        this.useProfile(profileId);
+                    });
+                });
+            }
+
+            openModal(profile = null) {
+                this.currentProfile = profile;
+                const modal = document.getElementById('profile-modal');
+                const title = document.getElementById('modal-title');
+                const form = document.getElementById('profile-form');
+                
+                title.textContent = profile ? 'Edit Profile' : 'Create New Profile';
+                
+                if (profile) {
+                    Object.keys(profile).forEach(key => {
+                        const input = form.querySelector(`[name="${key}"]`);
+                        if (input) input.value = profile[key] || '';
+                    });
+                } else {
+                    form.reset();
+                }
+                
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeModal() {
+                document.getElementById('profile-modal').classList.add('hidden');
+                document.body.style.overflow = '';
+                this.currentProfile = null;
+            }
+
+            async saveProfile(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const profileData = Object.fromEntries(formData.entries());
+                
+                if (this.currentProfile) {
+                    profileData.id = this.currentProfile.id;
+                    await this.updateProfile(profileData);
+                } else {
+                    profileData.id = Date.now().toString();
+                    profileData.createdAt = new Date().toISOString();
+                    await this.createProfile(profileData);
+                }
+                
+                this.closeModal();
+                this.renderProfiles();
+            }
+
+            async createProfile(profileData) {
+                try {
+                    const response = await fetch('/api/profiles', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(profileData)
+                    });
+                    
+                    if (response.ok) {
+                        this.profiles.push(profileData);
+                    }
+                } catch (error) {
+                    console.error('Failed to create profile:', error);
+                    this.profiles.push(profileData);
+                }
+            }
+
+            async updateProfile(profileData) {
+                try {
+                    const response = await fetch(`/api/profiles/${profileData.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(profileData)
+                    });
+                    
+                    if (response.ok) {
+                        const index = this.profiles.findIndex(p => p.id === profileData.id);
+                        if (index !== -1) this.profiles[index] = profileData;
+                    }
+                } catch (error) {
+                    console.error('Failed to update profile:', error);
+                    const index = this.profiles.findIndex(p => p.id === profileData.id);
+                    if (index !== -1) this.profiles[index] = profileData;
+                }
+            }
+
+            editProfile(profileId) {
+                const profile = this.profiles.find(p => p.id === profileId);
+                if (profile) this.openModal(profile);
+            }
+
+            async deleteProfile(profileId) {
+                if (!confirm('Are you sure you want to delete this profile?')) return;
+                
+                try {
+                    const response = await fetch(`/api/profiles/${profileId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        this.profiles = this.profiles.filter(p => p.id !== profileId);
+                        this.renderProfiles();
+                    }
+                } catch (error) {
+                    console.error('Failed to delete profile:', error);
+                    this.profiles = this.profiles.filter(p => p.id !== profileId);
+                    this.renderProfiles();
+                }
+            }
+
+            useProfile(profileId) {
+                const profile = this.profiles.find(p => p.id === profileId);
+                if (profile) {
+                    localStorage.setItem('selectedProfile', JSON.stringify(profile));
+                    window.location.href = '/';
+                }
+            }
+        }
+
+        // Data Table functionality
+        class DataTable {
+            constructor() {
+                this.data = [];
+                this.filteredData = [];
+                this.currentPage = 1;
+                this.pageSize = 10;
+                this.sortColumn = null;
+                this.sortDirection = 'asc';
+                this.selectedRows = new Set();
+                this.columnVisibility = {
+                    select: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    status: true,
+                    actions: true
+                };
+
+                this.init();
+            }
+
+            async loadProfiles() {
+                try {
+                    const response = await fetch('/api/profiles');
+                    if (response.ok) {
+                        const profiles = await response.json();
+                        // Transform profiles to match table structure
+                        this.data = profiles.map(profile => ({
+                            id: profile.id,
+                            name: profile.name || 'Unnamed Profile',
+                            email: profile.email || 'No email',
+                            firstName: profile.firstName,
+                            lastName: profile.lastName,
+                            phone: profile.phone,
+                            company: profile.company,
+                            status: profile.email ? 'active' : 'incomplete',
+                            amount: 0 // Placeholder for any future amount tracking
+                        }));
+                        this.filteredData = [...this.data];
+                        this.renderTable();
+                        this.updatePagination();
+                    }
+                } catch (error) {
+                    console.error('Failed to load profiles:', error);
+                }
+            }
+            
+            init() {
+                this.bindEvents();
+                this.loadProfiles();
+            }
+            
+            bindEvents() {
+                // Email filter
+                document.getElementById('email-filter').addEventListener('input', (e) => {
+                    this.filterData(e.target.value);
+                });
+                
+                // Column visibility toggle
+                document.getElementById('columns-toggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const dropdown = document.getElementById('columns-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    document.getElementById('columns-dropdown').classList.add('hidden');
+                });
+                
+                // Column visibility checkboxes
+                document.querySelectorAll('#columns-dropdown input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const column = e.target.dataset.column;
+                        this.columnVisibility[column] = e.target.checked;
+                        this.renderTable();
+                    });
+                });
+                
+                // Select all checkbox
+                document.getElementById('select-all').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        this.selectedRows = new Set(this.filteredData.map(item => item.id));
+                    } else {
+                        this.selectedRows.clear();
+                    }
+                    this.renderTable();
+                    this.updateSelectionCount();
+                });
+                
+                // Sort buttons
+                document.querySelectorAll('[data-sort]').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const column = e.target.closest('button').dataset.sort;
+                        this.sortData(column);
+                    });
+                });
+                
+                // Pagination buttons
+                document.getElementById('prev-page').addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.renderTable();
+                        this.updatePagination();
+                    }
+                });
+                
+                document.getElementById('next-page').addEventListener('click', () => {
+                    const totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.renderTable();
+                        this.updatePagination();
+                    }
+                });
+            }
+            
+            filterData(searchTerm) {
+                this.filteredData = this.data.filter(item => 
+                    item.email.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                this.currentPage = 1;
+                this.renderTable();
+                this.updatePagination();
+            }
+            
+            sortData(column) {
+                if (this.sortColumn === column) {
+                    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    this.sortColumn = column;
+                    this.sortDirection = 'asc';
+                }
+                
+                this.filteredData.sort((a, b) => {
+                    let aVal = a[column];
+                    let bVal = b[column];
+                    
+                    if (typeof aVal === 'string') {
+                        aVal = aVal.toLowerCase();
+                        bVal = bVal.toLowerCase();
+                    }
+                    
+                    if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                
+                this.renderTable();
+            }
+            
+            renderTable() {
+                const tbody = document.getElementById('table-body');
+                const startIndex = (this.currentPage - 1) * this.pageSize;
+                const endIndex = startIndex + this.pageSize;
+                const pageData = this.filteredData.slice(startIndex, endIndex);
+                
+                tbody.innerHTML = pageData.map(item => `
+                    <tr class="hover:bg-muted/50" data-id="${item.id}">
+                        ${this.columnVisibility.select ? `
+                            <td class="px-4 py-3">
+                                <input type="checkbox" class="row-checkbox rounded" data-id="${item.id}" ${this.selectedRows.has(item.id) ? 'checked' : ''}>
+                            </td>
+                        ` : ''}
+                        <td class="px-4 py-3 text-sm font-medium">
+                            ${item.name}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-muted-foreground">
+                            ${item.email}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-muted-foreground">
+                            ${item.phone || 'Not provided'}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                item.status === 'active' ? 'bg-green-100 text-green-800' :
+                                item.status === 'incomplete' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                            }">
+                                ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                            </span>
+                        </td>
+                        ${this.columnVisibility.actions ? `
+                            <td class="px-4 py-3 text-center">
+                                <div class="relative">
+                                    <button class="p-1 hover:bg-accent rounded" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                                        </svg>
+                                    </button>
+                                    <div class="hidden absolute right-0 mt-1 w-48 bg-card border border-gray-200 rounded-md shadow-lg z-10">
+                                        <div class="py-1">
+                                            <button class="w-full text-left px-4 py-2 text-sm hover:bg-accent" onclick="window.profilesManager.useProfile('${item.id}')">
+                                                Use Profile
+                                            </button>
+                                            <button class="w-full text-left px-4 py-2 text-sm hover:bg-accent" onclick="window.profilesManager.editProfile('${item.id}')">
+                                                Edit Profile
+                                            </button>
+                                            <button class="w-full text-left px-4 py-2 text-sm hover:bg-accent text-destructive" onclick="window.profilesManager.deleteProfile('${item.id}')">
+                                                Delete Profile
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        ` : ''}
+                    </tr>
+                `).join('');
+                
+                // Bind row checkbox events
+                tbody.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const id = e.target.dataset.id;
+                        if (e.target.checked) {
+                            this.selectedRows.add(id);
+                        } else {
+                            this.selectedRows.delete(id);
+                        }
+                        this.updateSelectionCount();
+                        this.updateSelectAllState();
+                    });
+                });
+                
+                this.updateSelectionCount();
+            }
+            
+            updatePagination() {
+                const totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+                const prevBtn = document.getElementById('prev-page');
+                const nextBtn = document.getElementById('next-page');
+                
+                prevBtn.disabled = this.currentPage === 1;
+                nextBtn.disabled = this.currentPage === totalPages;
+            }
+            
+            updateSelectionCount() {
+                document.getElementById('selected-count').textContent = this.selectedRows.size;
+                document.getElementById('total-count').textContent = this.filteredData.length;
+            }
+            
+            updateSelectAllState() {
+                const selectAllCheckbox = document.getElementById('select-all');
+                const visibleRowIds = Array.from(document.querySelectorAll('.row-checkbox')).map(cb => cb.dataset.id);
+                const selectedVisibleRows = visibleRowIds.filter(id => this.selectedRows.has(id));
+                
+                if (selectedVisibleRows.length === 0) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                } else if (selectedVisibleRows.length === visibleRowIds.length) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = true;
+                } else {
+                    selectAllCheckbox.indeterminate = true;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.profilesManager = new ProfilesManager();
+            window.dataTable = new DataTable();
+        });
+    </script>
+</body>
+</html>

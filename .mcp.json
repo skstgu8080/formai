@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+    "browser-use Docs": {
+      "url": "https://gitmcp.io/browser-use/browser-use"
+    },
+    "skyvern Docs": {
+      "url": "https://gitmcp.io/Skyvern-AI/skyvern"
+    },
+    "ai-manus Docs": {
+      "url": "https://gitmcp.io/Simpleyyt/ai-manus"
+    },
+    "steel-browser Docs": {
+      "url": "https://gitmcp.io/steel-dev/steel-browser"
+    }
+  }
+}

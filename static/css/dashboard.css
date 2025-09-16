@@ -1,0 +1,424 @@
+/* FormAI Dashboard CSS - Custom Styles Only */
+
+/* Sidebar Color Variables - Light Mode */
+:root {
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 222.2 84% 4.9%;
+  --sidebar-primary: 221.2 83.2% 53.3%;
+  --sidebar-primary-foreground: 210 40% 98%;
+  --sidebar-accent: 210 40% 96%;
+  --sidebar-accent-foreground: 222.2 84% 4.9%;
+  --sidebar-muted: 210 40% 96%;
+  --sidebar-muted-foreground: 215.4 16.3% 46.9%;
+  --sidebar-border: 214.3 31.8% 91.4%;
+}
+
+/* Force light theme for light mode */
+html:not(.dark) {
+  --sidebar-background: 0 0% 100% !important;
+  --sidebar-foreground: 222.2 84% 4.9% !important;
+  --sidebar-primary: 221.2 83.2% 53.3% !important;
+  --sidebar-primary-foreground: 210 40% 98% !important;
+  --sidebar-accent: 210 40% 96% !important;
+  --sidebar-accent-foreground: 222.2 84% 4.9% !important;
+  --sidebar-muted: 210 40% 96% !important;
+  --sidebar-muted-foreground: 215.4 16.3% 46.9% !important;
+  --sidebar-border: 214.3 31.8% 91.4% !important;
+}
+
+/* Force black theme for dark mode */
+html.dark {
+  --background: 0 0% 0% !important;
+  --foreground: 0 0% 100% !important;
+  --card: 0 0% 3% !important;
+  --card-foreground: 0 0% 100% !important;
+  --popover: 0 0% 3% !important;
+  --popover-foreground: 0 0% 100% !important;
+  --primary: 0 0% 100% !important;
+  --primary-foreground: 0 0% 0% !important;
+  --secondary: 0 0% 9% !important;
+  --secondary-foreground: 0 0% 100% !important;
+  --muted: 0 0% 9% !important;
+  --muted-foreground: 0 0% 63% !important;
+  --accent: 0 0% 9% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --destructive: 0 62.8% 30.6% !important;
+  --destructive-foreground: 0 0% 100% !important;
+  --border: 0 0% 15% !important;
+  --input: 0 0% 15% !important;
+  --ring: 0 0% 100% !important;
+  
+  /* Sidebar colors */
+  --sidebar-background: 0 0% 0% !important;
+  --sidebar-foreground: 0 0% 100% !important;
+  --sidebar-primary: 0 0% 100% !important;
+  --sidebar-primary-foreground: 0 0% 0% !important;
+  --sidebar-accent: 0 0% 9% !important;
+  --sidebar-accent-foreground: 0 0% 100% !important;
+  --sidebar-muted: 0 0% 9% !important;
+  --sidebar-muted-foreground: 0 0% 63% !important;
+  --sidebar-border: 0 0% 15% !important;
+}
+
+.dark {
+  --sidebar-background: 0 0% 0%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 0 0% 100%;
+  --sidebar-primary-foreground: 0 0% 0%;
+  --sidebar-accent: 0 0% 9%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-muted: 0 0% 9%;
+  --sidebar-muted-foreground: 0 0% 63%;
+  --sidebar-border: 0 0% 15%;
+}
+
+/* Sidebar Styling */
+.bg-sidebar {
+  background-color: hsl(var(--sidebar-background));
+}
+
+.text-sidebar-foreground {
+  color: hsl(var(--sidebar-foreground));
+}
+
+.text-sidebar-muted-foreground {
+  color: hsl(var(--sidebar-muted-foreground));
+}
+
+.bg-sidebar-accent {
+  background-color: hsl(var(--sidebar-accent));
+}
+
+.text-sidebar-accent-foreground {
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+.bg-sidebar-primary {
+  background-color: hsl(var(--sidebar-primary));
+}
+
+.text-sidebar-primary-foreground {
+  color: hsl(var(--sidebar-primary-foreground));
+}
+
+.border-sidebar-border {
+  border-color: hsl(var(--sidebar-border));
+}
+
+/* Sidebar Layout and Transitions */
+#sidebar {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 16rem; /* 256px */
+}
+
+#sidebar.sidebar-collapsed {
+  width: 4rem; /* 64px */
+  overflow: hidden;
+}
+
+#sidebar.sidebar-collapsed .sidebar-text {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+#sidebar.sidebar-collapsed .sidebar-user-info {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+#sidebar.sidebar-collapsed .sidebar-nav-item {
+  justify-content: center;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+#sidebar.sidebar-collapsed .sidebar-icon {
+  margin-right: 0;
+}
+
+/* Main Content Layout */
+main {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+  min-width: 0;
+}
+
+.main-content-collapsed {
+  margin-left: 0;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(-100%);
+  }
+  
+  #sidebar.sidebar-collapsed {
+    transform: translateX(-100%);
+  }
+  
+  #sidebar:not(.sidebar-collapsed) {
+    transform: translateX(0);
+  }
+  
+  main {
+    margin-left: 0;
+  }
+  
+  /* Mobile overlay */
+  body.sidebar-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+  
+  /* Prevent body scroll when sidebar is open on mobile */
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 769px) {
+  #sidebar {
+    position: relative;
+    transform: translateX(0);
+  }
+  
+  #sidebar.sidebar-collapsed {
+    transform: translateX(0);
+  }
+}
+
+/* Additional responsive improvements */
+@media (max-width: 640px) {
+  .grid-cols-1.lg\\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .lg\\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .lg\\:col-span-2 {
+    grid-column: span 1;
+  }
+  
+  .px-6 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+/* Tooltip styles for collapsed sidebar */
+#sidebar.sidebar-collapsed .sidebar-nav-item[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Smooth transitions for all interactive elements */
+button, input, select, textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus states for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Sidebar Text and Icon Transitions */
+.sidebar-text {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.sidebar-user-info {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-nav-item {
+  transition: all 0.2s ease-in-out;
+  position: relative;
+}
+
+.sidebar-nav-item:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+.sidebar-nav-item.active {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+.sidebar-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+/* Card Styling */
+.card {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Fade-in Animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-black;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-800 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-700;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(156 163 175) rgb(243 244 246);
+}
+
+.dark * {
+  scrollbar-color: rgb(31 41 55) rgb(0 0 0);
+}
+
+/* Focus styles */
+:focus-visible {
+  @apply outline-2 outline-blue-500 dark:outline-white outline-offset-2;
+}
+
+/* Custom animations */
+@keyframes enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-view {
+  animation: enter 0.3s ease-out forwards;
+}
+
+/* Custom form styles that aren't covered by Tailwind */
+.form-help {
+  @apply text-xs text-gray-500 dark:text-gray-400 mt-1;
+}
+
+/* Custom log styles */
+.logs-output {
+  @apply bg-gray-900 p-4 rounded-md h-112 text-white font-mono overflow-y-auto;
+}
+
+.log-entry {
+  @apply flex items-start text-xs mb-1;
+}
+
+.log-time {
+  @apply text-gray-400 mr-2 whitespace-nowrap;
+}
+
+.log-icon {
+  @apply mr-2 flex-shrink-0;
+}
+
+.log-svg {
+  @apply w-4 h-4;
+}
+
+.log-info {
+  @apply text-blue-400 dark:text-gray-400;
+}
+
+.log-success {
+  @apply text-green-400;
+}
+
+.log-warning {
+  @apply text-yellow-400;
+}
+
+.log-error {
+  @apply text-red-400;
+}
+
+.log-message {
+  @apply flex-1;
+}
+
+.log-message.log-info {
+  @apply text-blue-300 dark:text-gray-300;
+}
+
+.log-message.log-success {
+  @apply text-green-300;
+}
+
+.log-message.log-warning {
+  @apply text-yellow-300;
+}
+
+.log-message.log-error {
+  @apply text-red-300;
+}

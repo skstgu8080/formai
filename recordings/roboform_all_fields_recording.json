@@ -1,0 +1,297 @@
+{
+  "recording_name": "RoboForm All Fields Test Form",
+  "url": "https://www.roboform.com/filling-test-all-fields",
+  "description": "Complete form filling recording for RoboForm test form with all available fields",
+  "created_date": "2025-09-09",
+  "profile_used": "chris",
+  "total_fields_filled": 30,
+  "field_mappings": [
+    {
+      "field_name": "Title",
+      "field_selector": "input[name='01___title']",
+      "field_type": "textbox",
+      "profile_mapping": "title",
+      "sample_value": "Mr"
+    },
+    {
+      "field_name": "First Name",
+      "field_selector": "input[name='02frstname']",
+      "field_type": "textbox",
+      "profile_mapping": "firstName",
+      "sample_value": "chris"
+    },
+    {
+      "field_name": "Middle Initial",
+      "field_selector": "input[name='03middle_i']",
+      "field_type": "textbox",
+      "profile_mapping": "middleInitial",
+      "sample_value": "p"
+    },
+    {
+      "field_name": "Last Name",
+      "field_selector": "input[name='04lastname']",
+      "field_type": "textbox",
+      "profile_mapping": "lastName",
+      "sample_value": "son"
+    },
+    {
+      "field_name": "Full Name",
+      "field_selector": "input[name='04fullname']",
+      "field_type": "textbox",
+      "profile_mapping": "fullName",
+      "sample_value": "chris p son"
+    },
+    {
+      "field_name": "Company",
+      "field_selector": "input[name='05_company']",
+      "field_type": "textbox",
+      "profile_mapping": "company",
+      "sample_value": "Tech Corp"
+    },
+    {
+      "field_name": "Position",
+      "field_selector": "input[name='06position']",
+      "field_type": "textbox",
+      "profile_mapping": "position",
+      "sample_value": "Software Developer"
+    },
+    {
+      "field_name": "Address Line 1",
+      "field_selector": "input[name='10address1']",
+      "field_type": "textbox",
+      "profile_mapping": "address1",
+      "sample_value": "123 Main Street"
+    },
+    {
+      "field_name": "Address Line 2",
+      "field_selector": "input[name='11address2']",
+      "field_type": "textbox",
+      "profile_mapping": "address2",
+      "sample_value": "Apt 4B"
+    },
+    {
+      "field_name": "City",
+      "field_selector": "input[name='13adr_city']",
+      "field_type": "textbox",
+      "profile_mapping": "city",
+      "sample_value": "New York"
+    },
+    {
+      "field_name": "State / Province",
+      "field_selector": "input[name='14adrstate']",
+      "field_type": "textbox",
+      "profile_mapping": "state",
+      "sample_value": "NY"
+    },
+    {
+      "field_name": "Country",
+      "field_selector": "input[name='15_country']",
+      "field_type": "textbox",
+      "profile_mapping": "country",
+      "sample_value": "USA"
+    },
+    {
+      "field_name": "Zip",
+      "field_selector": "input[name='16addr_zip']",
+      "field_type": "textbox",
+      "profile_mapping": "zip",
+      "sample_value": "10001"
+    },
+    {
+      "field_name": "Home Phone",
+      "field_selector": "input[name='20homephon']",
+      "field_type": "textbox",
+      "profile_mapping": "homePhone",
+      "sample_value": "(555) 123-4567"
+    },
+    {
+      "field_name": "Work Telephone",
+      "field_selector": "input[name='21workphon']",
+      "field_type": "textbox",
+      "profile_mapping": "workPhone",
+      "sample_value": "(555) 987-6543"
+    },
+    {
+      "field_name": "Fax",
+      "field_selector": "input[name='22faxphone']",
+      "field_type": "textbox",
+      "profile_mapping": "fax",
+      "sample_value": "(555) 555-5555"
+    },
+    {
+      "field_name": "Cell Phone",
+      "field_selector": "input[name='23cellphon']",
+      "field_type": "textbox",
+      "profile_mapping": "cellPhone",
+      "sample_value": "(555) 456-7890"
+    },
+    {
+      "field_name": "E-mail",
+      "field_selector": "input[name='24emailadr']",
+      "field_type": "textbox",
+      "profile_mapping": "email",
+      "sample_value": "chris.peterson@example.com"
+    },
+    {
+      "field_name": "Web Site",
+      "field_selector": "input[name='25web_site']",
+      "field_type": "textbox",
+      "profile_mapping": "website",
+      "sample_value": "www.chrisson.dev"
+    },
+    {
+      "field_name": "User ID",
+      "field_selector": "input[name='30_user_id']",
+      "field_type": "textbox",
+      "profile_mapping": "username",
+      "sample_value": "cwatson"
+    },
+    {
+      "field_name": "Password",
+      "field_selector": "input[name='31password']",
+      "field_type": "textbox",
+      "profile_mapping": "password",
+      "sample_value": "SecurePass123!"
+    },
+    {
+      "field_name": "Credit Card Type",
+      "field_selector": "select[name='40cc__type']",
+      "field_type": "select",
+      "profile_mapping": "creditCardType",
+      "sample_value": "Visa (Preferred)"
+    },
+    {
+      "field_name": "Credit Card Number",
+      "field_selector": "input[name='41ccnumber']",
+      "field_type": "textbox",
+      "profile_mapping": "creditCardNumber",
+      "sample_value": "4111111111111111"
+    },
+    {
+      "field_name": "Card Expiration Month",
+      "field_selector": "select[name='42ccexp_mm']",
+      "field_type": "select",
+      "profile_mapping": "creditCardExpMonth",
+      "sample_value": "12"
+    },
+    {
+      "field_name": "Card Expiration Year",
+      "field_selector": "select[name='43ccexp_yy']",
+      "field_type": "select",
+      "profile_mapping": "creditCardExpYear",
+      "sample_value": "2027"
+    },
+    {
+      "field_name": "Card Verification Code",
+      "field_selector": "input[name='43cvc']",
+      "field_type": "textbox",
+      "profile_mapping": "creditCardCVC",
+      "sample_value": "123"
+    },
+    {
+      "field_name": "Card User Name",
+      "field_selector": "input[name='44cc_uname']",
+      "field_type": "textbox",
+      "profile_mapping": "creditCardName",
+      "sample_value": "Chris P Watson"
+    },
+    {
+      "field_name": "Card Issuing Bank",
+      "field_selector": "input[name='45ccissuer']",
+      "field_type": "textbox",
+      "profile_mapping": "creditCardBank",
+      "sample_value": "First National Bank"
+    },
+    {
+      "field_name": "Card Customer Service Phone",
+      "field_selector": "input[name='46cccstsvc']",
+      "field_type": "textbox",
+      "profile_mapping": "creditCardServicePhone",
+      "sample_value": "1-800-123-4567"
+    },
+    {
+      "field_name": "Sex",
+      "field_selector": "input[name='60pers_sex']",
+      "field_type": "textbox",
+      "profile_mapping": "sex",
+      "sample_value": "m"
+    },
+    {
+      "field_name": "Social Security Number",
+      "field_selector": "input[name='61pers_ssn']",
+      "field_type": "textbox",
+      "profile_mapping": "ssn",
+      "sample_value": "123-45-6789"
+    },
+    {
+      "field_name": "Driver License Number",
+      "field_selector": "input[name='62driv_lic']",
+      "field_type": "textbox",
+      "profile_mapping": "driverLicense",
+      "sample_value": "D123456789"
+    },
+    {
+      "field_name": "Date Of Birth Month",
+      "field_selector": "select[name='66mm']",
+      "field_type": "select",
+      "profile_mapping": "birthMonth",
+      "sample_value": "Feb"
+    },
+    {
+      "field_name": "Date Of Birth Day",
+      "field_selector": "select[name='67dd']",
+      "field_type": "select",
+      "profile_mapping": "birthDay",
+      "sample_value": "11"
+    },
+    {
+      "field_name": "Date Of Birth Year",
+      "field_selector": "select[name='68yy']",
+      "field_type": "select",
+      "profile_mapping": "birthYear",
+      "sample_value": "1989"
+    },
+    {
+      "field_name": "Age",
+      "field_selector": "input[name='66pers_age']",
+      "field_type": "textbox",
+      "profile_mapping": "age",
+      "sample_value": "21"
+    },
+    {
+      "field_name": "Birth Place",
+      "field_selector": "input[name='67birth_pl']",
+      "field_type": "textbox",
+      "profile_mapping": "birthPlace",
+      "sample_value": "New York, NY"
+    },
+    {
+      "field_name": "Income",
+      "field_selector": "input[name='68__income']",
+      "field_type": "textbox",
+      "profile_mapping": "income",
+      "sample_value": "75000"
+    },
+    {
+      "field_name": "Custom Message",
+      "field_selector": "input[name='71__custom']",
+      "field_type": "textbox",
+      "profile_mapping": "customMessage",
+      "sample_value": "Thank you for this comprehensive form testing experience!"
+    },
+    {
+      "field_name": "Comments",
+      "field_selector": "input[name='72__commnt']",
+      "field_type": "textbox",
+      "profile_mapping": "comments",
+      "sample_value": "This form was filled automatically using FormAI"
+    }
+  ],
+  "success_rate": "100%",
+  "notes": "Complete successful form filling with all 30+ fields populated. Includes personal info, contact details, financial data, and custom fields. Uses both profile data from 'chris' profile and intelligent sample data.",
+  "screenshots": [
+    "roboform-completely-filled-form.png"
+  ],
+  "automation_method": "playwright_mcp",
+  "tested_date": "2025-09-09"
+}
