@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kpr Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="../static/css/input.css">
+    <link rel="stylesheet" href="../static/css/dashboard.css">
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+            --radius: 0.5rem;
+        }
+        
+        .dark {
+            --background: 0 0% 0%;
+            --foreground: 0 0% 100%;
+            --card: 0 0% 3%;
+            --card-foreground: 0 0% 100%;
+            --popover: 0 0% 3%;
+            --popover-foreground: 0 0% 100%;
+            --primary: 0 0% 100%;
+            --primary-foreground: 0 0% 0%;
+            --secondary: 0 0% 9%;
+            --secondary-foreground: 0 0% 100%;
+            --muted: 0 0% 9%;
+            --muted-foreground: 0 0% 63%;
+            --accent: 0 0% 9%;
+            --accent-foreground: 0 0% 100%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 0 0% 100%;
+            --border: 0 0% 15%;
+            --input: 0 0% 15%;
+            --ring: 0 0% 100%;
+        }
+    </style>
+</head>
+<body class="h-full bg-background text-foreground">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-sidebar border-r border-sidebar-border flex-shrink-0 flex flex-col h-full transition-all duration-300">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-sidebar-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h1 class="text-lg font-semibold text-sidebar-foreground sidebar-text tracking-tight">Kpr</h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content -->
+            <div class="flex-1 overflow-y-auto">
+                <!-- Navigation Groups -->
+                <div class="p-2 space-y-6">
+                    <!-- Main Navigation Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Main</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-foreground bg-sidebar-accent rounded-md sidebar-nav-item active" data-tooltip="Dashboard">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>
+                                </svg>
+                                <span class="sidebar-text">Dashboard</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Automation Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Automation</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/profiles" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Profiles">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                <span class="sidebar-text">Profiles</span>
+                            </a>
+                            <a href="/automation" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Automation">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/>
+                                </svg>
+                                <span class="sidebar-text">Automation</span>
+                            </a>
+                            <a href="/saved_pages" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Saved Pages">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14,2 14,8 20,8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10,9 9,9 8,9"/>
+                                </svg>
+                                <span class="sidebar-text">Saved Pages</span>
+                            </a>
+                            <a href="/previous-orders" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Previous Orders">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                    <path d="M9 14l2 2 4-4"/>
+                                </svg>
+                                <span class="sidebar-text">Previous Orders</span>
+                            </a>
+                            <a href="/account" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Account">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span class="sidebar-text">Account</span>
+                            </a>
+                            <a href="/recorder" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Recorder">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+                                </svg>
+                                <span class="sidebar-text">Recorder</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Data Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Data</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/saved-urls" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="URLs">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/>
+                                </svg>
+                                <span class="sidebar-text">URLs</span>
+                            </a>
+                            <a href="/saved-pages" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Saved Pages">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>
+                                </svg>
+                                <span class="sidebar-text">Saved Pages</span>
+                            </a>
+                            <a href="/previous-orders" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Orders">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                </svg>
+                                <span class="sidebar-text">Orders</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Account Group -->
+                    <div class="space-y-1">
+                        <div class="px-3 py-2">
+                            <h3 class="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Account</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            <a href="/account" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Account">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span class="sidebar-text">Account</span>
+                            </a>
+                            <a href="/settings" class="flex items-center px-3 py-2 text-sm font-medium text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors sidebar-nav-item" data-tooltip="Settings">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 sidebar-icon">
+                                    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
+                                <span class="sidebar-text">Settings</span>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-sidebar-border">
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center">
+                        <span class="text-sm font-medium text-sidebar-primary-foreground">K</span>
+                    </div>
+                    <div class="flex-1 min-w-0 sidebar-user-info">
+                        <p class="text-sm font-medium text-sidebar-foreground truncate">Admin</p>
+                        <p class="text-xs text-sidebar-muted-foreground truncate">Premium User</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-background" id="main-content">
+            <!-- Header -->
+            <header class="bg-card/50 border-b border-gray-200 backdrop-blur-sm sticky top-0 z-10">
+                <div class="px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold text-card-foreground tracking-tight">Dashboard</h2>
+                            <p class="text-sm text-muted-foreground">Manage your form automation and AI-powered workflows</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            </button>
+                            <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div class="h-2 w-2 bg-green-500 rounded-full"></div>
+                                <span>Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <div class="p-6">
+
+
+                <!-- Main Dashboard Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Automation Control Panel -->
+                    <div class="lg:col-span-2 bg-card border border-gray-200 rounded-lg">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-card-foreground">Automation Control</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Left Column -->
+                                <div class="space-y-4">
+                                    <!-- Profile Selection -->
+                                    <div>
+                                        <label for="profile-select" class="block text-sm font-medium text-card-foreground mb-2">Select Profile</label>
+                                        <select id="profile-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                            <option value="">Loading profiles...</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Target URL Input -->
+                                    <div>
+                                        <label for="target-url" class="block text-sm font-medium text-card-foreground mb-2">Target URL (Optional)</label>
+                                        <input type="url" id="target-url" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Enter URL to automate">
+                                        <small class="text-xs text-muted-foreground mt-1">Leave empty to use saved URLs</small>
+                                    </div>
+
+                                    <!-- Mode Selection -->
+                                    <div>
+                                        <label for="mode-select" class="block text-sm font-medium text-card-foreground mb-2">Mode</label>
+                                        <select id="mode-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                            <option value="visible">Visible (Debug)</option>
+                                            <option value="headless">Headless (Fast)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="space-y-4">
+                                    <!-- URL Scope -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-card-foreground mb-2">URL Scope</label>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center">
+                                                <input id="url-scope-all" name="url-scope" type="radio" class="w-4 h-4 text-primary bg-background border-input focus:ring-ring" checked>
+                                                <label for="url-scope-all" class="ml-2 text-sm text-card-foreground">All URLs</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="url-scope-amount" name="url-scope" type="radio" class="w-4 h-4 text-primary bg-background border-input focus:ring-ring">
+                                                <label for="url-scope-amount" class="ml-2 text-sm text-card-foreground">Custom Amount</label>
+                                            </div>
+                                            <div id="url-amount-input-container" class="ml-6 hidden">
+                                                <input type="number" id="url-amount-input" value="10" min="1" placeholder="Enter amount" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="url-scope-group" name="url-scope" type="radio" class="w-4 h-4 text-primary bg-background border-input focus:ring-ring">
+                                                <label for="url-scope-group" class="ml-2 text-sm text-card-foreground">URL Group</label>
+                                            </div>
+                                            <div id="url-group-select-container" class="ml-6 hidden">
+                                                <select id="url-group-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                                    <option value="">Loading groups...</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Model Selection -->
+                                    <div>
+                                        <label for="llm-model-select" class="block text-sm font-medium text-card-foreground mb-2">AI Model</label>
+                                        <select id="llm-model-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet - Best for form context</option>
+                                            <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+                                            <option value="openai/gpt-4o">GPT-4o</option>
+                                            <option value="google/gemini-pro">Gemini Pro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Control Buttons -->
+                            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <button class="start-automation w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-md flex items-center justify-center transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
+                                        <path d="M8 5v14l11-7z"></path>
+                                    </svg>
+                                    Start Automation
+                                </button>
+                                <button class="stop-automation w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-medium py-3 px-6 rounded-md flex items-center justify-center transition-colors opacity-50" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
+                                        <path d="M6 6h12v12H6z"></path>
+                                    </svg>
+                                    Stop Automation
+                                </button>
+                            </div>
+
+                            <!-- AI Tools -->
+                            <div class="mt-6">
+                                <h4 class="text-sm font-medium text-card-foreground mb-3">AI Tools</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <button id="analyze-form-btn" class="w-full bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md flex items-center justify-center transition-colors border border-gray-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                                            <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/>
+                                            <polyline points="9,11 12,14 15,11"/>
+                                            <line x1="12" y1="14" x2="12" y2="3"/>
+                                        </svg>
+                                        AI Analyze Forms
+                                    </button>
+                                    <button id="generate-mapping-btn" class="w-full bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md flex items-center justify-center transition-colors border border-gray-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="9" y1="9" x2="15" y2="15"/>
+                                            <line x1="15" y1="9" x2="9" y2="15"/>
+                                        </svg>
+                                        Generate Mappings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Status & Quick Actions -->
+                    <div class="space-y-6">
+                        <!-- System Status -->
+                        <div class="bg-card border border-gray-200 rounded-lg">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-card-foreground">System Status</h3>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-muted-foreground">Browser Engine</span>
+                                        <span id="browser-status" class="text-sm font-medium text-muted-foreground">Checking...</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-muted-foreground">WebSocket</span>
+                                        <span id="websocket-status" class="text-sm font-medium text-muted-foreground">Checking...</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-muted-foreground">AI Model</span>
+                                        <span id="ai-model-status" class="text-sm font-medium text-muted-foreground">Checking...</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-muted-foreground">Memory Usage</span>
+                                        <span id="memory-status" class="text-sm font-medium text-muted-foreground">Calculating...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="bg-card border border-gray-200 rounded-lg">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-card-foreground">Quick Actions</h3>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-3">
+                                    <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-muted-foreground mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            <div>
+                                                <div class="text-sm font-medium text-card-foreground">Create Profile</div>
+                                                <div class="text-xs text-muted-foreground">Add new automation profile</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-muted-foreground mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                                            </svg>
+                                            <div>
+                                                <div class="text-sm font-medium text-card-foreground">View Logs</div>
+                                                <div class="text-xs text-muted-foreground">Check automation logs</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-muted-foreground mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            <div>
+                                                <div class="text-sm font-medium text-card-foreground">Settings</div>
+                                                <div class="text-xs text-muted-foreground">Configure automation</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Activity Feed -->
+                <div class="mt-8 bg-card border border-gray-200 rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-card-foreground">Live Activity Feed</h3>
+                            <button class="text-sm text-primary hover:text-primary/80 font-medium">
+                                Clear Logs
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="logs-container bg-muted p-4 rounded-lg h-80 overflow-y-auto font-mono text-sm">
+                            <div class="flex items-start text-xs mb-1">
+                                <span class="text-muted-foreground mr-2">[12:34:56]</span>
+                                <span class="mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <span class="text-primary">FormAI Dashboard initialized successfully</span>
+                            </div>
+                            <div class="flex items-start text-xs mb-1">
+                                <span class="text-muted-foreground mr-2">[12:34:57]</span>
+                                <span class="mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <span class="text-green-600">WebSocket connection established</span>
+                            </div>
+                            <div class="flex items-start text-xs mb-1">
+                                <span class="text-muted-foreground mr-2">[12:34:58]</span>
+                                <span class="mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <span class="text-card-foreground">System ready for automation tasks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../static/js/dashboard.js"></script>
+    <script src="../static/js/dashboard-enhanced.js"></script>
+    <script src="../static/js/system-status.js"></script>
+</body>
+</html>

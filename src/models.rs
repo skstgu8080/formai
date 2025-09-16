@@ -572,6 +572,7 @@ pub struct ApiKeyResponse {
     pub has_key: bool,
     pub created_at: Option<DateTime<Utc>>,
     pub last_used: Option<DateTime<Utc>>,
+    pub key_preview: Option<String>,
 }
 
 impl ApiKey {

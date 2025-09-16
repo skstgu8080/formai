@@ -34,19 +34,17 @@ class SystemStatusManager {
 
     async checkApiKeyStatus() {
         try {
-            const response = await fetch('/api/settings');
+            const response = await fetch('/api/api-keys');
             if (response.ok) {
-                const settings = await response.json();
-                const apiKeys = settings.apiKeys || {};
+                const apiKeys = await response.json();
 
-                // Check if any API key is configured
+                // Check if any API key is configured (locally stored or environment)
                 this.apiKeyStatus = !!(
-                    apiKeys.openai ||
-                    apiKeys.anthropic ||
-                    apiKeys.google ||
-                    apiKeys.openrouter
+                    (apiKeys.openrouter && apiKeys.openrouter.has_key) ||
+                    (apiKeys.firecrawl && apiKeys.firecrawl.has_key)
                 );
 
+                console.log('API key status checked:', this.apiKeyStatus);
                 this.updateAIModelStatus();
             }
         } catch (error) {

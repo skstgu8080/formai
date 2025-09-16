@@ -111,30 +111,6 @@ html.dark {
   width: 16rem; /* 256px */
 }
 
-#sidebar.sidebar-collapsed {
-  width: 4rem; /* 64px */
-  overflow: hidden;
-}
-
-#sidebar.sidebar-collapsed .sidebar-text {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-#sidebar.sidebar-collapsed .sidebar-user-info {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-#sidebar.sidebar-collapsed .sidebar-nav-item {
-  justify-content: center;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-
-#sidebar.sidebar-collapsed .sidebar-icon {
-  margin-right: 0;
-}
 
 /* Main Content Layout */
 main {
@@ -155,15 +131,12 @@ main {
     left: 0;
     height: 100vh;
     z-index: 50;
-    transform: translateX(-100%);
+    width: 16rem; /* Always full width on mobile */
+    transform: translateX(-100%); /* Hidden by default on mobile */
   }
-  
-  #sidebar.sidebar-collapsed {
-    transform: translateX(-100%);
-  }
-  
-  #sidebar:not(.sidebar-collapsed) {
-    transform: translateX(0);
+
+  #sidebar.sidebar-open {
+    transform: translateX(0); /* Visible when open */
   }
   
   main {
@@ -191,10 +164,6 @@ main {
 @media (min-width: 769px) {
   #sidebar {
     position: relative;
-    transform: translateX(0);
-  }
-  
-  #sidebar.sidebar-collapsed {
     transform: translateX(0);
   }
 }

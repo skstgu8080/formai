@@ -406,11 +406,13 @@ async fn get_api_keys_status() -> impl IntoResponse {
             let services = vec!["openrouter", "firecrawl"];
             for service in services {
                 if let Some(api_key) = api_keys.get(service) {
+                    let key_preview = services::get_api_key_preview(service).await;
                     let response = models::ApiKeyResponse {
                         service: service.to_string(),
                         has_key: true,
                         created_at: Some(api_key.created_at),
                         last_used: api_key.last_used,
+                        key_preview,
                     };
                     status.insert(service, response);
                 } else {
@@ -419,6 +421,7 @@ async fn get_api_keys_status() -> impl IntoResponse {
                         has_key: false,
                         created_at: None,
                         last_used: None,
+                        key_preview: None,
                     };
                     status.insert(service, response);
                 }

@@ -2772,3 +2772,21 @@ pub async fn get_openrouter_key() -> Option<String> {
         _ => None
     }
 }
+
+pub async fn get_api_key_preview(service: &str) -> Option<String> {
+    match get_api_key(service).await {
+        Ok(Some(encrypted_key)) => {
+            match decrypt_api_key(&encrypted_key) {
+                Ok(decrypted_key) => {
+                    if decrypted_key.len() >= 8 {
+                        Some(format!("{}...{}", &decrypted_key[0..6], &decrypted_key[decrypted_key.len()-4..]))
+                    } else {
+                        Some(format!("{}...", &decrypted_key[0..std::cmp::min(4, decrypted_key.len())]))
+                    }
+                },
+                Err(_) => None
+            }
+        },
+        _ => None
+    }
+}

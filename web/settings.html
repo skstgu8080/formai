@@ -114,16 +114,6 @@
                     <div class="flex items-center space-x-3">
                         <h1 class="text-lg font-semibold text-sidebar-foreground sidebar-text tracking-tight">Kpr</h1>
                     </div>
-                    <button id="sidebar-toggle" class="p-2 rounded-md text-sidebar-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
-                        <!-- Expanded state - collapse icon -->
-                        <svg id="collapse-icon" class="h-4 w-4 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                        </svg>
-                        <!-- Collapsed state - expand icon -->
-                        <svg id="expand-icon" class="h-4 w-4 transition-all duration-300 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                        </svg>
-                    </button>
                 </div>
             </div>
 
@@ -677,8 +667,8 @@
                     saveApiKeysBtn.addEventListener('click', () => this.saveApiKeys());
                 }
 
-                // Load API key status
-                this.loadApiKeyStatus();
+                // Load API key status after DOM is ready
+                setTimeout(() => this.loadApiKeyStatus(), 100);
             }
 
             async loadSettings() {
@@ -928,23 +918,55 @@
 
             async loadApiKeyStatus() {
                 try {
-                    const response = await fetch('/api/api-keys');
+                    console.log('Loading API key status...');
+                    const response = await fetch('/api/api-keys?' + Date.now()); // Cache busting
                     if (response.ok) {
                         const status = await response.json();
+                        console.log('API key status received:', status);
 
                         // Check OpenRouter status
                         if (status.openrouter && status.openrouter.has_key) {
-                            document.getElementById('openrouter-status').textContent = '✓ Saved locally';
-                            document.getElementById('openrouter-status').className = 'text-xs text-green-600';
-                            document.getElementById('save-openrouter-locally').checked = true;
-                            localStorage.setItem('formai-openrouter-saved-locally', 'true');
+                            const keyPreview = status.openrouter.key_preview || '';
+                            console.log('OpenRouter key found, preview:', keyPreview);
+
+                            const statusElement = document.getElementById('openrouter-status');
+                            const checkboxElement = document.getElementById('save-openrouter-locally');
+
+                            // Update input field with preview
+                            const inputElement = document.getElementById('openrouter-api-key');
+                            if (inputElement) {
+                                inputElement.value = keyPreview;
+                                inputElement.placeholder = keyPreview;
+                                console.log('Updated input field with preview:', keyPreview);
+                            } else {
+                                console.error('openrouter-api-key input not found');
+                            }
+
+                            if (statusElement) {
+                                statusElement.textContent = `✓ Saved locally`;
+                                statusElement.className = 'text-xs text-green-600';
+                                console.log('Updated status element');
+                            } else {
+                                console.error('openrouter-status element not found');
+                            }
+
+                            if (checkboxElement) {
+                                checkboxElement.checked = true;
+                                localStorage.setItem('formai-openrouter-saved-locally', 'true');
+                            } else {
+                                console.error('save-openrouter-locally checkbox not found');
+                            }
                         } else {
+                            console.log('No OpenRouter key found');
                             // Check if user previously chose to save locally
                             const savedLocally = localStorage.getItem('formai-openrouter-saved-locally');
-                            if (savedLocally === 'true') {
-                                document.getElementById('save-openrouter-locally').checked = true;
+                            const checkboxElement = document.getElementById('save-openrouter-locally');
+                            if (savedLocally === 'true' && checkboxElement) {
+                                checkboxElement.checked = true;
                             }
                         }
+                    } else {
+                        console.error('API key status request failed:', response.status);
                     }
                 } catch (error) {
                     console.error('Error loading API key status:', error);
@@ -974,8 +996,13 @@
                         });
 
                         if (response.ok) {
-                            // Update UI to show saved locally
-                            document.getElementById('openrouter-status').textContent = '✓ Saved locally';
+                            // Create a preview of the saved key
+                            const keyPreview = openrouterKey.length >= 8
+                                ? `${openrouterKey.substring(0, 6)}...${openrouterKey.substring(openrouterKey.length - 4)}`
+                                : `${openrouterKey.substring(0, Math.min(4, openrouterKey.length))}...`;
+
+                            // Update UI to show saved locally with preview
+                            document.getElementById('openrouter-status').textContent = `✓ Saved locally (${keyPreview})`;
                             document.getElementById('openrouter-status').className = 'text-xs text-green-600';
 
                             // Store preference in localStorage
