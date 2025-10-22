@@ -17,17 +17,19 @@ from colorama import Fore, Style
 class ClientCallback:
     """Handles two-way communication with admin server"""
 
-    def __init__(self, admin_url: Optional[str] = None, interval: int = 300):
+    def __init__(self, admin_url: Optional[str] = None, interval: int = 300, quiet: bool = True):
         """
         Initialize callback client
 
         Args:
             admin_url: Admin server URL (e.g., "http://admin.example.com:5512")
             interval: Heartbeat interval in seconds (default: 300 = 5 minutes)
+            quiet: Suppress verbose logging (default: True)
         """
         self.admin_url = admin_url
         self.interval = interval
         self.enabled = bool(admin_url)
+        self.quiet = quiet
         self.task = None
         self.client_id = None
         self.command_handlers: Dict[str, Callable] = {}
@@ -213,16 +215,21 @@ class ClientCallback:
                     if "commands" in result and result["commands"]:
                         await self._process_commands(result["commands"])
 
-                    print(f"{Fore.CYAN}📡 Heartbeat sent to admin server{Style.RESET_ALL}")
+                    if not self.quiet:
+                        print(f"{Fore.CYAN}📡 Heartbeat sent to admin server{Style.RESET_ALL}")
                 else:
-                    print(f"{Fore.YELLOW}⚠ Heartbeat failed: {response.status_code}{Style.RESET_ALL}")
+                    if not self.quiet:
+                        print(f"{Fore.YELLOW}⚠ Heartbeat failed: {response.status_code}{Style.RESET_ALL}")
 
         except httpx.TimeoutException:
-            print(f"{Fore.YELLOW}⚠ Admin server timeout (will retry){Style.RESET_ALL}")
+            if not self.quiet:
+                print(f"{Fore.YELLOW}⚠ Admin server timeout (will retry){Style.RESET_ALL}")
         except httpx.ConnectError:
-            print(f"{Fore.YELLOW}⚠ Cannot connect to admin server (will retry){Style.RESET_ALL}")
+            if not self.quiet:
+                print(f"{Fore.YELLOW}⚠ Cannot connect to admin server (will retry){Style.RESET_ALL}")
         except Exception as e:
-            print(f"{Fore.YELLOW}⚠ Heartbeat error: {e}{Style.RESET_ALL}")
+            if not self.quiet:
+                print(f"{Fore.YELLOW}⚠ Heartbeat error: {e}{Style.RESET_ALL}")
 
     async def _process_commands(self, commands: list):
         """Process commands from admin server"""
@@ -232,7 +239,8 @@ class ClientCallback:
                 command_type = cmd.get("command")
                 params = cmd.get("params", {})
 
-                print(f"{Fore.CYAN}📥 Received command: {command_type}{Style.RESET_ALL}")
+                if not self.quiet:
+                    print(f"{Fore.CYAN}📥 Received command: {command_type}{Style.RESET_ALL}")
 
                 # Execute command
                 if command_type in self.command_handlers:
@@ -268,8 +276,9 @@ class ClientCallback:
 
     async def heartbeat_loop(self):
         """Background loop for sending heartbeats"""
-        print(f"{Fore.GREEN}✓ Callback system enabled (interval: {self.interval}s){Style.RESET_ALL}")
-        print(f"{Fore.CYAN}  Admin URL: {self.admin_url}{Style.RESET_ALL}")
+        if not self.quiet:
+            print(f"{Fore.GREEN}✓ Callback system enabled (interval: {self.interval}s){Style.RESET_ALL}")
+            print(f"{Fore.CYAN}  Admin URL: {self.admin_url}{Style.RESET_ALL}")
 
         # Send initial heartbeat
         await self.send_heartbeat()

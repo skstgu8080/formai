@@ -60,7 +60,8 @@ chrome_parser = ChromeRecorderParser()
 # Initialize callback system
 admin_url = os.getenv("ADMIN_CALLBACK_URL", "")
 callback_interval = int(os.getenv("ADMIN_CALLBACK_INTERVAL", "300"))
-callback_client = ClientCallback(admin_url=admin_url, interval=callback_interval)
+callback_quiet = os.getenv("ADMIN_CALLBACK_QUIET", "true").lower() == "true"
+callback_client = ClientCallback(admin_url=admin_url, interval=callback_interval, quiet=callback_quiet)
 
 # Pydantic models
 class Profile(BaseModel):
@@ -1029,6 +1030,6 @@ if __name__ == "__main__":
         app,
         host="127.0.0.1",
         port=5511,
-        log_level="info",
+        log_level="warning",  # Changed from "info" to suppress WebSocket connection logs
         access_log=False
     )
