@@ -1,0 +1,58 @@
+{
+    "title": "credit card drop down",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1136,
+            "height": 932,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://www.roboform.com/filling-test-all-fields",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://www.roboform.com/filling-test-all-fields",
+                    "title": "RoboForm Tutorials - Form Filler: Filling Your Information into Online Forms with One Click"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(3) select"
+                ],
+                [
+                    "xpath//html/body/div[2]/form/div/div[2]/div[3]/div[2]/select"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) select"
+                ]
+            ],
+            "offsetY": 10.9375,
+            "offsetX": 162.4166259765625
+        },
+        {
+            "type": "change",
+            "value": "9",
+            "selectors": [
+                [
+                    "div:nth-of-type(3) select"
+                ],
+                [
+                    "xpath//html/body/div[2]/form/div/div[2]/div[3]/div[2]/select"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) select"
+                ]
+            ],
+            "target": "main"
+        }
+    ]
+}

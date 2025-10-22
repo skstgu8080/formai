@@ -424,14 +424,73 @@
                 this.successRate = 98.7;
                 this.avgSpeed = 3.2;
                 this.isRunning = false;
-                
+                this.ws = null;
+                this.currentSessionId = null;
+
                 this.init();
+                this.connectWebSocket();
             }
-            
+
             init() {
                 this.bindEvents();
                 this.updateMetrics();
                 this.loadProfiles();
+            }
+
+            connectWebSocket() {
+                const wsUrl = `ws://${window.location.host}/ws`;
+                this.ws = new WebSocket(wsUrl);
+
+                this.ws.onopen = () => {
+                    this.addLogEntry('✅ Connected to server', 'success');
+                };
+
+                this.ws.onmessage = (event) => {
+                    try {
+                        const message = JSON.parse(event.data);
+                        this.handleWebSocketMessage(message);
+                    } catch (e) {
+                        console.error('Failed to parse WebSocket message:', e);
+                    }
+                };
+
+                this.ws.onerror = (error) => {
+                    this.addLogEntry('❌ WebSocket error', 'error');
+                };
+
+                this.ws.onclose = () => {
+                    this.addLogEntry('⚠️ Disconnected from server', 'warning');
+                    // Attempt to reconnect after 5 seconds
+                    setTimeout(() => this.connectWebSocket(), 5000);
+                };
+            }
+
+            handleWebSocketMessage(message) {
+                switch (message.type) {
+                    case 'automation_started':
+                        this.addLogEntry(`🚀 Automation started: ${message.url}`, 'info');
+                        this.currentSessionId = message.session_id;
+                        break;
+                    case 'automation_completed':
+                        this.formsFilled += message.fields_filled || 0;
+                        this.updateMetrics();
+                        this.addLogEntry(`✅ Automation completed! Filled ${message.fields_filled} fields`, 'success');
+                        this.isRunning = false;
+                        break;
+                    case 'automation_failed':
+                        this.addLogEntry(`❌ Automation failed: ${message.error}`, 'error');
+                        this.isRunning = false;
+                        break;
+                    case 'automation_error':
+                        this.addLogEntry(`❌ Error: ${message.error}`, 'error');
+                        this.isRunning = false;
+                        break;
+                    case 'connected':
+                        // Already handled in onopen
+                        break;
+                    default:
+                        console.log('Unknown message type:', message.type);
+                }
             }
             
             bindEvents() {
@@ -520,18 +579,49 @@
                 }, 2000);
             }
             
-            startAutomation() {
+            async startAutomation() {
                 const profileSelect = document.getElementById('profile-select');
                 const targetUrl = document.getElementById('target-url');
-                
+                const modeSelect = document.getElementById('mode-select');
+
                 if (!profileSelect.value) {
                     this.addLogEntry('Please select a profile first', 'error');
                     return;
                 }
-                
+
+                const url = targetUrl.value.trim() || 'https://www.roboform.com/filling-test-all-fields';
+                const useHeadless = modeSelect.value === 'headless';
+
                 this.isRunning = true;
                 this.addLogEntry(`Starting automation with profile: ${profileSelect.options[profileSelect.selectedIndex].text}`, 'info');
-                this.simulateProgress();
+                this.addLogEntry(`Target URL: ${url}`, 'info');
+                this.addLogEntry(`Mode: ${useHeadless ? 'Headless (Fast)' : 'Visible (Debug)'}`, 'info');
+
+                try {
+                    const response = await fetch('/api/automation/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            profile_id: profileSelect.value,
+                            url: url,
+                            use_stealth: true
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.addLogEntry(`✅ Browser launched! Session ID: ${result.session_id}`, 'success');
+                        this.addLogEntry(`Profile: ${result.profile}`, 'info');
+                        this.addLogEntry('Navigating to page and detecting form fields...', 'info');
+                    } else {
+                        this.addLogEntry(`❌ Failed to start: ${result.detail || 'Unknown error'}`, 'error');
+                        this.isRunning = false;
+                    }
+                } catch (error) {
+                    this.addLogEntry(`❌ Error: ${error.message}`, 'error');
+                    this.isRunning = false;
+                }
             }
             
             stopAutomation() {
@@ -555,21 +645,6 @@
                 }, 2500);
             }
             
-            simulateProgress() {
-                if (!this.isRunning) return;
-                
-                // Simulate form filling progress
-                setTimeout(() => {
-                    if (this.isRunning) {
-                        this.formsFilled++;
-                        this.updateMetrics();
-                        this.addLogEntry(`Form filled successfully (${this.formsFilled} total)`, 'success');
-                        
-                        // Continue simulation
-                        this.simulateProgress();
-                    }
-                }, Math.random() * 5000 + 2000); // Random delay between 2-7 seconds
-            }
             
             addLogEntry(message, type = 'info') {
                 const logsContainer = document.querySelector('.bg-muted.p-4.rounded-md.h-80');

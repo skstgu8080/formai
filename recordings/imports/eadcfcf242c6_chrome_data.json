@@ -1,0 +1,101 @@
+{
+  "title": "Test Contact Form Recording",
+  "steps": [
+    {
+      "type": "navigate",
+      "url": "https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_contact_form"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "iframe[name=\"iframeResult\"]"
+        ]
+      ]
+    },
+    {
+      "type": "change",
+      "target": "main",
+      "selectors": [
+        [
+          "input[name=\"first_name\"]"
+        ],
+        [
+          "input[placeholder=\"Your name..\"]"
+        ]
+      ],
+      "value": "John"
+    },
+    {
+      "type": "change",
+      "target": "main",
+      "selectors": [
+        [
+          "input[name=\"last_name\"]"
+        ],
+        [
+          "input[placeholder=\"Your last name..\"]"
+        ]
+      ],
+      "value": "Smith"
+    },
+    {
+      "type": "change",
+      "target": "main",
+      "selectors": [
+        [
+          "input[name=\"email\"]"
+        ],
+        [
+          "input[placeholder=\"Your email..\"]"
+        ]
+      ],
+      "value": "john.smith@example.com"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "select[name=\"country\"]"
+        ]
+      ]
+    },
+    {
+      "type": "change",
+      "target": "main",
+      "selectors": [
+        [
+          "select[name=\"country\"]"
+        ]
+      ],
+      "value": "usa"
+    },
+    {
+      "type": "change",
+      "target": "main",
+      "selectors": [
+        [
+          "textarea[name=\"message\"]"
+        ],
+        [
+          "textarea[placeholder=\"Write something..\"]"
+        ]
+      ],
+      "value": "This is a test message for the contact form."
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "input[type=\"submit\"]"
+        ],
+        [
+          "input[value=\"Submit\"]"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "recordings": {
+    "99b94e119ba7": {
+      "recording_id": "99b94e119ba7",
+      "recording_name": "Test Contact Form Import",
+      "url": "https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_contact_form",
+      "created_date": "2025-10-19",
+      "created_timestamp": "2025-10-19T07:11:58.564650",
+      "total_fields": 8,
+      "import_source": "chrome_devtools_recorder",
+      "file_path": "recordings\\99b94e119ba7.json",
+      "success_rate": "pending",
+      "description": "Imported from Chrome DevTools Recorder - Test Contact Form Recording",
+      "tags": []
+    },
+    "eadcfcf242c6": {
+      "recording_id": "eadcfcf242c6",
+      "recording_name": "Test Contact Form Import",
+      "url": "https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_contact_form",
+      "created_date": "2025-10-19",
+      "created_timestamp": "2025-10-19T07:12:07.073781",
+      "total_fields": 8,
+      "import_source": "chrome_devtools_recorder",
+      "file_path": "recordings\\eadcfcf242c6.json",
+      "success_rate": "pending",
+      "description": "Imported from Chrome DevTools Recorder - Test Contact Form Recording",
+      "tags": []
+    }
+  },
+  "metadata": {
+    "created": "2025-10-19T07:10:07.600725",
+    "last_updated": "2025-10-19T07:12:07.104984",
+    "total_recordings": 2,
+    "version": "1.0"
+  }
+}

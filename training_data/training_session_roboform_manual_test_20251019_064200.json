@@ -1,0 +1,13 @@
+{
+  "session_stats": {
+    "session_id": "roboform_manual_test",
+    "start_time": "2025-10-19T06:41:52.070899",
+    "total_fields": 0,
+    "successful_fields": 0,
+    "failed_fields": 0,
+    "field_types": {},
+    "interaction_methods": {},
+    "avg_time_per_field": 0
+  },
+  "training_data": []
+}

@@ -55,7 +55,7 @@ class Sidebar {
                 items: [
                     {
                         id: 'saved-urls',
-                        label: 'URLs',
+                        label: 'Saved URLs',
                         href: '/saved-urls',
                         icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/>'
                     },
@@ -70,6 +70,12 @@ class Sidebar {
                         label: 'Previous Orders',
                         href: '/previous-orders',
                         icon: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/>'
+                    },
+                    {
+                        id: 'user-data',
+                        label: 'User Data',
+                        href: '/user-data',
+                        icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>'
                     }
                 ]
             },

@@ -31,7 +31,7 @@
     "webSite": "www.example.dev",
     "username": "cPublic",
     "password": "SecurePass123!",
-    "creditCardType": "Visa",
+    "creditCardType": "Visa (Preferred)",
     "creditCardNumber": "4111111111111111",
     "creditCardExpMonth": "12",
     "creditCardExpYear": "2027",

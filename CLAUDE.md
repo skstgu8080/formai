@@ -2,35 +2,53 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Session History
+
+**IMPORTANT**: Before starting work on this project, read `sessions.md` for context on recent development sessions, including:
+- Recent bug fixes and feature implementations
+- API endpoint additions and modifications
+- Profile system enhancements and normalization fixes
+- Project structure reorganization
+- Error resolutions and workarounds
+
+This file tracks the evolution of the FormAI project and will help you understand what has been recently modified or fixed.
+
 ## Essential Commands
 
 ### Development Server
-- `start-rust.bat` - **RECOMMENDED: Start the Rust server (port 5511)**
-- `cargo run --release` - Run Rust server directly (port 5511)
-- `start.bat` - Legacy Python server (deprecated)
+- `python formai_server.py` - **RECOMMENDED: Start the Python server (port 5511)**
+- `start-python.bat` - Windows batch script to start the server
+- `uvicorn formai_server:app --host 127.0.0.1 --port 5511` - Start with uvicorn directly
 
 ### Build System
 - `npm run build-css` - Build Tailwind CSS from input.css to tailwind.css
 - `npm run watch-css` - Watch and rebuild CSS automatically
-- `cargo build --release` - Build optimized Rust executable
-- `build-release.bat` - One-time build setup with CSS compilation
 
 ### Browser Setup
-- `install-browser.bat` - Install Playwright browsers for automation
+- `scripts/install-browser.bat` - Install SeleniumBase browsers for automation
 
 ## Architecture Overview
 
-FormAI is a **high-performance browser automation platform** built in Rust:
+FormAI is a **high-performance browser automation platform** built with Python and SeleniumBase:
 
 ### Primary Architecture
-**Rust Server** (`src/main.rs`)
+**Python Server** (`formai_server.py`)
 - **Primary and recommended backend**
+- FastAPI web framework with WebSocket support
 - Runs on port 5511
-- Axum web framework with WebSocket support
-- Full browser automation with Playwright
+- Full browser automation with SeleniumBase
 - AI-powered form field mapping
-- Real-time progress updates
-- Anti-bot detection bypass
+- Real-time progress updates via WebSocket
+- Anti-bot detection bypass with UC (Undetected Chrome) mode
+
+### Automation Engine
+**SeleniumBase** (`selenium_automation.py`)
+- UC mode for undetected Chrome browser automation
+- CDP (Chrome DevTools Protocol) mode for enhanced stealth
+- PyAutoGUI integration for CAPTCHA assistance
+- Smart form field detection and mapping
+- Profile-based auto-fill
+- Human-like interaction delays
 
 ### Frontend Structure
 - **Web Pages**: `web/` directory contains HTML pages (index.html, profiles.html, automation.html, etc.)
@@ -44,75 +62,76 @@ FormAI is a **high-performance browser automation platform** built in Rust:
 - **Saved URLs**: Managed in `saved_urls/` directory
 - **Recordings**: Browser recordings stored in `recordings/` directory
 
-## Key Rust Modules
+## Key Python Modules
 
-- `main.rs` - Axum server setup and routing
-- `models.rs` - Data structures (Profile, FieldMapping, etc.)
-- `services.rs` - Business logic and automation services
-- `websocket.rs` - Real-time communication
-- `field_mapping_service.rs` - Smart form field mapping
-- `profile_adapter.rs` - Profile data transformation
-- `stats.rs` - Performance tracking
-- `dropdown_service.rs` - Dropdown handling automation
+- `formai_server.py` - FastAPI server setup and routing
+- `selenium_automation.py` - SeleniumBase automation engine
+- `gui_automation.py` - PyAutoGUI helper utilities
+- `recording_manager.py` - Chrome recorder import and replay
+- `profile_replay_engine.py` - Profile-based automation replay
+- `enhanced_field_mapper.py` - Smart field detection and mapping
+- `chrome_recorder_parser.py` - Chrome DevTools recorder JSON parser
 
 ## Browser Automation
 
-- Uses **Playwright** for reliable browser automation
-- Headless Chrome/Chromium support
+- Uses **SeleniumBase** with UC mode for undetected Chrome
+- CDP mode for enhanced stealth and anti-detection
+- **PyAutoGUI** for GUI automation and CAPTCHA assistance
+- Headless and headed (visible) browser modes
 - Anti-bot detection bypass capabilities
 - Form field detection and intelligent mapping
 - Real-time progress updates via WebSocket
 
 ## Development Workflow
 
-1. **Starting Server**: Run `start-rust.bat` for full-featured Rust server
+1. **Starting Server**: Run `python formai_server.py` or `start-python.bat`
 2. **CSS Changes**: Run `npm run watch-css` for live CSS rebuilding
-3. **Rust Changes**: Server will auto-rebuild when you restart `start-rust.bat`
-4. **Testing**: Access via http://localhost:5511 (Rust server)
+3. **Testing**: Access via http://localhost:5511
 
 ## Project Dependencies
 
-### Rust Dependencies
-- `axum` - Web framework with WebSocket support
-- `playwright` - Browser automation
-- `serde/serde_json` - Serialization
-- `tokio` - Async runtime
-- `sqlx` - Database operations
+### Python Dependencies
+- `fastapi` - Web framework with async support
+- `uvicorn` - ASGI server
+- `seleniumbase` - Browser automation with anti-detection
+- `pyautogui` - GUI automation for CAPTCHA handling
+- `websockets` - Real-time communication
+- `pydantic` - Data validation
+- `colorama` - Terminal colors (Windows support)
 
 ### Node.js Dependencies
 - `tailwindcss` - CSS framework
-- `playwright` - Browser automation support
-- Shadcn UI components (configured in .cursor/mcp.json)
+- Shadcn UI components
 
 ## Configuration Files
 
-- `Cargo.toml` - Rust dependencies and build configuration
+- `requirements.txt` - Python dependencies
 - `package.json` - Node.js scripts and dependencies
-- `tsconfig.json` - TypeScript configuration
 - `tailwind.config.js` - Tailwind CSS configuration
-- `components.json` - Shadcn UI component configuration
-
-## Performance Optimizations
-
-The Rust server is optimized for production:
-- Release profile with `opt-level = 3`
-- Link-time optimization (LTO)
-- Single codegen unit
-- Panic = abort for smaller binaries
-- Symbol stripping for reduced size
 
 ## Important Notes
 
-- **Primary backend is Rust** - use `start-rust.bat` to start the server
+- **Primary backend is Python** - use `python formai_server.py` to start the server
 - CSS must be built with `npm run build-css` after Tailwind changes
-- Playwright browsers are automatically managed but can be manually installed
+- SeleniumBase browsers are automatically managed
 - Profile data is stored as JSON files, not in a traditional database
 - WebSocket communication provides real-time automation updates
-- The system includes anti-bot detection bypass capabilities for form automation
+- The system includes anti-bot detection bypass with UC mode
 - AI models configured in `static/Models.json` for intelligent form field mapping
 
 ## Quick Start
 
-1. **Run the server**: Double-click `start-rust.bat`
-2. **Open dashboard**: Go to http://localhost:5511
-3. **Start automation**: Profiles are automatically loaded from `profiles/` directory - just start using the web interface
+1. **Install dependencies**: `pip install -r requirements.txt`
+2. **Run the server**: `python formai_server.py` or double-click `start-python.bat`
+3. **Open dashboard**: Go to http://localhost:5511
+4. **Start automation**: Profiles are automatically loaded from `profiles/` directory - just start using the web interface
+
+## Features
+
+- **Undetected Chrome**: UC mode bypasses most bot detection systems
+- **CDP Mode**: Chrome DevTools Protocol for enhanced stealth
+- **Smart Field Detection**: Automatically detects and maps form fields
+- **Profile Management**: Save and reuse profile data across sites
+- **Recording Replay**: Import Chrome DevTools recordings and replay with profiles
+- **WebSocket Updates**: Real-time progress tracking during automation
+- **PyAutoGUI Integration**: Manual CAPTCHA solving assistance

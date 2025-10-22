@@ -242,44 +242,21 @@ class DashboardApp {
     getAutomationConfig() {
         const targetUrl = document.getElementById('target-url')?.value;
 
-        let urlConfig = {};
+        // Get URL - use target URL input or default to RoboForm test page
+        let url = targetUrl && targetUrl.trim() !== ''
+            ? targetUrl.trim()
+            : 'https://www.roboform.com/filling-test-all-fields';
 
-        // If a target URL is provided, use it directly and ignore URL scope
-        if (targetUrl && targetUrl.trim() !== '') {
-            urlConfig = {
-                type: 'single',
-                url: targetUrl.trim()
-            };
-        } else {
-            // Otherwise use the URL scope settings
-            const selectedScope = document.querySelector('input[name="url-scope"]:checked')?.id;
-            switch (selectedScope) {
-                case 'url-scope-all':
-                    urlConfig = { type: 'all' };
-                    break;
-                case 'url-scope-amount':
-                    urlConfig = {
-                        type: 'amount',
-                        amount: parseInt(this.urlAmountInput?.value || '10')
-                    };
-                    break;
-                case 'url-scope-group':
-                    urlConfig = {
-                        type: 'group',
-                        group_id: this.urlGroupSelect?.value
-                    };
-                    break;
-                default:
-                    urlConfig = { type: 'all' };
-            }
-        }
+        // Map mode to use_stealth (headless uses stealth, visible doesn't for debugging)
+        const mode = this.modeSelect?.value || 'Visible (Debug)';
+        const use_stealth = mode === 'Headless (Fast)';
 
-        console.log('Sending config with URL:', urlConfig);
+        console.log('Sending config - URL:', url, 'Stealth:', use_stealth);
 
         return {
             profile_id: this.profileSelect?.value,
-            url_config: urlConfig,
-            mode: this.modeSelect?.value === 'Headless (Fast)' ? 'headless' : 'visible'
+            url: url,
+            use_stealth: use_stealth
         };
     }
 
