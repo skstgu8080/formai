@@ -25,13 +25,15 @@ init()
 # Admin server configuration
 ADMIN_PORT = 5512
 DATA_DIR = Path("admin_data")
+SCREENSHOTS_DIR = DATA_DIR / "screenshots"
 CLIENTS_FILE = DATA_DIR / "clients.json"
 COMMANDS_FILE = DATA_DIR / "commands.json"
 COMMAND_RESULTS_FILE = DATA_DIR / "command_results.json"
 OFFLINE_THRESHOLD = 600  # 10 minutes
 
-# Ensure data directory exists
+# Ensure data directories exist
 DATA_DIR.mkdir(exist_ok=True)
+SCREENSHOTS_DIR.mkdir(exist_ok=True)
 
 # Initialize FastAPI
 app = FastAPI(title="FormAI Admin Server", version="1.0.0")
@@ -327,6 +329,31 @@ async def receive_command_result(data: dict):
     if not command_id or not client_id:
         raise HTTPException(status_code=400, detail="command_id and client_id are required")
 
+    # Handle screenshot results specially
+    if result.get("screenshot"):
+        try:
+            import base64
+            screenshot_data = result["screenshot"]
+            screenshot_bytes = base64.b64decode(screenshot_data)
+
+            # Save screenshot to disk
+            client_name = clients.get(client_id, {}).get("hostname", "unknown")
+            timestamp_str = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            screenshot_filename = f"{client_name}_{timestamp_str}.png"
+            screenshot_path = SCREENSHOTS_DIR / screenshot_filename
+
+            with open(screenshot_path, 'wb') as f:
+                f.write(screenshot_bytes)
+
+            # Store reference to screenshot instead of base64 data
+            result["screenshot_file"] = screenshot_filename
+            result["screenshot_path"] = str(screenshot_path)
+            del result["screenshot"]  # Remove large base64 data
+
+            print(f"{Fore.GREEN}📸 Screenshot saved from {client_name}: {screenshot_filename}{Style.RESET_ALL}")
+        except Exception as e:
+            print(f"{Fore.RED}✗ Failed to save screenshot: {e}{Style.RESET_ALL}")
+
     # Store result
     command_results[command_id] = {
         "client_id": client_id,
@@ -360,6 +387,32 @@ async def get_command_result(command_id: str):
         raise HTTPException(status_code=404, detail="Command result not found")
 
     return command_results[command_id]
+
+
+@app.get("/api/screenshots")
+async def get_screenshots():
+    """Get list of all screenshots"""
+    screenshots = []
+    if SCREENSHOTS_DIR.exists():
+        for screenshot_file in sorted(SCREENSHOTS_DIR.glob("*.png"), key=lambda x: x.stat().st_mtime, reverse=True):
+            screenshots.append({
+                "filename": screenshot_file.name,
+                "size": screenshot_file.stat().st_size,
+                "created_at": datetime.fromtimestamp(screenshot_file.stat().st_mtime).isoformat()
+            })
+    return {
+        "total": len(screenshots),
+        "screenshots": screenshots
+    }
+
+
+@app.get("/api/screenshots/{filename}")
+async def get_screenshot(filename: str):
+    """Get a specific screenshot file"""
+    screenshot_path = SCREENSHOTS_DIR / filename
+    if not screenshot_path.exists():
+        raise HTTPException(status_code=404, detail="Screenshot not found")
+    return FileResponse(screenshot_path, media_type="image/png")
 
 
 @app.get("/")

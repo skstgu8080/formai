@@ -13,8 +13,8 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a2e;
-            color: #eee;
+            background: #0d1117;
+            color: #c9d1d9;
             padding: 20px;
         }
 
@@ -43,11 +43,11 @@
         }
 
         .stat-card {
-            background: #16213e;
+            background: #161b22;
             padding: 20px;
             border-radius: 10px;
             border-left: 4px solid #667eea;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .stat-card h3 {
@@ -64,10 +64,10 @@
         }
 
         .clients-section {
-            background: #16213e;
+            background: #161b22;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .clients-section h2 {
@@ -76,11 +76,11 @@
         }
 
         .client-card {
-            background: #1a1a2e;
+            background: #0d1117;
             padding: 20px;
             margin-bottom: 15px;
             border-radius: 8px;
-            border-left: 4px solid #0f3460;
+            border-left: 4px solid #21262d;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -172,7 +172,7 @@
         }
 
         .modal-content {
-            background: #16213e;
+            background: #161b22;
             padding: 30px;
             border-radius: 10px;
             max-width: 500px;
@@ -200,10 +200,10 @@
         .form-group input {
             width: 100%;
             padding: 10px;
-            background: #1a1a2e;
-            border: 1px solid #333;
+            background: #0d1117;
+            border: 1px solid #30363d;
             border-radius: 5px;
-            color: #eee;
+            color: #c9d1d9;
             font-family: inherit;
         }
 
@@ -275,6 +275,27 @@
         </div>
     </div>
 
+    <div class="clients-section" style="margin-top: 30px;">
+        <h2>📸 Recent Screenshots</h2>
+        <div id="screenshots-list">
+            <div class="no-clients loading">Loading screenshots...</div>
+        </div>
+    </div>
+
+    <!-- Screenshot Modal -->
+    <div class="modal" id="screenshotModal">
+        <div class="modal-content" style="max-width: 90%; max-height: 90vh;">
+            <h2 id="screenshotTitle">Screenshot</h2>
+            <div style="overflow: auto; max-height: calc(90vh - 100px);">
+                <img id="screenshotImage" style="width: 100%; height: auto;" />
+            </div>
+            <div class="button-group">
+                <button type="button" class="button-secondary" onclick="closeScreenshotModal()">Close</button>
+                <button type="button" onclick="downloadScreenshot()">Download</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Command Modal -->
     <div class="modal" id="commandModal">
         <div class="modal-content">
@@ -284,6 +305,7 @@
                     <label>Command Type</label>
                     <select id="commandType" required>
                         <option value="ping">Ping</option>
+                        <option value="screenshot">Screenshot (Troubleshooting)</option>
                         <option value="get_status">Get Status</option>
                         <option value="update_config">Update Config</option>
                         <option value="restart">Restart</option>
@@ -349,11 +371,14 @@
                                 <button onclick="sendCommand('${client.client_id}', 'ping')" ${!client.is_online ? 'disabled' : ''}>
                                     🏓 Ping
                                 </button>
+                                <button onclick="sendCommand('${client.client_id}', 'screenshot')" ${!client.is_online ? 'disabled' : ''}>
+                                    📸 Screenshot
+                                </button>
                                 <button onclick="sendCommand('${client.client_id}', 'get_status')" ${!client.is_online ? 'disabled' : ''}>
                                     📊 Status
                                 </button>
                                 <button onclick="openCommandModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
-                                    💻 Custom Command
+                                    💻 Custom
                                 </button>
                             </div>
                         </div>
@@ -447,10 +472,67 @@
             }
         });
 
+        // Load screenshots
+        async function loadScreenshots() {
+            try {
+                const response = await fetch('/api/screenshots');
+                const data = await response.json();
+
+                const screenshotsList = document.getElementById('screenshots-list');
+
+                if (data.screenshots.length === 0) {
+                    screenshotsList.innerHTML = '<div class="no-clients">No screenshots yet</div>';
+                    return;
+                }
+
+                screenshotsList.innerHTML = data.screenshots.slice(0, 10).map(screenshot => {
+                    const date = new Date(screenshot.created_at);
+                    const sizeKB = (screenshot.size / 1024).toFixed(1);
+                    return `
+                        <div class="client-card">
+                            <div class="client-info">
+                                <h3>${screenshot.filename}</h3>
+                                <p><strong>Size:</strong> ${sizeKB} KB | <strong>Created:</strong> ${date.toLocaleString()}</p>
+                            </div>
+                            <button onclick="viewScreenshot('${screenshot.filename}')">
+                                🖼️ View
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load screenshots:', error);
+            }
+        }
+
+        let currentScreenshotFilename = null;
+
+        // View screenshot
+        function viewScreenshot(filename) {
+            currentScreenshotFilename = filename;
+            document.getElementById('screenshotTitle').textContent = `Screenshot: ${filename}`;
+            document.getElementById('screenshotImage').src = `/api/screenshots/${filename}`;
+            document.getElementById('screenshotModal').classList.add('active');
+        }
+
+        // Close screenshot modal
+        function closeScreenshotModal() {
+            document.getElementById('screenshotModal').classList.remove('active');
+            currentScreenshotFilename = null;
+        }
+
+        // Download screenshot
+        function downloadScreenshot() {
+            if (currentScreenshotFilename) {
+                window.open(`/api/screenshots/${currentScreenshotFilename}`, '_blank');
+            }
+        }
+
         // Auto-refresh data
         function refresh() {
             loadStats();
             loadClients();
+            loadScreenshots();
         }
 
         // Initial load
