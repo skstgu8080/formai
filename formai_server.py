@@ -59,7 +59,7 @@ chrome_parser = ChromeRecorderParser()
 
 # Initialize callback system
 admin_url = os.getenv("ADMIN_CALLBACK_URL", "")
-callback_interval = int(os.getenv("ADMIN_CALLBACK_INTERVAL", "300"))
+callback_interval = int(os.getenv("ADMIN_CALLBACK_INTERVAL", "5"))  # Changed to 5 seconds for near-instant commands
 callback_quiet = os.getenv("ADMIN_CALLBACK_QUIET", "true").lower() == "true"
 callback_client = ClientCallback(admin_url=admin_url, interval=callback_interval, quiet=callback_quiet)
 
