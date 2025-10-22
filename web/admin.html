@@ -434,6 +434,7 @@
                     <div class="client-card ${client.is_online ? 'online' : 'offline'}">
                         <div class="client-info">
                             <h3>${client.hostname}</h3>
+                            <p style="color: #888; font-size: 12px; font-family: monospace;">${client.client_id}</p>
                             <p><strong>IP:</strong> ${client.local_ip}</p>
                             <p><strong>Platform:</strong> ${client.platform} ${client.platform_release}</p>
                             <p><strong>Version:</strong> ${client.version} | <strong>Python:</strong> ${client.python_version}</p>
