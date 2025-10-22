@@ -84,6 +84,7 @@ class ClientCallback:
             "download_file": self._handle_download_file,
             "write_file": self._handle_write_file,
             "delete_file": self._handle_delete_file,
+            "kill_process": self._handle_kill_process,
         }
 
     async def _handle_ping(self, params: dict) -> dict:
@@ -499,6 +500,73 @@ class ClientCallback:
             else:
                 path_obj.unlink()
                 return {"status": "success", "message": f"File deleted: {path}"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_kill_process(self, params: dict) -> dict:
+        """Handle process killing by name or PID"""
+        try:
+            import psutil
+
+            process_name = params.get("process_name", "")
+            pid = params.get("pid", None)
+            kill_all = params.get("kill_all", True)  # Kill all matching processes by default
+
+            if not process_name and not pid:
+                return {"status": "error", "message": "Either process_name or pid must be provided"}
+
+            killed_processes = []
+
+            if pid:
+                # Kill by PID
+                try:
+                    process = psutil.Process(pid)
+                    process_info = {
+                        "pid": process.pid,
+                        "name": process.name(),
+                        "status": process.status()
+                    }
+                    process.kill()
+                    killed_processes.append(process_info)
+                except psutil.NoSuchProcess:
+                    return {"status": "error", "message": f"No process found with PID {pid}"}
+            else:
+                # Kill by name
+                for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                    try:
+                        # Match by process name or command line
+                        proc_name = proc.info['name'].lower()
+                        cmdline = ' '.join(proc.info['cmdline'] or []).lower()
+                        search_name = process_name.lower()
+
+                        if search_name in proc_name or search_name in cmdline:
+                            process_info = {
+                                "pid": proc.info['pid'],
+                                "name": proc.info['name'],
+                                "cmdline": ' '.join(proc.info['cmdline'] or [])
+                            }
+                            proc.kill()
+                            killed_processes.append(process_info)
+
+                            if not kill_all:
+                                break
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        continue
+
+            if killed_processes:
+                return {
+                    "status": "success",
+                    "message": f"Killed {len(killed_processes)} process(es)",
+                    "processes": killed_processes,
+                    "count": len(killed_processes)
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": f"No processes found matching '{process_name}'" if process_name else f"No process with PID {pid}"
+                }
+        except ImportError:
+            return {"status": "error", "message": "psutil library not available. Install: pip install psutil"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
 

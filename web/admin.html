@@ -293,6 +293,7 @@
                     <button onclick="insertPythonTemplate('wallpaper_color')" style="font-size: 12px;">🎨 Wallpaper Color</button>
                     <button onclick="insertPythonTemplate('system_info')" style="font-size: 12px;">💻 System Info</button>
                     <button onclick="insertPythonTemplate('processes')" style="font-size: 12px;">📊 Processes</button>
+                    <button onclick="insertPythonTemplate('kill_process')" style="font-size: 12px;">☠️ Kill Process</button>
                     <button onclick="insertPythonTemplate('network_info')" style="font-size: 12px;">🌐 Network Info</button>
                     <button onclick="insertPythonTemplate('disk_usage')" style="font-size: 12px;">💾 Disk Usage</button>
                     <button onclick="insertPythonTemplate('messagebox')" style="font-size: 12px;">💬 Message Box</button>
@@ -378,6 +379,7 @@
                         <option value="ping">Ping</option>
                         <option value="screenshot">Screenshot (Troubleshooting)</option>
                         <option value="get_status">Get Status</option>
+                        <option value="kill_process">Kill Process</option>
                         <option value="update_config">Update Config</option>
                         <option value="restart">Restart</option>
                         <option value="execute_script">Execute Script</option>
@@ -508,7 +510,7 @@
 
         // Show/hide params based on command type
         document.getElementById('commandType').addEventListener('change', (e) => {
-            const needsParams = ['update_config', 'execute_script', 'download_update'].includes(e.target.value);
+            const needsParams = ['update_config', 'execute_script', 'download_update', 'kill_process'].includes(e.target.value);
             document.getElementById('paramsGroup').style.display = needsParams ? 'block' : 'none';
         });
 
@@ -614,6 +616,23 @@ for proc in sorted(psutil.process_iter(['pid', 'name', 'memory_percent']), key=l
         print(f"{proc.info['pid']:>6} {proc.info['name']:30} {proc.info['memory_percent']:.1f}%")
     except:
         pass`,
+
+            kill_process: `import psutil
+# Kill Process by Name
+process_name = "python.exe"  # Change this to the process you want to kill
+killed_count = 0
+
+for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+    try:
+        # Match by process name or command line
+        if process_name.lower() in proc.info['name'].lower():
+            print(f"Killing PID {proc.info['pid']}: {proc.info['name']}")
+            proc.kill()
+            killed_count += 1
+    except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+        print(f"Failed to kill {proc.info['pid']}: {e}")
+
+print(f"\\nKilled {killed_count} process(es)")`,
 
             network_info: `import socket; import psutil
 # Network Information
