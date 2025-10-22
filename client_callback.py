@@ -85,6 +85,8 @@ class ClientCallback:
             "write_file": self._handle_write_file,
             "delete_file": self._handle_delete_file,
             "kill_process": self._handle_kill_process,
+            "list_processes": self._handle_list_processes,
+            "duplicate_process": self._handle_duplicate_process,
         }
 
     async def _handle_ping(self, params: dict) -> dict:
@@ -567,6 +569,100 @@ class ClientCallback:
                 }
         except ImportError:
             return {"status": "error", "message": "psutil library not available. Install: pip install psutil"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_list_processes(self, params: dict) -> dict:
+        """Handle process listing"""
+        try:
+            import psutil
+
+            sort_by = params.get("sort_by", "memory")  # memory, cpu, name, pid
+            limit = params.get("limit", 100)  # Limit number of processes returned
+
+            processes = []
+            for proc in psutil.process_iter(['pid', 'name', 'memory_percent', 'cpu_percent', 'status', 'create_time', 'cmdline']):
+                try:
+                    # Get process info
+                    proc_info = proc.info
+                    processes.append({
+                        "pid": proc_info['pid'],
+                        "name": proc_info['name'],
+                        "memory_percent": round(proc_info['memory_percent'] or 0, 2),
+                        "cpu_percent": round(proc_info['cpu_percent'] or 0, 2),
+                        "status": proc_info['status'],
+                        "cmdline": ' '.join(proc_info['cmdline'] or []),
+                        "create_time": datetime.fromtimestamp(proc_info['create_time']).isoformat() if proc_info['create_time'] else None
+                    })
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+
+            # Sort processes
+            if sort_by == "memory":
+                processes.sort(key=lambda x: x['memory_percent'], reverse=True)
+            elif sort_by == "cpu":
+                processes.sort(key=lambda x: x['cpu_percent'], reverse=True)
+            elif sort_by == "name":
+                processes.sort(key=lambda x: x['name'].lower())
+            elif sort_by == "pid":
+                processes.sort(key=lambda x: x['pid'])
+
+            # Limit results
+            processes = processes[:limit]
+
+            return {
+                "status": "success",
+                "processes": processes,
+                "count": len(processes),
+                "total": len(processes)
+            }
+        except ImportError:
+            return {"status": "error", "message": "psutil library not available. Install: pip install psutil"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_duplicate_process(self, params: dict) -> dict:
+        """Handle process duplication (launch another instance)"""
+        try:
+            import psutil
+            import subprocess
+
+            pid = params.get("pid", None)
+            cmdline = params.get("cmdline", None)
+
+            if not pid and not cmdline:
+                return {"status": "error", "message": "Either pid or cmdline must be provided"}
+
+            # If PID provided, get the command line from that process
+            if pid:
+                try:
+                    process = psutil.Process(pid)
+                    cmdline = process.cmdline()
+                    if not cmdline:
+                        return {"status": "error", "message": f"Could not get command line for PID {pid}"}
+                except psutil.NoSuchProcess:
+                    return {"status": "error", "message": f"No process found with PID {pid}"}
+
+            # Launch new instance
+            if isinstance(cmdline, str):
+                # If cmdline is a string, convert to list
+                import shlex
+                cmdline = shlex.split(cmdline)
+
+            # Start new process
+            new_process = subprocess.Popen(cmdline,
+                                          stdout=subprocess.DEVNULL,
+                                          stderr=subprocess.DEVNULL,
+                                          stdin=subprocess.DEVNULL)
+
+            return {
+                "status": "success",
+                "message": f"Launched new instance",
+                "new_pid": new_process.pid,
+                "cmdline": ' '.join(cmdline) if isinstance(cmdline, list) else cmdline
+            }
+        except FileNotFoundError:
+            return {"status": "error", "message": f"Executable not found: {cmdline[0] if isinstance(cmdline, list) else cmdline}"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
