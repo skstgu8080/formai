@@ -282,6 +282,38 @@
         </div>
     </div>
 
+    <!-- Python Templates Modal -->
+    <div class="modal" id="pythonTemplatesModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <h2>🐍 Python Command Templates</h2>
+
+            <div class="form-group">
+                <label>Quick Actions</label>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                    <button onclick="insertPythonTemplate('wallpaper_color')" style="font-size: 12px;">🎨 Wallpaper Color</button>
+                    <button onclick="insertPythonTemplate('system_info')" style="font-size: 12px;">💻 System Info</button>
+                    <button onclick="insertPythonTemplate('processes')" style="font-size: 12px;">📊 Processes</button>
+                    <button onclick="insertPythonTemplate('network_info')" style="font-size: 12px;">🌐 Network Info</button>
+                    <button onclick="insertPythonTemplate('disk_usage')" style="font-size: 12px;">💾 Disk Usage</button>
+                    <button onclick="insertPythonTemplate('messagebox')" style="font-size: 12px;">💬 Message Box</button>
+                    <button onclick="insertPythonTemplate('env_vars')" style="font-size: 12px;">🔧 Env Variables</button>
+                    <button onclick="insertPythonTemplate('user_info')" style="font-size: 12px;">👤 User Info</button>
+                    <button onclick="insertPythonTemplate('file_list')" style="font-size: 12px;">📁 List Files</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Python Code</label>
+                <textarea id="pythonCode" style="font-family: 'Courier New', monospace; min-height: 200px;" placeholder="Python code will appear here..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="button-secondary" onclick="closePythonTemplatesModal()">Cancel</button>
+                <button type="button" onclick="executePythonTemplate()">Execute</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Screenshot Modal -->
     <div class="modal" id="screenshotModal">
         <div class="modal-content" style="max-width: 90%; max-height: 90vh;">
@@ -376,6 +408,9 @@
                                 </button>
                                 <button onclick="sendCommand('${client.client_id}', 'get_status')" ${!client.is_online ? 'disabled' : ''}>
                                     📊 Status
+                                </button>
+                                <button onclick="openPythonTemplatesModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
+                                    🐍 Python
                                 </button>
                                 <button onclick="openCommandModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
                                     💻 Custom
@@ -506,6 +541,141 @@
         }
 
         let currentScreenshotFilename = null;
+        let currentPythonClientId = null;
+
+        // Python Templates
+        const pythonTemplates = {
+            wallpaper_color: `from PIL import Image; import os; import ctypes
+# Change wallpaper to red
+img = Image.new('RGB', (1920, 1080), (255, 0, 0))
+path = os.path.join(os.environ['TEMP'], 'wallpaper.png')
+img.save(path)
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to red')`,
+
+            system_info: `import platform; import psutil
+# System Information
+info = f\"\"\"
+OS: {platform.system()} {platform.release()}
+CPU: {platform.processor()}
+RAM: {psutil.virtual_memory().total // (1024**3)} GB
+Disk: {psutil.disk_usage('/').total // (1024**3)} GB
+Python: {platform.python_version()}
+\"\"\"
+print(info)`,
+
+            processes: `import psutil
+# Running Processes
+for proc in sorted(psutil.process_iter(['pid', 'name', 'memory_percent']), key=lambda p: p.info['memory_percent'] or 0, reverse=True)[:20]:
+    try:
+        print(f"{proc.info['pid']:>6} {proc.info['name']:30} {proc.info['memory_percent']:.1f}%")
+    except:
+        pass`,
+
+            network_info: `import socket; import psutil
+# Network Information
+hostname = socket.gethostname()
+ip = socket.gethostbyname(hostname)
+print(f"Hostname: {hostname}")
+print(f"IP: {ip}")
+print("\\nNetwork Interfaces:")
+for iface, addrs in psutil.net_if_addrs().items():
+    print(f"  {iface}:")
+    for addr in addrs:
+        print(f"    {addr.address}")`,
+
+            disk_usage: `import psutil
+# Disk Usage
+for partition in psutil.disk_partitions():
+    try:
+        usage = psutil.disk_usage(partition.mountpoint)
+        print(f"{partition.device} ({partition.fstype})")
+        print(f"  Total: {usage.total // (1024**3)} GB")
+        print(f"  Used:  {usage.used // (1024**3)} GB ({usage.percent}%)")
+        print(f"  Free:  {usage.free // (1024**3)} GB")
+    except:
+        pass`,
+
+            messagebox: `import ctypes
+# Display Message Box
+ctypes.windll.user32.MessageBoxW(0, "Hello from Admin Dashboard!", "FormAI", 0x40)
+print('Message displayed')`,
+
+            env_vars: `import os
+# Environment Variables
+for key in sorted(os.environ.keys())[:20]:
+    print(f"{key:30} = {os.environ[key][:50]}")`,
+
+            user_info: `import os; import getpass; import platform
+# Current User Info
+print(f"Username: {getpass.getuser()}")
+print(f"Home: {os.path.expanduser('~')}")
+print(f"Computer: {platform.node()}")
+print(f"Platform: {platform.platform()}")`,
+
+            file_list: `import os
+# List files in current directory
+cwd = os.getcwd()
+print(f"Current Directory: {cwd}\\n")
+for item in sorted(os.listdir(cwd))[:50]:
+    path = os.path.join(cwd, item)
+    size = os.path.getsize(path) if os.path.isfile(path) else 0
+    type_icon = "📁" if os.path.isdir(path) else "📄"
+    print(f"{type_icon} {item:40} {size:>10} bytes")`
+        };
+
+        // Open Python templates modal
+        function openPythonTemplatesModal(clientId) {
+            currentPythonClientId = clientId;
+            document.getElementById('pythonCode').value = '';
+            document.getElementById('pythonTemplatesModal').classList.add('active');
+        }
+
+        // Close Python templates modal
+        function closePythonTemplatesModal() {
+            document.getElementById('pythonTemplatesModal').classList.remove('active');
+            currentPythonClientId = null;
+        }
+
+        // Insert Python template
+        function insertPythonTemplate(templateName) {
+            const template = pythonTemplates[templateName];
+            if (template) {
+                document.getElementById('pythonCode').value = template;
+            }
+        }
+
+        // Execute Python template
+        async function executePythonTemplate() {
+            const code = document.getElementById('pythonCode').value.trim();
+            if (!code) {
+                alert('Please enter or select Python code');
+                return;
+            }
+
+            if (!currentPythonClientId) {
+                alert('No client selected');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentPythonClientId,
+                        command: 'execute_script',
+                        params: { script: code }
+                    })
+                });
+
+                const result = await response.json();
+                alert(`Python command sent! Command ID: ${result.command_id}`);
+                closePythonTemplatesModal();
+            } catch (error) {
+                alert('Failed to send Python command: ' + error.message);
+            }
+        }
 
         // View screenshot
         function viewScreenshot(filename) {

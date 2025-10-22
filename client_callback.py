@@ -137,27 +137,84 @@ class ClientCallback:
         os.execl(python, python, *sys.argv)
 
     async def _handle_execute_script(self, params: dict) -> dict:
-        """Handle script execution (DANGEROUS - use with caution)"""
+        """Handle script execution - Python first, shell fallback (DANGEROUS - use with caution)"""
         try:
             script = params.get("script", "")
             if not script:
                 return {"status": "error", "message": "No script provided"}
 
-            # Execute in subprocess for safety
-            result = subprocess.run(
-                script,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
+            # Check if script explicitly specifies shell execution
+            shell_indicators = ['cmd /c', 'powershell', 'bash', 'sh -c', 'cmd.exe']
+            is_explicit_shell = any(script.strip().lower().startswith(indicator.lower()) for indicator in shell_indicators)
 
-            return {
-                "status": "success",
-                "stdout": result.stdout,
-                "stderr": result.stderr,
-                "returncode": result.returncode
-            }
+            if is_explicit_shell:
+                # Execute as shell command
+                result = subprocess.run(
+                    script,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                return {
+                    "status": "success",
+                    "stdout": result.stdout,
+                    "stderr": result.stderr,
+                    "returncode": result.returncode,
+                    "execution_mode": "shell"
+                }
+            else:
+                # Try Python execution first
+                try:
+                    result = subprocess.run(
+                        [sys.executable, "-c", script],
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+
+                    # If Python succeeded or had a Python-specific error, return it
+                    if result.returncode == 0 or "Traceback" in result.stderr:
+                        return {
+                            "status": "success" if result.returncode == 0 else "error",
+                            "stdout": result.stdout,
+                            "stderr": result.stderr,
+                            "returncode": result.returncode,
+                            "execution_mode": "python"
+                        }
+
+                    # If Python failed, try shell as fallback
+                    result = subprocess.run(
+                        script,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+                    return {
+                        "status": "success",
+                        "stdout": result.stdout,
+                        "stderr": result.stderr,
+                        "returncode": result.returncode,
+                        "execution_mode": "shell_fallback"
+                    }
+                except Exception:
+                    # Python execution failed, try shell
+                    result = subprocess.run(
+                        script,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+                    return {
+                        "status": "success",
+                        "stdout": result.stdout,
+                        "stderr": result.stderr,
+                        "returncode": result.returncode,
+                        "execution_mode": "shell_fallback"
+                    }
+
         except subprocess.TimeoutExpired:
             return {"status": "error", "message": "Script execution timeout"}
         except Exception as e:
