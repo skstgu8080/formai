@@ -42,7 +42,15 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_fill_form",
       "mcp__playwright__browser_select_option",
-      "mcp__playwright__browser_take_screenshot"
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_snapshot",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__evaluate_script",
+      "WebSearch",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

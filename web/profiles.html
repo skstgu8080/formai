@@ -58,52 +58,15 @@
     <link rel="stylesheet" href="/static/css/theme-variables.css">
     <link rel="stylesheet" href="/static/css/input.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
-    <style>
-        :root {
-            --background: 0 0% 100%;
-            --foreground: 222.2 84% 4.9%;
-            --card: 0 0% 100%;
-            --card-foreground: 222.2 84% 4.9%;
-            --popover: 0 0% 100%;
-            --popover-foreground: 222.2 84% 4.9%;
-            --primary: 221.2 83.2% 53.3%;
-            --primary-foreground: 210 40% 98%;
-            --secondary: 210 40% 96%;
-            --secondary-foreground: 222.2 84% 4.9%;
-            --muted: 210 40% 96%;
-            --muted-foreground: 215.4 16.3% 46.9%;
-            --accent: 210 40% 96%;
-            --accent-foreground: 222.2 84% 4.9%;
-            --destructive: 0 84.2% 60.2%;
-            --destructive-foreground: 210 40% 98%;
-            --border: 214.3 31.8% 91.4%;
-            --input: 214.3 31.8% 91.4%;
-            --ring: 221.2 83.2% 53.3%;
-            --radius: 0.5rem;
-        }
-        
-        .dark {
-            --background: 0 0% 0%;
-            --foreground: 0 0% 100%;
-            --card: 0 0% 3%;
-            --card-foreground: 0 0% 100%;
-            --popover: 0 0% 3%;
-            --popover-foreground: 0 0% 100%;
-            --primary: 0 0% 100%;
-            --primary-foreground: 0 0% 0%;
-            --secondary: 0 0% 9%;
-            --secondary-foreground: 0 0% 100%;
-            --muted: 0 0% 9%;
-            --muted-foreground: 0 0% 63%;
-            --accent: 0 0% 9%;
-            --accent-foreground: 0 0% 100%;
-            --destructive: 0 62.8% 30.6%;
-            --destructive-foreground: 0 0% 100%;
-            --border: 0 0% 15%;
-            --input: 0 0% 15%;
-            --ring: 0 0% 100%;
-        }
-    </style>
+    <script>
+        // Instant theme application - prevents flash
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="h-full bg-background text-foreground font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
@@ -130,11 +93,7 @@
                             <div id="keyboard-hint" class="text-xs text-muted-foreground hidden">
                                 <kbd class="px-2 py-1 bg-muted rounded text-xs">Ctrl+B</kbd> to toggle
                             </div>
-                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                                </svg>
-                            </button>
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent"></button>
                             <div class="flex items-center space-x-2 text-sm text-muted-foreground">
                                 <div class="h-2 w-2 bg-green-500 rounded-full"></div>
                                 <span>Connected</span>
@@ -208,39 +167,10 @@
                         </div>
                     </div>
                     
-                    <div class="overflow-hidden rounded-md border border-gray-200">
+                    <div class="overflow-visible rounded-md border border-gray-200">
                         <table class="w-full">
-                            <thead class="bg-muted">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-                                        <input type="checkbox" id="select-all" class="rounded">
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-                                        <button class="flex items-center hover:text-foreground" data-sort="name">
-                                            Profile Name
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
-                                                <path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>
-                                            </svg>
-                                        </button>
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-                                        <button class="flex items-center hover:text-foreground" data-sort="email">
-                                            Email
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
-                                                <path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>
-                                            </svg>
-                                        </button>
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-                                        Phone
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-                                        Status
-                                    </th>
-                                    <th class="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
-                                        Actions
-                                    </th>
-                                </tr>
+                            <thead id="table-header" class="bg-muted">
+                                <!-- Table header will be dynamically generated here -->
                             </thead>
                             <tbody id="table-body" class="divide-y divide-border">
                                 <!-- Table rows will be dynamically generated here -->
@@ -904,9 +834,80 @@
             
             init() {
                 this.bindEvents();
+                this.renderTableHeader();
                 this.loadProfiles();
             }
-            
+
+            renderTableHeader() {
+                const thead = document.getElementById('table-header');
+                thead.innerHTML = `
+                    <tr>
+                        ${this.columnVisibility.select ? `
+                            <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                <input type="checkbox" id="select-all" class="rounded">
+                            </th>
+                        ` : ''}
+                        ${this.columnVisibility.name ? `
+                            <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                <button class="flex items-center hover:text-foreground" data-sort="name">
+                                    Profile Name
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                                        <path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>
+                                    </svg>
+                                </button>
+                            </th>
+                        ` : ''}
+                        ${this.columnVisibility.email ? `
+                            <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                <button class="flex items-center hover:text-foreground" data-sort="email">
+                                    Email
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                                        <path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>
+                                    </svg>
+                                </button>
+                            </th>
+                        ` : ''}
+                        ${this.columnVisibility.phone ? `
+                            <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                Phone
+                            </th>
+                        ` : ''}
+                        ${this.columnVisibility.status ? `
+                            <th class="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                                Status
+                            </th>
+                        ` : ''}
+                        ${this.columnVisibility.actions ? `
+                            <th class="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+                                Actions
+                            </th>
+                        ` : ''}
+                    </tr>
+                `;
+
+                // Re-bind sort buttons after header render
+                document.querySelectorAll('[data-sort]').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const column = e.target.closest('button').dataset.sort;
+                        this.sortData(column);
+                    });
+                });
+
+                // Re-bind select all checkbox after header render
+                const selectAllCheckbox = document.getElementById('select-all');
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', (e) => {
+                        if (e.target.checked) {
+                            this.selectedRows = new Set(this.filteredData.map(item => item.id));
+                        } else {
+                            this.selectedRows.clear();
+                        }
+                        this.renderTable();
+                        this.updateSelectionCount();
+                    });
+                }
+            }
+
             bindEvents() {
                 // Email filter
                 document.getElementById('email-filter').addEventListener('input', (e) => {
@@ -921,8 +922,16 @@
                 });
                 
                 // Close dropdown when clicking outside
-                document.addEventListener('click', () => {
-                    document.getElementById('columns-dropdown').classList.add('hidden');
+                document.addEventListener('click', (e) => {
+                    // Close column visibility dropdown
+                    if (!e.target.closest('#columns-toggle') && !e.target.closest('#columns-dropdown')) {
+                        document.getElementById('columns-dropdown').classList.add('hidden');
+                    }
+
+                    // Close action dropdowns
+                    if (!e.target.closest('.action-menu-btn') && !e.target.closest('.action-dropdown')) {
+                        this.closeAllDropdowns();
+                    }
                 });
                 
                 // Column visibility checkboxes
@@ -930,26 +939,8 @@
                     checkbox.addEventListener('change', (e) => {
                         const column = e.target.dataset.column;
                         this.columnVisibility[column] = e.target.checked;
+                        this.renderTableHeader();
                         this.renderTable();
-                    });
-                });
-                
-                // Select all checkbox
-                document.getElementById('select-all').addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        this.selectedRows = new Set(this.filteredData.map(item => item.id));
-                    } else {
-                        this.selectedRows.clear();
-                    }
-                    this.renderTable();
-                    this.updateSelectionCount();
-                });
-                
-                // Sort buttons
-                document.querySelectorAll('[data-sort]').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const column = e.target.closest('button').dataset.sort;
-                        this.sortData(column);
                     });
                 });
                 
@@ -1019,41 +1010,49 @@
                                 <input type="checkbox" class="row-checkbox rounded" data-id="${item.id}" ${this.selectedRows.has(item.id) ? 'checked' : ''}>
                             </td>
                         ` : ''}
-                        <td class="px-4 py-3 text-sm font-medium">
-                            ${item.name}
-                        </td>
-                        <td class="px-4 py-3 text-sm text-muted-foreground">
-                            ${item.email}
-                        </td>
-                        <td class="px-4 py-3 text-sm text-muted-foreground">
-                            ${item.phone || 'Not provided'}
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                item.status === 'active' ? 'bg-green-100 text-green-800' :
-                                item.status === 'incomplete' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
-                            }">
-                                ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                            </span>
-                        </td>
+                        ${this.columnVisibility.name ? `
+                            <td class="px-4 py-3 text-sm font-medium">
+                                ${item.name}
+                            </td>
+                        ` : ''}
+                        ${this.columnVisibility.email ? `
+                            <td class="px-4 py-3 text-sm text-muted-foreground">
+                                ${item.email}
+                            </td>
+                        ` : ''}
+                        ${this.columnVisibility.phone ? `
+                            <td class="px-4 py-3 text-sm text-muted-foreground">
+                                ${item.phone || 'Not provided'}
+                            </td>
+                        ` : ''}
+                        ${this.columnVisibility.status ? `
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    item.status === 'active' ? 'bg-green-100 text-green-800' :
+                                    item.status === 'incomplete' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-gray-100 text-gray-800'
+                                }">
+                                    ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                                </span>
+                            </td>
+                        ` : ''}
                         ${this.columnVisibility.actions ? `
                             <td class="px-4 py-3 text-center">
                                 <div class="relative">
-                                    <button class="p-1 hover:bg-accent rounded" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                    <button class="action-menu-btn p-1 hover:bg-accent rounded" data-profile-id="${item.id}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
                                         </svg>
                                     </button>
-                                    <div class="hidden absolute right-0 mt-1 w-48 bg-card border border-gray-200 rounded-md shadow-lg z-10">
+                                    <div class="action-dropdown hidden absolute right-0 mt-1 w-48 bg-card border border-gray-200 rounded-md shadow-lg z-50" data-profile-id="${item.id}">
                                         <div class="py-1">
-                                            <button class="w-full text-left px-4 py-2 text-sm hover:bg-accent" onclick="window.profilesManager.useProfile('${item.id}')">
+                                            <button class="action-use w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground" data-profile-id="${item.id}">
                                                 Use Profile
                                             </button>
-                                            <button class="w-full text-left px-4 py-2 text-sm hover:bg-accent" onclick="window.profilesManager.editProfile('${item.id}')">
+                                            <button class="action-edit w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground" data-profile-id="${item.id}">
                                                 Edit Profile
                                             </button>
-                                            <button class="w-full text-left px-4 py-2 text-sm hover:bg-accent text-destructive" onclick="window.profilesManager.deleteProfile('${item.id}')">
+                                            <button class="action-delete w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10" data-profile-id="${item.id}">
                                                 Delete Profile
                                             </button>
                                         </div>
@@ -1077,8 +1076,61 @@
                         this.updateSelectAllState();
                     });
                 });
-                
+
+                // Bind action menu button events
+                tbody.querySelectorAll('.action-menu-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const profileId = btn.dataset.profileId;
+                        const dropdown = tbody.querySelector(`.action-dropdown[data-profile-id="${profileId}"]`);
+
+                        // Close all other dropdowns first
+                        tbody.querySelectorAll('.action-dropdown').forEach(d => {
+                            if (d !== dropdown) {
+                                d.classList.add('hidden');
+                            }
+                        });
+
+                        // Toggle current dropdown
+                        dropdown.classList.toggle('hidden');
+                    });
+                });
+
+                // Bind dropdown menu item events
+                tbody.querySelectorAll('.action-use').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const profileId = btn.dataset.profileId;
+                        this.closeAllDropdowns();
+                        window.profilesManager.useProfile(profileId);
+                    });
+                });
+
+                tbody.querySelectorAll('.action-edit').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const profileId = btn.dataset.profileId;
+                        this.closeAllDropdowns();
+                        window.profilesManager.editProfile(profileId);
+                    });
+                });
+
+                tbody.querySelectorAll('.action-delete').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const profileId = btn.dataset.profileId;
+                        this.closeAllDropdowns();
+                        window.profilesManager.deleteProfile(profileId);
+                    });
+                });
+
                 this.updateSelectionCount();
+            }
+
+            closeAllDropdowns() {
+                document.querySelectorAll('.action-dropdown').forEach(dropdown => {
+                    dropdown.classList.add('hidden');
+                });
             }
             
             updatePagination() {

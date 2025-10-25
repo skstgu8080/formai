@@ -47,47 +47,24 @@ class Sidebar {
                         label: 'Recorder',
                         href: '/recorder',
                         icon: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>'
-                    }
-                ]
-            },
-            {
-                group: 'Data',
-                items: [
-                    {
-                        id: 'saved-urls',
-                        label: 'Saved URLs',
-                        href: '/saved-urls',
-                        icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/>'
                     },
                     {
-                        id: 'saved-pages',
-                        label: 'Saved Pages',
-                        href: '/saved-pages',
-                        icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>'
+                        id: 'templates',
+                        label: 'Templates',
+                        href: '/templates',
+                        icon: '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="15" x2="15" y2="15"/>'
                     },
                     {
-                        id: 'previous-orders',
-                        label: 'Previous Orders',
-                        href: '/previous-orders',
-                        icon: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/>'
-                    },
-                    {
-                        id: 'user-data',
-                        label: 'User Data',
-                        href: '/user-data',
-                        icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>'
+                        id: 'http-submit',
+                        label: 'HTTP Submit',
+                        href: '/http-submit',
+                        icon: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>'
                     }
                 ]
             },
             {
                 group: 'Settings',
                 items: [
-                    {
-                        id: 'account',
-                        label: 'Account',
-                        href: '/account',
-                        icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'
-                    },
                     {
                         id: 'settings',
                         label: 'Settings',
@@ -161,10 +138,6 @@ class Sidebar {
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-muted-foreground">WebSocket</span>
                             <span id="websocket-status" class="text-sm font-medium text-muted-foreground">Checking...</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">AI Model</span>
-                            <span id="ai-model-status" class="text-sm font-medium text-muted-foreground">Checking...</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-muted-foreground">Memory Usage</span>

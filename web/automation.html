@@ -67,66 +67,15 @@
     <link rel="stylesheet" href="/static/css/theme-variables.css">
     <link rel="stylesheet" href="/static/css/input.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
-    <style>
-        :root {
-            --background: 0 0% 100%;
-            --foreground: 222.2 84% 4.9%;
-            --card: 0 0% 100%;
-            --card-foreground: 222.2 84% 4.9%;
-            --popover: 0 0% 100%;
-            --popover-foreground: 222.2 84% 4.9%;
-            --primary: 221.2 83.2% 53.3%;
-            --primary-foreground: 210 40% 98%;
-            --secondary: 210 40% 96%;
-            --secondary-foreground: 222.2 84% 4.9%;
-            --muted: 210 40% 96%;
-            --muted-foreground: 215.4 16.3% 46.9%;
-            --accent: 210 40% 96%;
-            --accent-foreground: 222.2 84% 4.9%;
-            --destructive: 0 84.2% 60.2%;
-            --destructive-foreground: 210 40% 98%;
-            --border: 214.3 31.8% 91.4%;
-            --input: 214.3 31.8% 91.4%;
-            --ring: 221.2 83.2% 53.3%;
-            --radius: 0.5rem;
-            --sidebar: 0 0% 98%;
-            --sidebar-foreground: 240 5.3% 26.1%;
-            --sidebar-muted: 240 4.8% 95.9%;
-            --sidebar-muted-foreground: 240 3.8% 46.1%;
-            --sidebar-accent: 240 4.8% 95.9%;
-            --sidebar-accent-foreground: 240 5.9% 10%;
-            --sidebar-border: 220 13% 91%;
-        }
-        
-        .dark {
-            --background: 0 0% 0%;
-            --foreground: 0 0% 100%;
-            --card: 0 0% 3%;
-            --card-foreground: 0 0% 100%;
-            --popover: 0 0% 3%;
-            --popover-foreground: 0 0% 100%;
-            --primary: 0 0% 100%;
-            --primary-foreground: 0 0% 0%;
-            --secondary: 0 0% 9%;
-            --secondary-foreground: 0 0% 100%;
-            --muted: 0 0% 9%;
-            --muted-foreground: 0 0% 63%;
-            --accent: 0 0% 9%;
-            --accent-foreground: 0 0% 100%;
-            --destructive: 0 62.8% 30.6%;
-            --destructive-foreground: 0 0% 100%;
-            --border: 0 0% 15%;
-            --input: 0 0% 15%;
-            --ring: 0 0% 100%;
-            --sidebar: 240 5.9% 10%;
-            --sidebar-foreground: 0 0% 98%;
-            --sidebar-muted: 240 3.7% 15.9%;
-            --sidebar-muted-foreground: 240 5% 64.9%;
-            --sidebar-accent: 240 3.7% 15.9%;
-            --sidebar-accent-foreground: 0 0% 98%;
-            --sidebar-border: 240 5.9% 90%;
-        }
-    </style>
+    <script>
+        // Instant theme application - prevents flash
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="h-full bg-background text-foreground">
     <div class="flex h-screen overflow-hidden">
@@ -153,9 +102,7 @@
                             <div id="keyboard-hint" class="text-xs text-muted-foreground hidden">
                                 <kbd class="px-2 py-1 bg-muted rounded text-xs">Ctrl+B</kbd> to toggle
                             </div>
-                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent">
-                                <!-- Icon will be dynamically updated by theme.js -->
-                            </button>
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent"></button>
                             <div class="flex items-center space-x-2 text-sm text-muted-foreground">
                                 <div class="h-2 w-2 bg-green-500 rounded-full"></div>
                                 <span>Connected</span>
@@ -251,38 +198,13 @@
                                     </select>
                                 </div>
 
-                                <!-- Target URL Input -->
+                                <!-- Recording Selection -->
                                 <div>
-                                    <label for="target-url" class="block text-sm font-medium text-foreground mb-2">Target URL (Optional)</label>
-                                    <input type="url" id="target-url" data-shadcn="input" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Enter URL to automate (e.g., https://lightningautofill.com/practice/)">
-                                    <small class="text-xs text-muted-foreground mt-1">Leave empty to use saved URLs, or enter a specific URL to test</small>
-                                </div>
-
-                                <!-- URL Scope -->
-                                <div>
-                                    <label class="block text-sm font-medium text-foreground mb-2">URL Scope</label>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center">
-                                            <input id="url-scope-all" name="url-scope" type="radio" class="w-4 h-4 text-primary bg-background border-input focus:ring-ring" checked>
-                                            <label for="url-scope-all" class="ml-2 text-sm text-foreground">All URLs</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input id="url-scope-amount" name="url-scope" type="radio" class="w-4 h-4 text-primary bg-background border-input focus:ring-ring">
-                                            <label for="url-scope-amount" class="ml-2 text-sm text-foreground">Custom Amount</label>
-                                        </div>
-                                        <div id="url-amount-input-container" class="ml-6 hidden">
-                                            <input type="number" id="url-amount-input" data-shadcn="input" value="10" min="1" placeholder="Enter amount" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input id="url-scope-group" name="url-scope" type="radio" class="w-4 h-4 text-primary bg-background border-input focus:ring-ring">
-                                            <label for="url-scope-group" class="ml-2 text-sm text-foreground">URL Group</label>
-                                        </div>
-                                        <div id="url-group-select-container" class="ml-6 hidden">
-                                            <select id="url-group-select" data-shadcn="select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
-                                                <option value="">Loading groups...</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    <label for="recording-select" class="block text-sm font-medium text-foreground mb-2">Select Recording</label>
+                                    <select id="recording-select" data-shadcn="select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                        <option value="">Loading recordings...</option>
+                                    </select>
+                                    <small class="text-xs text-muted-foreground mt-1">Select a saved recording to automate. Import new recordings in the Recorder page.</small>
                                 </div>
 
                                 <!-- Mode -->
@@ -291,17 +213,6 @@
                                     <select id="mode-select" data-shadcn="select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
                                         <option value="visible">Visible (Debug)</option>
                                         <option value="headless">Headless (Fast)</option>
-                                    </select>
-                                </div>
-
-                                <!-- LLM Model Selection -->
-                                <div>
-                                    <label for="llm-model-select" class="block text-sm font-medium text-foreground mb-2">AI Model</label>
-                                    <select id="llm-model-select" data-shadcn="select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
-                                        <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Recommended)</option>
-                                        <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-                                        <option value="openai/gpt-4o">GPT-4o</option>
-                                        <option value="google/gemini-pro">Gemini Pro</option>
                                     </select>
                                 </div>
 
@@ -376,7 +287,6 @@
 
     <script src="/static/js/sidebar.js"></script>
     <script src="/static/js/shadcn-components.js"></script>
-    <script src="/static/js/theme.js"></script>
     <script src="/static/js/system-status.js"></script>
     
     <script>
@@ -435,6 +345,7 @@
                 this.bindEvents();
                 this.updateMetrics();
                 this.loadProfiles();
+                this.loadRecordings();
             }
 
             connectWebSocket() {
@@ -484,6 +395,27 @@
                     case 'automation_error':
                         this.addLogEntry(`❌ Error: ${message.error}`, 'error');
                         this.isRunning = false;
+                        break;
+                    case 'replay_progress':
+                        // Handle real-time field-by-field progress updates
+                        const status = message.data?.status || 'info';
+                        const progressMessage = message.data?.message || 'Progress update';
+
+                        // Map status to log type for proper icon display
+                        const logTypeMap = {
+                            'filling': 'info',
+                            'field_completed': 'success',
+                            'field_failed': 'error',
+                            'submitting': 'info',
+                            'verified': 'success',
+                            'warning': 'warning',
+                            'initializing': 'info',
+                            'navigating': 'info',
+                            'ready': 'success'
+                        };
+                        const logType = logTypeMap[status] || 'info';
+
+                        this.addLogEntry(progressMessage, logType);
                         break;
                     case 'connected':
                         // Already handled in onopen
@@ -535,13 +467,31 @@
                         const profileSelect = document.getElementById('profile-select');
                         if (profileSelect) {
                             profileSelect.innerHTML = '<option value="">Select a profile...</option>' +
-                                profiles.map(profile => 
+                                profiles.map(profile =>
                                     `<option value="${profile.id}">${profile.name || 'Unnamed Profile'}</option>`
                                 ).join('');
                         }
                     }
                 } catch (error) {
                     console.error('Failed to load profiles:', error);
+                }
+            }
+
+            async loadRecordings() {
+                try {
+                    const response = await fetch('/api/recordings');
+                    if (response.ok) {
+                        const recordings = await response.json();
+                        const recordingSelect = document.getElementById('recording-select');
+                        if (recordingSelect) {
+                            recordingSelect.innerHTML = '<option value="">Select a recording...</option>' +
+                                recordings.map(recording =>
+                                    `<option value="${recording.recording_id}" data-url="${recording.url}">${recording.recording_name} (${recording.url})</option>`
+                                ).join('');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to load recordings:', error);
                 }
             }
             
@@ -581,7 +531,7 @@
             
             async startAutomation() {
                 const profileSelect = document.getElementById('profile-select');
-                const targetUrl = document.getElementById('target-url');
+                const recordingSelect = document.getElementById('recording-select');
                 const modeSelect = document.getElementById('mode-select');
 
                 if (!profileSelect.value) {
@@ -589,31 +539,42 @@
                     return;
                 }
 
-                const url = targetUrl.value.trim() || 'https://www.roboform.com/filling-test-all-fields';
+                if (!recordingSelect.value) {
+                    this.addLogEntry('Please select a recording first', 'error');
+                    return;
+                }
+
+                const recordingId = recordingSelect.value;
+                const recordingName = recordingSelect.options[recordingSelect.selectedIndex].text;
+                const selectedOption = recordingSelect.options[recordingSelect.selectedIndex];
+                const url = selectedOption.getAttribute('data-url');
                 const useHeadless = modeSelect.value === 'headless';
 
                 this.isRunning = true;
                 this.addLogEntry(`Starting automation with profile: ${profileSelect.options[profileSelect.selectedIndex].text}`, 'info');
+                this.addLogEntry(`Recording: ${recordingName}`, 'info');
                 this.addLogEntry(`Target URL: ${url}`, 'info');
                 this.addLogEntry(`Mode: ${useHeadless ? 'Headless (Fast)' : 'Visible (Debug)'}`, 'info');
 
                 try {
-                    const response = await fetch('/api/automation/start', {
+                    // Start recording replay
+                    const response = await fetch(`/api/recordings/${recordingId}/replay`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
+                            recording_id: recordingId,
                             profile_id: profileSelect.value,
-                            url: url,
-                            use_stealth: true
+                            session_name: `${recordingName}_${Date.now()}`
                         })
                     });
 
                     const result = await response.json();
 
                     if (response.ok) {
-                        this.addLogEntry(`✅ Browser launched! Session ID: ${result.session_id}`, 'success');
-                        this.addLogEntry(`Profile: ${result.profile}`, 'info');
-                        this.addLogEntry('Navigating to page and detecting form fields...', 'info');
+                        this.addLogEntry(`✅ Replay started! Session ID: ${result.session_id}`, 'success');
+                        this.addLogEntry(`Recording: ${result.recording_name}`, 'info');
+                        this.addLogEntry(`Profile: ${result.profile_name}`, 'info');
+                        this.addLogEntry(`Replaying ${url}...`, 'info');
                     } else {
                         this.addLogEntry(`❌ Failed to start: ${result.detail || 'Unknown error'}`, 'error');
                         this.isRunning = false;
@@ -684,5 +645,6 @@
             new AutomationManager();
         });
     </script>
+    <script src="/static/js/theme.js"></script>
 </body>
 </html>

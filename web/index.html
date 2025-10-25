@@ -69,6 +69,15 @@
     <link rel="stylesheet" href="/static/css/theme-variables.css">
     <link rel="stylesheet" href="/static/css/input.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script>
+        // Instant theme application - prevents flash
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="h-full bg-background text-foreground font-sans antialiased overflow-hidden">
     <div class="flex h-screen overflow-hidden">
@@ -86,11 +95,7 @@
                             <p class="text-sm text-muted-foreground">Manage your form automation and AI-powered workflows</p>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                                </svg>
-                            </button>
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent"></button>
                             <div class="flex items-center space-x-2 text-sm text-muted-foreground">
                                 <div class="h-2 w-2 bg-green-500 rounded-full"></div>
                                 <span>Connected</span>
@@ -103,6 +108,74 @@
             <!-- Page Content -->
             <div class="flex-1 overflow-auto">
                 <div class="p-6">
+                    <!-- Dashboard Metrics -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <!-- Total Profiles Card -->
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-muted-foreground">Total Profiles</p>
+                                    <p class="text-2xl font-bold text-card-foreground mt-1" id="total-profiles-count">0</p>
+                                </div>
+                                <div class="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-600">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Recordings Card -->
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-muted-foreground">Total Recordings</p>
+                                    <p class="text-2xl font-bold text-card-foreground mt-1" id="total-recordings-count">0</p>
+                                </div>
+                                <div class="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-purple-600">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <circle cx="12" cy="12" r="4"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Automations Run Card -->
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-muted-foreground">Automations Run</p>
+                                    <p class="text-2xl font-bold text-card-foreground mt-1" id="automations-run-count">0</p>
+                                </div>
+                                <div class="p-3 bg-green-100 dark:bg-green-900/20 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-600">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22,4 12,14.01 9,11.01"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Success Rate Card -->
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-muted-foreground">Success Rate</p>
+                                    <p class="text-2xl font-bold text-card-foreground mt-1" id="success-rate-percent">--</p>
+                                </div>
+                                <div class="p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-600">
+                                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Main Dashboard Grid -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Automation Control Panel -->
@@ -112,7 +185,7 @@
                             </div>
                             <div class="p-6">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Left Column -->
+                                    <!-- Left Column - Controls -->
                                     <div class="space-y-4">
                                         <!-- Profile Selection -->
                                         <div>
@@ -121,49 +194,84 @@
                                                 <option value="">Loading profiles...</option>
                                             </select>
                                         </div>
-                                        <!-- Target URL Input -->
+
+                                        <!-- Recording Selection Mode -->
                                         <div>
-                                            <label for="target-url" class="block text-sm font-medium text-card-foreground mb-2">Target URL (Optional)</label>
-                                            <input type="url" id="target-url" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="Enter URL to automate">
-                                            <small class="text-xs text-muted-foreground mt-1">Leave empty to use saved URLs</small>
+                                            <label for="url-mode-select" class="block text-sm font-medium text-card-foreground mb-2">URL Selection</label>
+                                            <select id="url-mode-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                                <option value="single">Single Recording</option>
+                                                <option value="multiple">Multiple Recordings</option>
+                                                <option value="all">All Recordings</option>
+                                            </select>
                                         </div>
+
+                                        <!-- Single Recording Selection -->
+                                        <div id="single-recording-container" class="recording-option">
+                                            <label for="recording-select" class="block text-sm font-medium text-card-foreground mb-2">Select Recording</label>
+                                            <select id="recording-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                                <option value="">Loading recordings...</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Multiple Recordings Selection -->
+                                        <div id="multiple-recording-container" class="recording-option hidden">
+                                            <label for="recording-count" class="block text-sm font-medium text-card-foreground mb-2">Number of Recordings</label>
+                                            <div class="flex gap-2">
+                                                <input type="number" id="recording-count" min="1" value="5" class="flex-1 bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="5">
+                                                <select id="recording-order" class="bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
+                                                    <option value="first">First</option>
+                                                    <option value="last">Last</option>
+                                                </select>
+                                            </div>
+                                            <small class="text-xs text-muted-foreground mt-1">Select the first or last N recordings</small>
+                                        </div>
+
+                                        <!-- All Recordings Badge -->
+                                        <div id="all-recording-container" class="recording-option hidden">
+                                            <div class="p-3 bg-accent rounded-md border border-gray-200">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-sm text-card-foreground">Total Recordings:</span>
+                                                    <span id="total-recordings-badge" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground">0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <!-- Mode Selection -->
                                         <div>
-                                            <label for="mode-select" class="block text-sm font-medium text-card-foreground mb-2">Mode</label>
+                                            <label for="mode-select" class="block text-sm font-medium text-card-foreground mb-2">Browser Mode</label>
                                             <select id="mode-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
                                                 <option value="visible">Visible (Debug)</option>
                                                 <option value="headless">Headless (Fast)</option>
                                             </select>
                                         </div>
-                                    </div>
-                                    <!-- Right Column -->
-                                    <div class="space-y-4">
-                                        <!-- AI Model Selection -->
-                                        <div>
-                                            <label for="llm-model-select" class="block text-sm font-medium text-card-foreground mb-2">AI Model</label>
-                                            <select id="llm-model-select" class="w-full bg-background border border-input text-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
-                                                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet - Best for form context</option>
-                                                <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-                                                <option value="openai/gpt-4o">GPT-4o</option>
-                                                <option value="google/gemini-pro">Gemini Pro</option>
-                                            </select>
+
+                                        <!-- Control Buttons -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <button class="start-automation w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-md flex items-center justify-center transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
+                                                    <path d="M8 5v14l11-7z"></path>
+                                                </svg>
+                                                Start Automation
+                                            </button>
+                                            <button class="stop-automation w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-medium py-3 px-6 rounded-md flex items-center justify-center transition-colors opacity-50" disabled>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
+                                                    <path d="M6 6h12v12H6z"></path>
+                                                </svg>
+                                                Stop Automation
+                                            </button>
                                         </div>
                                     </div>
-                                </div>
-                                <!-- Control Buttons -->
-                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <button class="start-automation w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-md flex items-center justify-center transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
-                                            <path d="M8 5v14l11-7z"></path>
-                                        </svg>
-                                        Start Automation
-                                    </button>
-                                    <button class="stop-automation w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-medium py-3 px-6 rounded-md flex items-center justify-center transition-colors opacity-50" disabled>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
-                                            <path d="M6 6h12v12H6z"></path>
-                                        </svg>
-                                        Stop Automation
-                                    </button>
+
+                                    <!-- Right Column - Logs Preview -->
+                                    <div class="flex flex-col">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h4 class="text-sm font-medium text-card-foreground">Console Output</h4>
+                                            <span class="text-xs text-muted-foreground">Live</span>
+                                        </div>
+                                        <div class="logs-container flex-1 bg-muted/30 rounded-lg p-4 font-mono text-xs overflow-y-auto max-h-96 border border-gray-200">
+                                            <div class="text-muted-foreground">Waiting for automation to start...</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -186,6 +294,18 @@
                                             </div>
                                         </div>
                                     </a>
+                                    <a href="/recorder" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors block">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-muted-foreground mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <circle cx="12" cy="12" r="4"/>
+                                            </svg>
+                                            <div>
+                                                <div class="text-sm font-medium text-card-foreground">Record Workflow</div>
+                                                <div class="text-xs text-muted-foreground">Capture new automation</div>
+                                            </div>
+                                        </div>
+                                    </a>
                                     <a href="/settings" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors block">
                                         <div class="flex items-center">
                                             <svg class="w-5 h-5 text-muted-foreground mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,17 +318,20 @@
                                             </div>
                                         </div>
                                     </a>
-                                    <a href="/saved-urls" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors block">
-                                        <div class="flex items-center">
-                                            <svg class="w-5 h-5 text-muted-foreground mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/>
-                                            </svg>
-                                            <div>
-                                                <div class="text-sm font-medium text-card-foreground">Manage URLs</div>
-                                                <div class="text-xs text-muted-foreground">Add and organize URLs</div>
-                                            </div>
-                                        </div>
-                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="mt-6 bg-card border border-gray-200 rounded-lg">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-card-foreground">Recent Activity</h3>
+                        </div>
+                        <div class="p-6">
+                            <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto">
+                                <div class="text-sm text-muted-foreground text-center py-4">
+                                    No recent activity
                                 </div>
                             </div>
                         </div>
@@ -219,8 +342,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/static/js/sidebar.js"></script>
     <script src="/static/js/theme.js"></script>
+    <script src="/static/js/sidebar.js"></script>
     <script src="/static/js/dashboard.js"></script>
     <script src="/static/js/dashboard-enhanced.js"></script>
     <script src="/static/js/system-status.js"></script>

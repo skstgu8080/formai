@@ -1,16 +1,14 @@
 /**
  * System Status Manager
- * Handles real-time status updates for browser, WebSocket, AI model, and memory
+ * Handles real-time status updates for browser, WebSocket, and memory
  */
 class SystemStatusManager {
     constructor() {
         this.statusElements = {
             browser: null,
             websocket: null,
-            aiModel: null,
             memory: null
         };
-        this.apiKeyStatus = false;
         this.websocket = null;
         this.init();
     }
@@ -19,39 +17,13 @@ class SystemStatusManager {
         // Get status elements
         this.statusElements.browser = document.getElementById('browser-status');
         this.statusElements.websocket = document.getElementById('websocket-status');
-        this.statusElements.aiModel = document.getElementById('ai-model-status');
         this.statusElements.memory = document.getElementById('memory-status');
-
-        // Check API key status
-        this.checkApiKeyStatus();
 
         // Start monitoring
         this.startMonitoring();
 
         // Try to connect WebSocket
         this.connectWebSocket();
-    }
-
-    async checkApiKeyStatus() {
-        try {
-            const response = await fetch('/api/api-keys');
-            if (response.ok) {
-                const apiKeys = await response.json();
-
-                // Check if any API key is configured (locally stored or environment)
-                this.apiKeyStatus = !!(
-                    (apiKeys.openrouter && apiKeys.openrouter.has_key) ||
-                    (apiKeys.firecrawl && apiKeys.firecrawl.has_key)
-                );
-
-                console.log('API key status checked:', this.apiKeyStatus);
-                this.updateAIModelStatus();
-            }
-        } catch (error) {
-            console.error('Failed to check API key status:', error);
-            this.apiKeyStatus = false;
-            this.updateAIModelStatus();
-        }
     }
 
     connectWebSocket() {
@@ -108,18 +80,6 @@ class SystemStatusManager {
         }
     }
 
-    updateAIModelStatus() {
-        if (this.statusElements.aiModel) {
-            if (this.apiKeyStatus) {
-                this.statusElements.aiModel.textContent = 'Ready';
-                this.statusElements.aiModel.className = 'text-sm font-medium text-green-600';
-            } else {
-                this.statusElements.aiModel.textContent = 'No API Key';
-                this.statusElements.aiModel.className = 'text-sm font-medium text-yellow-600';
-            }
-        }
-    }
-
     updateMemoryUsage() {
         if (this.statusElements.memory) {
             // Get memory usage (this is approximate since we can't get real process memory from browser)
@@ -168,11 +128,6 @@ class SystemStatusManager {
         setInterval(() => {
             this.updateMemoryUsage();
         }, 5000);
-
-        // Check API key status every 30 seconds
-        setInterval(() => {
-            this.checkApiKeyStatus();
-        }, 30000);
 
         // Check browser status every 10 seconds
         setInterval(() => {

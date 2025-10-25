@@ -5,6 +5,8 @@ SeleniumBase Automation Module - Browser automation with anti-detection
 import asyncio
 import json
 import re
+import os
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
@@ -13,6 +15,13 @@ from seleniumbase import SB
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import pyautogui
+
+# Configure logging - only show warnings and errors by default
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
+
+# Check if verbose automation logging is enabled
+AUTOMATION_VERBOSE = os.getenv("AUTOMATION_VERBOSE", "false").lower() == "true"
 
 class SeleniumAutomation:
     """SeleniumBase automation with CDP mode for anti-detection"""
@@ -79,9 +88,11 @@ class SeleniumAutomation:
                             url = recording['url']
                             # Convert recording format to internal format
                             self.field_mappings[url] = recording['field_mappings']
-                            print(f"[OK] Loaded {len(recording['field_mappings'])} field mappings from recording: {recording.get('recording_name', file.name)}")
+                            if AUTOMATION_VERBOSE:
+                                logger.info(f"Loaded {len(recording['field_mappings'])} field mappings from recording: {recording.get('recording_name', file.name)}")
                 except Exception as e:
-                    print(f"[WARN] Could not load recording {file.name}: {e}")
+                    if AUTOMATION_VERBOSE:
+                        logger.warning(f"Could not load recording {file.name}: {e}")
                     pass
 
     async def start(self, url: str) -> bool:
@@ -104,9 +115,10 @@ class SeleniumAutomation:
             await asyncio.sleep(2)  # Wait for page to load
             return True
         except Exception as e:
-            print(f"Error starting browser: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Error starting browser: {e}")
+            if AUTOMATION_VERBOSE:
+                import traceback
+                traceback.print_exc()
             return False
 
     async def detect_and_fill_forms(self) -> int:
@@ -118,11 +130,14 @@ class SeleniumAutomation:
             recording_mappings = self.field_mappings.get(self.current_url, [])
 
             if recording_mappings:
-                print(f"[OK] Using recording with {len(recording_mappings)} field mappings for {self.current_url}")
+                if AUTOMATION_VERBOSE:
+                    logger.info(f"Using recording with {len(recording_mappings)} field mappings for {self.current_url}")
                 fields_filled = await self._fill_from_recording(recording_mappings)
-                print(f"[OK] Filled {fields_filled} fields using recording")
+                if AUTOMATION_VERBOSE:
+                    logger.info(f"Filled {fields_filled} fields using recording")
             else:
-                print(f"[WARN] No recording found for {self.current_url}, using pattern matching")
+                if AUTOMATION_VERBOSE:
+                    logger.warning(f"No recording found for {self.current_url}, using pattern matching")
                 # Fallback to pattern matching
                 field_patterns = {
                     'email': ['email', 'e-mail', 'mail', 'username'],
@@ -148,9 +163,10 @@ class SeleniumAutomation:
             return fields_filled
 
         except Exception as e:
-            print(f"[ERROR] Error detecting/filling forms: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Error detecting/filling forms: {e}")
+            if AUTOMATION_VERBOSE:
+                import traceback
+                traceback.print_exc()
             return fields_filled
 
     async def _fill_from_recording(self, field_mappings: List[Dict]) -> int:
@@ -159,7 +175,8 @@ class SeleniumAutomation:
         fields_skipped = 0
         total_fields = len(field_mappings)
 
-        print(f"[INFO] Processing {total_fields} fields from recording...")
+        if AUTOMATION_VERBOSE:
+            logger.info(f"Processing {total_fields} fields from recording...")
 
         for mapping in field_mappings:
             try:
@@ -178,7 +195,8 @@ class SeleniumAutomation:
                         profile_value = self.profile.get(profile_mapping)
 
                 if not profile_value:
-                    print(f"[SKIP] {field_name}: No value in profile for '{profile_mapping}'")
+                    if AUTOMATION_VERBOSE:
+                        logger.debug(f"SKIP {field_name}: No value in profile for '{profile_mapping}'")
                     fields_skipped += 1
                     continue
 
@@ -190,20 +208,23 @@ class SeleniumAutomation:
 
                 if success:
                     fields_filled += 1
-                    print(f"[FILL] {field_name} = {profile_value}")
+                    if AUTOMATION_VERBOSE:
+                        logger.debug(f"FILL {field_name} = {profile_value}")
                 else:
-                    print(f"[FAIL] {field_name}: Could not fill")
+                    if AUTOMATION_VERBOSE:
+                        logger.debug(f"FAIL {field_name}: Could not fill")
                     fields_skipped += 1
 
                 # Human-like delay between fields
                 await asyncio.sleep(0.3)
 
             except Exception as e:
-                print(f"[ERROR] Failed to fill {mapping.get('field_name', 'unknown')}: {e}")
+                logger.error(f"Failed to fill {mapping.get('field_name', 'unknown')}: {e}")
                 fields_skipped += 1
                 continue
 
-        print(f"[SUMMARY] Filled {fields_filled}/{total_fields} fields, skipped {fields_skipped}")
+        # Always show summary - this is useful info
+        logger.info(f"Filled {fields_filled}/{total_fields} fields, skipped {fields_skipped}")
         return fields_filled
 
     async def _fill_text_field(self, selector: str, value: str, field_name: str = "") -> bool:
@@ -219,7 +240,8 @@ class SeleniumAutomation:
                     self.sb.cdp.type(selector, value)
                     return True
                 else:
-                    print(f"[DEBUG] Element not found (CDP): {selector}")
+                    if AUTOMATION_VERBOSE:
+                        logger.debug(f"Element not found (CDP): {selector}")
                     return False
             else:
                 # Standard Selenium
@@ -230,10 +252,12 @@ class SeleniumAutomation:
                         element.clear()
                         element.send_keys(value)
                         return True
-                print(f"[DEBUG] Element not found (Standard): {selector}")
+                if AUTOMATION_VERBOSE:
+                    logger.debug(f"Element not found (Standard): {selector}")
                 return False
         except Exception as e:
-            print(f"[DEBUG] Error filling text field {field_name}: {e}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Error filling text field {field_name}: {e}")
             return False
 
     async def _fill_select_field(self, selector: str, value: str, field_name: str = "") -> bool:
@@ -242,66 +266,68 @@ class SeleniumAutomation:
             # Get mapped value if available
             mapped_value = self.DROPDOWN_VALUE_MAPPINGS.get(value, value)
 
-            print(f"\n{'='*60}")
-            print(f"[SELECT] Field: {field_name}")
-            print(f"[SELECT] Selector: {selector}")
-            print(f"[SELECT] Desired value: '{value}'")
-            print(f"[SELECT] Mapped value: '{mapped_value}'")
-            print(f"[SELECT] Mode: {'CDP/Stealth' if self.use_stealth else 'Standard'}")
-            print(f"{'='*60}\n")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"SELECT Field: {field_name}, Selector: {selector}, Value: '{value}' -> '{mapped_value}', Mode: {'CDP' if self.use_stealth else 'Standard'}")
 
             if self.use_stealth and hasattr(self.sb, 'cdp'):
                 result = await self._fill_select_cdp(selector, value, mapped_value, field_name)
             else:
                 result = await self._fill_select_standard(selector, value, mapped_value, field_name)
 
-            if result:
-                print(f"[✓] SUCCESS: {field_name} filled with '{value}'\n")
-            else:
-                print(f"[✗] FAILED: {field_name} could not be filled\n")
+            if AUTOMATION_VERBOSE:
+                if result:
+                    logger.debug(f"SUCCESS: {field_name} filled with '{value}'")
+                else:
+                    logger.debug(f"FAILED: {field_name} could not be filled")
 
             return result
 
         except Exception as e:
-            print(f"[ERROR] Exception in _fill_select_field for {field_name}: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Exception in _fill_select_field for {field_name}: {e}")
+            if AUTOMATION_VERBOSE:
+                import traceback
+                traceback.print_exc()
             return False
 
     async def _fill_select_cdp(self, selector: str, value: str, mapped_value: str, field_name: str) -> bool:
         """Fill select field using CDP mode - matches Chrome DevTools recording interaction"""
 
         # First, check if element exists and get its current state
-        print(f"[CDP] Checking element existence...")
+        if AUTOMATION_VERBOSE:
+            logger.debug("CDP: Checking element existence...")
         if not self.sb.cdp.is_element_present(selector):
-            print(f"[CDP] ✗ Element NOT found: {selector}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"CDP: Element NOT found: {selector}")
             return False
 
-        print(f"[CDP] ✓ Element found: {selector}")
+        if AUTOMATION_VERBOSE:
+            logger.debug(f"CDP: Element found: {selector}")
 
         # Get dropdown options for debugging
-        try:
-            options_script = f"""
-                const select = document.querySelector('{selector}');
-                if (select) {{
-                    return Array.from(select.options).map(opt => ({{
-                        value: opt.value,
-                        text: opt.text,
-                        selected: opt.selected
-                    }}));
-                }}
-                return [];
-            """
-            options = self.sb.execute_script(options_script)
-            print(f"[CDP] Available options:")
-            for opt in options:
-                marker = " ← CURRENT" if opt['selected'] else ""
-                print(f"      value='{opt['value']}' text='{opt['text']}'{marker}")
-        except Exception as e:
-            print(f"[CDP] Could not fetch options: {e}")
+        if AUTOMATION_VERBOSE:
+            try:
+                options_script = f"""
+                    const select = document.querySelector('{selector}');
+                    if (select) {{
+                        return Array.from(select.options).map(opt => ({{
+                            value: opt.value,
+                            text: opt.text,
+                            selected: opt.selected
+                        }}));
+                    }}
+                    return [];
+                """
+                options = self.sb.execute_script(options_script)
+                logger.debug("CDP: Available options:")
+                for opt in options:
+                    marker = " ← CURRENT" if opt['selected'] else ""
+                    logger.debug(f"  value='{opt['value']}' text='{opt['text']}'{marker}")
+            except Exception as e:
+                logger.debug(f"CDP: Could not fetch options: {e}")
 
         # Strategy 1: Click then Change (mimics Chrome DevTools recording)
-        print(f"[CDP] Strategy 1: Click + Change (matching Chrome recording)")
+        if AUTOMATION_VERBOSE:
+            logger.debug("CDP: Strategy 1 - Click + Change")
         try:
             js_script = f"""
                 const select = document.querySelector('{selector}');
@@ -329,19 +355,22 @@ class SeleniumAutomation:
             verify_script = f"return document.querySelector('{selector}').value;"
             actual_value = self.sb.execute_script(verify_script)
 
-            print(f"[CDP] Strategy 1 result: {result}")
-            print(f"[CDP] Actual selected value: '{actual_value}' (expected: '{mapped_value}')")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"CDP: Strategy 1 result: {result}, actual: '{actual_value}' (expected: '{mapped_value}')")
 
             if result:
-                print(f"[CDP] ✓ Strategy 1 SUCCESS")
+                if AUTOMATION_VERBOSE:
+                    logger.debug("CDP: Strategy 1 SUCCESS")
                 await asyncio.sleep(0.3)
                 return True
             else:
-                print(f"[CDP] ✗ Strategy 1 FAILED - trying alternatives")
+                if AUTOMATION_VERBOSE:
+                    logger.debug("CDP: Strategy 1 FAILED - trying alternatives")
         except Exception as e:
-            print(f"[CDP] ✗ Strategy 1 exception: {e}")
-            import traceback
-            traceback.print_exc()
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"CDP: Strategy 1 exception: {e}")
+                import traceback
+                traceback.print_exc()
 
         # Strategy 2: Try selecting by visible text (fallback)
         try:
@@ -362,11 +391,13 @@ class SeleniumAutomation:
             """
             result = self.sb.execute_script(js_script)
             if result:
-                print(f"[SUCCESS] Selected by text (CDP): {field_name} = {value}")
+                if AUTOMATION_VERBOSE:
+                    logger.debug(f"Selected by text (CDP): {field_name} = {value}")
                 await asyncio.sleep(0.3)
                 return True
         except Exception as e:
-            print(f"[DEBUG] CDP Strategy 2 failed: {e}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"CDP Strategy 2 failed: {e}")
 
         # Strategy 3: Try partial text match (last resort)
         try:
@@ -386,20 +417,24 @@ class SeleniumAutomation:
             """
             result = self.sb.execute_script(js_script)
             if result:
-                print(f"[SUCCESS] Selected by partial text (CDP): {field_name} = {value}")
+                if AUTOMATION_VERBOSE:
+                    logger.debug(f"Selected by partial text (CDP): {field_name} = {value}")
                 await asyncio.sleep(0.3)
                 return True
         except Exception as e:
-            print(f"[DEBUG] CDP Strategy 3 failed: {e}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"CDP Strategy 3 failed: {e}")
 
-        print(f"[FAIL] All CDP strategies failed for {field_name}")
+        if AUTOMATION_VERBOSE:
+            logger.debug(f"All CDP strategies failed for {field_name}")
         return False
 
     async def _fill_select_standard(self, selector: str, value: str, mapped_value: str, field_name: str) -> bool:
         """Fill select field using standard Selenium - click first, then select"""
         elements = self.sb.find_elements(selector)
         if not elements or len(elements) == 0:
-            print(f"[DEBUG] Select element not found (Standard): {selector}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Select element not found (Standard): {selector}")
             return False
 
         element = elements[0]
@@ -408,29 +443,34 @@ class SeleniumAutomation:
 
         # Strategy 1: Click + Select by value (matches Chrome recording pattern)
         try:
-            print(f"[DEBUG] Attempting click+select by value for {field_name}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Attempting click+select by value for {field_name}")
             # Step 1: Click to focus
             element.click()
             await asyncio.sleep(0.1)
 
             # Step 2: Select by value
             select_element.select_by_value(mapped_value)
-            print(f"[SUCCESS] Selected by value with click (Standard): {field_name} = {mapped_value}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Selected by value with click (Standard): {field_name} = {mapped_value}")
             await asyncio.sleep(0.3)
             return True
         except Exception as e:
-            print(f"[DEBUG] Standard Strategy 1 (click+value) failed: {e}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Standard Strategy 1 (click+value) failed: {e}")
 
         # Strategy 2: Click + Select by visible text
         try:
             element.click()
             await asyncio.sleep(0.1)
             select_element.select_by_visible_text(value)
-            print(f"[SUCCESS] Selected by text with click (Standard): {field_name} = {value}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Selected by text with click (Standard): {field_name} = {value}")
             await asyncio.sleep(0.3)
             return True
         except Exception as e:
-            print(f"[DEBUG] Standard Strategy 2 (click+text) failed: {e}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Standard Strategy 2 (click+text) failed: {e}")
 
         # Strategy 3: Try partial text match
         try:
@@ -439,13 +479,16 @@ class SeleniumAutomation:
             for option in select_element.options:
                 if value in option.text:
                     select_element.select_by_value(option.get_attribute('value'))
-                    print(f"[SUCCESS] Selected by partial text (Standard): {field_name} = {value}")
+                    if AUTOMATION_VERBOSE:
+                        logger.debug(f"Selected by partial text (Standard): {field_name} = {value}")
                     await asyncio.sleep(0.3)
                     return True
         except Exception as e:
-            print(f"[DEBUG] Standard Strategy 3 (partial) failed: {e}")
+            if AUTOMATION_VERBOSE:
+                logger.debug(f"Standard Strategy 3 (partial) failed: {e}")
 
-        print(f"[FAIL] All Standard strategies failed for {field_name}")
+        if AUTOMATION_VERBOSE:
+            logger.debug(f"All Standard strategies failed for {field_name}")
         return False
 
     async def _fill_with_cdp(self, field_patterns: Dict) -> int:
@@ -597,7 +640,7 @@ class SeleniumAutomation:
             self.sb.save_screenshot(filename)
             return filename
         except Exception as e:
-            print(f"Error taking screenshot: {e}")
+            logger.error(f"Error taking screenshot: {e}")
             return None
 
     async def extract_form_fields(self) -> List[Dict]:
@@ -625,7 +668,7 @@ class SeleniumAutomation:
 
             return fields
         except Exception as e:
-            print(f"Error extracting form fields: {e}")
+            logger.error(f"Error extracting form fields: {e}")
             return fields
 
     async def save_field_mapping(self, url: str, mappings: Dict):
@@ -660,7 +703,7 @@ class SeleniumAutomation:
 
             for indicator in captcha_indicators:
                 if indicator in page_source:
-                    print(f"CAPTCHA detected: {indicator}")
+                    logger.warning(f"CAPTCHA detected: {indicator}")
                     # Here you could integrate with CAPTCHA solving services
                     # or use PyAutoGUI for manual solving assistance
                     return False
@@ -677,7 +720,7 @@ class SeleniumAutomation:
                 self.sb = None
                 self.sb_context = None
         except Exception as e:
-            print(f"Error closing browser: {e}")
+            logger.error(f"Error closing browser: {e}")
             pass
 
     async def get_page_info(self) -> Dict:

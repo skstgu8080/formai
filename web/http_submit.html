@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Submit - Kpr Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/theme-variables.css">
+    <link rel="stylesheet" href="/static/css/input.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="h-full bg-background text-foreground font-sans antialiased">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto bg-background" id="main-content">
+            <!-- Header -->
+            <header class="bg-card/50 border-b border-gray-200 backdrop-blur-sm sticky top-0 z-10">
+                <div class="px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold text-card-foreground tracking-tight">HTTP Form Submission</h2>
+                            <p class="text-sm text-muted-foreground">Execute saved templates with profile data - fast and automated</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent"></button>
+                            <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div class="h-2 w-2 bg-green-500 rounded-full"></div>
+                                <span>Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="p-6 space-y-6 max-w-6xl mx-auto">
+                <!-- Quick Info Banner -->
+                <div class="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm text-blue-300 font-medium mb-1">How it works</p>
+                            <p class="text-sm text-blue-200">Select one or more templates, choose profiles to use, and execute them all at once. Templates are managed on the <a href="/templates" class="underline hover:text-blue-100">Templates page</a>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template Selection -->
+                <div class="bg-card rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-card-foreground">📋 Select Templates</h3>
+                        <button onclick="loadTemplates()"
+                            class="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-md text-sm transition-colors">
+                            Refresh
+                        </button>
+                    </div>
+
+                    <!-- Templates List -->
+                    <div id="templates-list" class="space-y-2 mb-4">
+                        <p class="text-muted-foreground text-center py-8">Loading templates...</p>
+                    </div>
+
+                    <div id="template-selection-info" class="hidden bg-muted/50 border border-input rounded-md p-3">
+                        <p class="text-sm text-muted-foreground">
+                            <span id="selected-count" class="font-semibold text-foreground">0</span> template(s) selected
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Profile Selection -->
+                <div class="bg-card rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-medium text-card-foreground mb-4">👤 Select Profiles</h3>
+
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-2">Choose one or more profiles (Ctrl/Cmd+Click for multiple)</label>
+                        <select id="profile-select" multiple size="6"
+                            class="w-full p-2 bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
+                            <option disabled class="text-muted-foreground">Loading profiles...</option>
+                        </select>
+                    </div>
+
+                    <div id="profile-selection-info" class="hidden bg-muted/50 border border-input rounded-md p-3">
+                        <p class="text-sm text-muted-foreground">
+                            <span id="profile-selected-count" class="font-semibold text-foreground">0</span> profile(s) selected
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Execute Section -->
+                <div class="bg-card rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-medium text-card-foreground mb-4">🚀 Execute</h3>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Concurrency</label>
+                            <select id="concurrency-select"
+                                class="w-full p-2 bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="1">1 request at a time (Slower, safer)</option>
+                                <option value="3" selected>3 concurrent requests</option>
+                                <option value="5">5 concurrent requests</option>
+                                <option value="10">10 concurrent requests (Faster, riskier)</option>
+                            </select>
+                            <p class="text-xs text-muted-foreground mt-1">Higher concurrency = faster but may trigger rate limits</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Delay Between Requests</label>
+                            <select id="delay-select"
+                                class="w-full p-2 bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="0">No delay</option>
+                                <option value="500">500ms</option>
+                                <option value="1000" selected>1 second</option>
+                                <option value="2000">2 seconds</option>
+                                <option value="5000">5 seconds</option>
+                            </select>
+                            <p class="text-xs text-muted-foreground mt-1">Delay helps avoid rate limiting</p>
+                        </div>
+                    </div>
+
+                    <button onclick="executeBatch()"
+                        class="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 py-3 rounded-md font-semibold text-lg transition-colors"
+                        id="execute-btn">
+                        Execute Selected Templates
+                    </button>
+
+                    <!-- Execution Summary -->
+                    <div id="execution-summary" class="hidden mt-4 bg-muted/50 border border-input rounded-md p-4">
+                        <p class="text-sm text-muted-foreground mb-2">
+                            Ready to execute: <span id="total-executions" class="font-semibold text-foreground">0</span> requests
+                            (<span id="summary-templates">0</span> templates × <span id="summary-profiles">0</span> profiles)
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                            Estimated time: <span id="estimated-time" class="text-foreground">0s</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div id="progress-section" class="bg-card rounded-lg border border-gray-200 p-6 hidden">
+                    <h3 class="text-lg font-medium text-card-foreground mb-4">⏳ Progress</h3>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span id="progress-text" class="text-muted-foreground">Starting...</span>
+                            <span id="progress-percentage" class="text-foreground font-medium">0%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-2">
+                            <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div id="progress-stats" class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-muted/50 rounded-md p-3">
+                            <div class="text-2xl font-bold text-green-500" id="success-count">0</div>
+                            <div class="text-xs text-muted-foreground">Successful</div>
+                        </div>
+                        <div class="bg-muted/50 rounded-md p-3">
+                            <div class="text-2xl font-bold text-red-500" id="failed-count">0</div>
+                            <div class="text-xs text-muted-foreground">Failed</div>
+                        </div>
+                        <div class="bg-muted/50 rounded-md p-3">
+                            <div class="text-2xl font-bold text-muted-foreground" id="remaining-count">0</div>
+                            <div class="text-xs text-muted-foreground">Remaining</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-section" class="bg-card rounded-lg border border-gray-200 p-6 hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-card-foreground">📊 Results</h3>
+                        <button onclick="clearResults()"
+                            class="text-sm text-muted-foreground hover:text-foreground">
+                            Clear
+                        </button>
+                    </div>
+                    <div id="results-content" class="space-y-2"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/system-status.js"></script>
+    <script>
+        let allTemplates = [];
+        let allProfiles = [];
+        let selectedTemplates = [];
+        let selectedProfiles = [];
+        let executionQueue = [];
+        let executionResults = [];
+
+        // Load templates
+        async function loadTemplates() {
+            try {
+                const response = await axios.get('/api/http-requests/templates');
+                allTemplates = response.data;
+                displayTemplates(allTemplates);
+            } catch (error) {
+                console.error('Failed to load templates:', error);
+                document.getElementById('templates-list').innerHTML =
+                    '<p class="text-destructive text-center py-4">Failed to load templates. <a href="/templates" class="underline">Manage templates</a></p>';
+            }
+        }
+
+        function displayTemplates(templates) {
+            const container = document.getElementById('templates-list');
+
+            if (templates.length === 0) {
+                container.innerHTML = `
+                    <p class="text-muted-foreground text-center py-8">
+                        No templates found. <a href="/templates" class="text-secondary underline hover:text-secondary/80">Create templates</a> to get started.
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = templates.map(template => `
+                <div class="bg-background border border-input rounded-md p-4 hover:border-secondary transition-colors cursor-pointer template-card"
+                    data-template-id="${template.id}"
+                    onclick="toggleTemplate('${template.id}')">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="check-${template.id}" class="w-4 h-4 rounded border-input pointer-events-none">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-semibold text-card-foreground">${template.name}</h4>
+                                <span class="px-2 py-0.5 text-xs font-medium rounded bg-secondary/20 text-secondary">${template.method}</span>
+                            </div>
+                            <div class="text-sm text-muted-foreground">${template.url}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleTemplate(templateId) {
+            const checkbox = document.getElementById(`check-${templateId}`);
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                if (!selectedTemplates.includes(templateId)) {
+                    selectedTemplates.push(templateId);
+                }
+            } else {
+                selectedTemplates = selectedTemplates.filter(id => id !== templateId);
+            }
+
+            updateSelectionInfo();
+        }
+
+        // Load profiles
+        async function loadProfiles() {
+            try {
+                const response = await axios.get('/api/profiles');
+                allProfiles = response.data;
+                displayProfiles(allProfiles);
+            } catch (error) {
+                console.error('Failed to load profiles:', error);
+            }
+        }
+
+        function displayProfiles(profiles) {
+            const select = document.getElementById('profile-select');
+
+            if (profiles.length === 0) {
+                select.innerHTML = '<option disabled>No profiles found. Create profiles first.</option>';
+                return;
+            }
+
+            select.innerHTML = profiles.map(profile =>
+                `<option value="${profile.id}">${profile.email || profile.name || profile.id}</option>`
+            ).join('');
+
+            select.addEventListener('change', updateProfileSelection);
+        }
+
+        function updateProfileSelection() {
+            const select = document.getElementById('profile-select');
+            selectedProfiles = Array.from(select.selectedOptions).map(opt => opt.value);
+            updateSelectionInfo();
+        }
+
+        function updateSelectionInfo() {
+            // Update template count
+            document.getElementById('selected-count').textContent = selectedTemplates.length;
+            document.getElementById('template-selection-info').classList.toggle('hidden', selectedTemplates.length === 0);
+
+            // Update profile count
+            document.getElementById('profile-selected-count').textContent = selectedProfiles.length;
+            document.getElementById('profile-selection-info').classList.toggle('hidden', selectedProfiles.length === 0);
+
+            // Update execution summary
+            const totalExecutions = selectedTemplates.length * selectedProfiles.length;
+            const canExecute = selectedTemplates.length > 0 && selectedProfiles.length > 0;
+
+            document.getElementById('execution-summary').classList.toggle('hidden', !canExecute);
+            document.getElementById('execute-btn').disabled = !canExecute;
+
+            if (canExecute) {
+                document.getElementById('total-executions').textContent = totalExecutions;
+                document.getElementById('summary-templates').textContent = selectedTemplates.length;
+                document.getElementById('summary-profiles').textContent = selectedProfiles.length;
+
+                const delay = parseInt(document.getElementById('delay-select').value);
+                const concurrency = parseInt(document.getElementById('concurrency-select').value);
+                const estimatedTime = Math.ceil(totalExecutions / concurrency) * (delay / 1000 + 0.5); // +0.5s per request
+                document.getElementById('estimated-time').textContent = estimatedTime + 's';
+            }
+        }
+
+        // Execute batch
+        async function executeBatch() {
+            if (selectedTemplates.length === 0 || selectedProfiles.length === 0) {
+                alert('Please select at least one template and one profile');
+                return;
+            }
+
+            // Build execution queue
+            executionQueue = [];
+            executionResults = [];
+
+            for (const templateId of selectedTemplates) {
+                const template = allTemplates.find(t => t.id === templateId);
+                for (const profileId of selectedProfiles) {
+                    const profile = allProfiles.find(p => p.id === profileId);
+                    executionQueue.push({ template, profile });
+                }
+            }
+
+            // Show progress section
+            document.getElementById('progress-section').classList.remove('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('execute-btn').disabled = true;
+
+            // Reset progress
+            document.getElementById('success-count').textContent = '0';
+            document.getElementById('failed-count').textContent = '0';
+            document.getElementById('remaining-count').textContent = executionQueue.length;
+
+            // Execute
+            const concurrency = parseInt(document.getElementById('concurrency-select').value);
+            const delay = parseInt(document.getElementById('delay-select').value);
+
+            await executeQueue(executionQueue, concurrency, delay);
+
+            // Show results
+            document.getElementById('results-section').classList.remove('hidden');
+            displayResults(executionResults);
+            document.getElementById('execute-btn').disabled = false;
+        }
+
+        async function executeQueue(queue, concurrency, delay) {
+            const total = queue.length;
+            let completed = 0;
+            let success = 0;
+            let failed = 0;
+
+            async function executeOne(item) {
+                try {
+                    const response = await axios.post('/api/http-requests/execute-template', {
+                        template_id: item.template.id,
+                        profile_id: item.profile.id
+                    });
+
+                    executionResults.push({
+                        template: item.template.name,
+                        profile: item.profile.email || item.profile.id,
+                        success: true,
+                        status: response.data.status_code,
+                        message: 'Success'
+                    });
+                    success++;
+                } catch (error) {
+                    executionResults.push({
+                        template: item.template.name,
+                        profile: item.profile.email || item.profile.id,
+                        success: false,
+                        status: error.response?.status || 'ERROR',
+                        message: error.response?.data?.detail || error.message
+                    });
+                    failed++;
+                }
+
+                completed++;
+                updateProgress(completed, total, success, failed);
+
+                if (delay > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+
+            // Execute with concurrency limit
+            const chunks = [];
+            for (let i = 0; i < queue.length; i += concurrency) {
+                chunks.push(queue.slice(i, i + concurrency));
+            }
+
+            for (const chunk of chunks) {
+                await Promise.all(chunk.map(executeOne));
+            }
+        }
+
+        function updateProgress(completed, total, success, failed) {
+            const percentage = Math.round((completed / total) * 100);
+            document.getElementById('progress-bar').style.width = percentage + '%';
+            document.getElementById('progress-percentage').textContent = percentage + '%';
+            document.getElementById('progress-text').textContent = `${completed} / ${total} completed`;
+
+            document.getElementById('success-count').textContent = success;
+            document.getElementById('failed-count').textContent = failed;
+            document.getElementById('remaining-count').textContent = total - completed;
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('results-content');
+
+            if (results.length === 0) {
+                container.innerHTML = '<p class="text-muted-foreground text-center py-4">No results yet</p>';
+                return;
+            }
+
+            container.innerHTML = results.map(result => `
+                <div class="bg-background border ${result.success ? 'border-green-500/50' : 'border-red-500/50'} rounded-md p-3">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="${result.success ? 'text-green-500' : 'text-red-500'} font-mono text-xs">${result.status}</span>
+                                <span class="font-semibold text-sm">${result.template}</span>
+                            </div>
+                            <div class="text-xs text-muted-foreground mb-1">Profile: ${result.profile}</div>
+                            ${!result.success ? `<div class="text-xs text-red-400">${result.message}</div>` : ''}
+                        </div>
+                        <div class="text-xs ${result.success ? 'text-green-500' : 'text-red-500'} font-medium">
+                            ${result.success ? '✓ Success' : '✗ Failed'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearResults() {
+            executionResults = [];
+            document.getElementById('results-section').classList.add('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTemplates();
+            loadProfiles();
+
+            // Update summary when settings change
+            document.getElementById('concurrency-select').addEventListener('change', updateSelectionInfo);
+            document.getElementById('delay-select').addEventListener('change', updateSelectionInfo);
+        });
+    </script>
+</body>
+</html>

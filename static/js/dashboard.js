@@ -6,6 +6,10 @@
 class DashboardApp {
     constructor() {
         this.profileSelect = document.getElementById('profile-select');
+        this.urlModeSelect = document.getElementById('url-mode-select');
+        this.recordingSelect = document.getElementById('recording-select');
+        this.recordingCount = document.getElementById('recording-count');
+        this.recordingOrder = document.getElementById('recording-order');
         this.urlScopeRadios = document.querySelectorAll('input[name="url-scope"]');
         this.urlAmountInput = document.getElementById('url-amount-input');
         this.urlGroupSelect = document.getElementById('url-group-select');
@@ -20,22 +24,49 @@ class DashboardApp {
         this.websocket = null;
         this.isAutomationRunning = false;
         this.currentPage = 'dashboard';
+        this.recordings = [];
+
+        // Dashboard stats tracking
+        this.stats = {
+            totalAutomations: 0,
+            successfulAutomations: 0
+        };
+        this.loadStatsFromStorage();
 
         this.init();
+    }
+
+    loadStatsFromStorage() {
+        const saved = localStorage.getItem('formai-stats');
+        if (saved) {
+            try {
+                this.stats = JSON.parse(saved);
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+    }
+
+    saveStatsToStorage() {
+        localStorage.setItem('formai-stats', JSON.stringify(this.stats));
     }
 
     init() {
         this.setupEventListeners();
         this.loadProfiles();
+        this.loadRecordings();
         this.loadUrlGroups();
         this.loadAIModels();
         this.connectWebSocket();
         this.setupThemeToggle();
         this.setupMobileMenu();
+        this.updateDashboardStats();
         // Simple navigation - no SPA complexity
     }
 
     setupEventListeners() {
+        this.urlModeSelect?.addEventListener('change', this.handleUrlModeChange.bind(this));
+
         this.urlScopeRadios.forEach(radio => {
             radio.addEventListener('change', this.handleUrlScopeChange.bind(this));
         });
@@ -99,6 +130,92 @@ class DashboardApp {
             option.textContent = profile.name;
             this.profileSelect.appendChild(option);
         });
+
+        // Update dashboard metric
+        this.updateMetric('total-profiles-count', profiles.length);
+    }
+
+    async loadRecordings() {
+        if (!this.recordingSelect) return;
+
+        try {
+            this.recordingSelect.innerHTML = '<option value="">Loading recordings...</option>';
+
+            const response = await fetch('/api/recordings');
+            if (response.ok) {
+                this.recordings = await response.json();
+                if (this.recordings && this.recordings.length > 0) {
+                    this.populateRecordings(this.recordings);
+                    this.updateTotalRecordingsBadge(this.recordings.length);
+                    this.updateMetric('total-recordings-count', this.recordings.length);
+                } else {
+                    this.recordingSelect.innerHTML = '<option value="">No recordings available</option>';
+                    this.updateTotalRecordingsBadge(0);
+                    this.updateMetric('total-recordings-count', 0);
+                }
+            } else {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Failed to load recordings:', error);
+            this.recordingSelect.innerHTML = '<option value="">Error loading recordings</option>';
+            this.addLog('warning', `Failed to load recordings: ${error.message}`);
+        }
+    }
+
+    populateRecordings(recordings) {
+        if (!this.recordingSelect) return;
+
+        this.recordingSelect.innerHTML = '';
+        recordings.forEach((recording, index) => {
+            const option = document.createElement('option');
+
+            // Handle recordings without ID
+            const recordingId = recording.id || recording.recording_id || `recording-${index}`;
+            option.value = recordingId;
+
+            // Display recording name, ID, or URL
+            let displayText;
+            if (recording.recording_name || recording.title) {
+                displayText = recording.recording_name || recording.title;
+            } else if (recording.url) {
+                const shortId = recordingId.length > 8 ? recordingId.substring(0, 8) + '...' : recordingId;
+                displayText = `${shortId} - ${recording.url}`;
+            } else {
+                displayText = recordingId;
+            }
+
+            option.textContent = displayText;
+            this.recordingSelect.appendChild(option);
+        });
+    }
+
+    updateTotalRecordingsBadge(count) {
+        const badge = document.getElementById('total-recordings-badge');
+        if (badge) {
+            badge.textContent = count;
+        }
+    }
+
+    handleUrlModeChange() {
+        const mode = this.urlModeSelect?.value;
+        const singleContainer = document.getElementById('single-recording-container');
+        const multipleContainer = document.getElementById('multiple-recording-container');
+        const allContainer = document.getElementById('all-recording-container');
+
+        // Hide all containers
+        singleContainer?.classList.add('hidden');
+        multipleContainer?.classList.add('hidden');
+        allContainer?.classList.add('hidden');
+
+        // Show relevant container based on mode
+        if (mode === 'single') {
+            singleContainer?.classList.remove('hidden');
+        } else if (mode === 'multiple') {
+            multipleContainer?.classList.remove('hidden');
+        } else if (mode === 'all') {
+            allContainer?.classList.remove('hidden');
+        }
     }
 
     async loadUrlGroups() {
@@ -188,33 +305,93 @@ class DashboardApp {
     async startAutomation() {
         if (this.isAutomationRunning) return;
 
-        const config = this.getAutomationConfig();
-        console.log('Sending automation config:', config);
-
-        try {
-            this.updateButtonStates(true);
-
-            const response = await fetch('/api/automation/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(config)
-            });
-
-            if (response.ok) {
-                this.isAutomationRunning = true;
-                this.addLog('info', 'Automation started successfully');
-            } else {
-                const error = await response.json();
-                this.addLog('error', `Failed to start automation: ${error.message}`);
-                this.updateButtonStates(false);
-            }
-        } catch (error) {
-            console.error('Failed to start automation:', error);
-            this.addLog('error', `Error starting automation: ${error.message}`);
-            this.updateButtonStates(false);
+        const profileId = this.profileSelect?.value;
+        if (!profileId) {
+            this.addLog('error', 'Please select a profile first');
+            return;
         }
+
+        const urlMode = this.urlModeSelect?.value;
+        const selectedRecordings = this.getSelectedRecordings(urlMode);
+
+        if (!selectedRecordings || selectedRecordings.length === 0) {
+            this.addLog('error', 'Please select at least one recording');
+            return;
+        }
+
+        const mode = this.modeSelect?.value || 'visible';
+        const useHeadless = mode === 'headless';
+
+        this.isAutomationRunning = true;
+        this.updateButtonStates(true);
+
+        this.addLog('info', `🚀 Starting automation with ${selectedRecordings.length} recording(s)`);
+        this.addLog('info', `Mode: ${useHeadless ? 'Headless (Fast)' : 'Visible (Debug)'}`);
+        this.addActivityLog('automation_started', `Started automation with ${selectedRecordings.length} recording(s)`, 'info');
+
+        let completed = 0;
+        let failed = 0;
+
+        for (let i = 0; i < selectedRecordings.length; i++) {
+            const recordingId = selectedRecordings[i];
+            const recording = this.recordings.find(r => (r.id || r.recording_id) === recordingId);
+            const recordingName = recording?.recording_name || recording?.title || recordingId;
+
+            try {
+                this.addLog('info', `📋 [${i + 1}/${selectedRecordings.length}] Starting: ${recordingName}`);
+                this.addLog('info', `  ↳ Initializing browser and loading page...`);
+
+                const response = await fetch(`/api/recordings/${recordingId}/replay`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        profile_id: profileId,
+                        headless: useHeadless,
+                        session_name: `${recordingName}_${Date.now()}`,
+                        preview: false  // Use profile data, not recorded values
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    this.addLog('info', `  ↳ Browser session started: ${result.session_id}`);
+                    this.addLog('success', `✓ [${i + 1}/${selectedRecordings.length}] Completed: ${recordingName}`);
+                    completed++;
+                } else {
+                    const error = await response.json();
+                    this.addLog('error', `✗ [${i + 1}/${selectedRecordings.length}] Failed: ${recordingName} - ${error.detail || error.message}`);
+                    failed++;
+                }
+            } catch (error) {
+                console.error(`Failed to replay recording ${recordingId}:`, error);
+                this.addLog('error', `✗ [${i + 1}/${selectedRecordings.length}] Error: ${recordingName} - ${error.message}`);
+                failed++;
+            }
+
+            // Small delay between recordings to avoid overwhelming the system
+            if (i < selectedRecordings.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        this.isAutomationRunning = false;
+        this.updateButtonStates(false);
+        this.addLog('success', `🎉 Batch automation completed! Total: ${selectedRecordings.length}, Success: ${completed}, Failed: ${failed}`);
+
+        // Update stats
+        this.stats.totalAutomations += selectedRecordings.length;
+        this.stats.successfulAutomations += completed;
+        this.saveStatsToStorage();
+        this.updateDashboardStats();
+
+        // Add to activity log
+        this.addActivityLog(
+            'automation_completed',
+            `Completed ${completed}/${selectedRecordings.length} automation(s)`,
+            completed === selectedRecordings.length ? 'success' : (completed > 0 ? 'warning' : 'error')
+        );
     }
 
     async stopAutomation() {
@@ -239,25 +416,35 @@ class DashboardApp {
         }
     }
 
-    getAutomationConfig() {
-        const targetUrl = document.getElementById('target-url')?.value;
 
-        // Get URL - use target URL input or default to RoboForm test page
-        let url = targetUrl && targetUrl.trim() !== ''
-            ? targetUrl.trim()
-            : 'https://www.roboform.com/filling-test-all-fields';
+    getSelectedRecordings(urlMode) {
+        let selectedRecordings = [];
 
-        // Map mode to use_stealth (headless uses stealth, visible doesn't for debugging)
-        const mode = this.modeSelect?.value || 'Visible (Debug)';
-        const use_stealth = mode === 'Headless (Fast)';
+        if (urlMode === 'single') {
+            // Single recording selection
+            const recordingId = this.recordingSelect?.value;
+            if (recordingId) {
+                selectedRecordings = [recordingId];
+            }
+        } else if (urlMode === 'multiple') {
+            // Multiple recordings selection
+            const count = parseInt(this.recordingCount?.value) || 5;
+            const order = this.recordingOrder?.value || 'first';
 
-        console.log('Sending config - URL:', url, 'Stealth:', use_stealth);
+            if (order === 'first') {
+                selectedRecordings = this.recordings.slice(0, count).map((r, i) => r.id || r.recording_id || `recording-${i}`);
+            } else {
+                selectedRecordings = this.recordings.slice(-count).map((r, i) => r.id || r.recording_id || `recording-${i}`);
+            }
+        } else if (urlMode === 'all') {
+            // All recordings
+            selectedRecordings = this.recordings.map((r, i) => r.id || r.recording_id || `recording-${i}`);
+        }
 
-        return {
-            profile_id: this.profileSelect?.value,
-            url: url,
-            use_stealth: use_stealth
-        };
+        // Filter out any undefined or empty values
+        selectedRecordings = selectedRecordings.filter(id => id && id.trim() !== '');
+
+        return selectedRecordings;
     }
 
     updateButtonStates(running) {
@@ -318,6 +505,156 @@ class DashboardApp {
                 break;
             case 'url_groups_updated':
                 this.loadUrlGroups();
+                break;
+
+            // Replay progress messages
+            case 'replay_progress':
+                if (data.data) {
+                    const status = data.data.status;
+                    const message = data.data.message;
+                    const progress = data.data.progress || 0;
+                    const fieldData = data.data.field_data;
+
+                    // Handle different status types with appropriate log levels
+                    switch (status) {
+                        case 'initializing':
+                        case 'navigating':
+                        case 'loading':
+                            this.addLog('info', `🔄 ${message}`);
+                            break;
+
+                        case 'ready':
+                        case 'profile_loaded':
+                            this.addLog('info', `✓ ${message}`);
+                            break;
+
+                        case 'starting':
+                            this.addLog('info', `🎬 ${message}`);
+                            break;
+
+                        case 'filling':
+                            // Show field being filled with details
+                            if (fieldData) {
+                                const fieldName = fieldData.field_name || 'Field';
+                                const value = fieldData.value_used || '';
+                                const displayValue = value.length > 30 ? value.substring(0, 30) + '...' : value;
+                                this.addLog('info', `  📝 Filling "${fieldName}": ${displayValue}`);
+                            } else {
+                                this.addLog('info', `  📝 ${message}`);
+                            }
+                            break;
+
+                        case 'field_completed':
+                            // Show successful field completion
+                            if (fieldData) {
+                                const fieldName = fieldData.field_name || 'Field';
+                                const execTime = fieldData.execution_time_ms ? ` (${fieldData.execution_time_ms.toFixed(0)}ms)` : '';
+                                this.addLog('success', `  ✅ ${fieldName} completed${execTime}`);
+                            } else {
+                                this.addLog('success', `  ✅ ${message}`);
+                            }
+                            break;
+
+                        case 'field_failed':
+                            // Show field failure
+                            if (fieldData) {
+                                const fieldName = fieldData.field_name || 'Field';
+                                const error = fieldData.error || 'Unknown error';
+                                this.addLog('error', `  ❌ ${fieldName} failed: ${error}`);
+                            } else {
+                                this.addLog('error', `  ❌ ${message}`);
+                            }
+                            break;
+
+                        case 'submitting':
+                            this.addLog('info', `📤 ${message}`);
+                            break;
+
+                        case 'verifying':
+                            this.addLog('info', `🔍 ${message}`);
+                            break;
+
+                        case 'verified':
+                            this.addLog('success', `✅ ${message}`);
+                            break;
+
+                        case 'warning':
+                            this.addLog('warning', `⚠️ ${message}`);
+                            break;
+
+                        case 'completed':
+                            // Final completion message
+                            this.addLog('success', `🎉 ${message}`);
+                            if (data.data.stats) {
+                                const stats = data.data.stats;
+                                this.addLog('info', `  ↳ Success: ${stats.successful_fields}/${stats.total_fields} fields`);
+                                if (stats.failed_fields > 0) {
+                                    this.addLog('warning', `  ↳ Failed: ${stats.failed_fields} fields`);
+                                }
+                            }
+                            break;
+
+                        case 'error':
+                            this.addLog('error', `❌ ${message}`);
+                            break;
+
+                        case 'screenshot':
+                        case 'cleanup':
+                            // Less important status updates
+                            this.addLog('info', `  ↳ ${message}`);
+                            break;
+
+                        default:
+                            // Fallback for any unknown status
+                            this.addLog('info', `  ↳ ${message}`);
+                            break;
+                    }
+                }
+                break;
+            case 'replay_completed':
+                this.addLog('success', `✓ Replay completed successfully`);
+                if (data.data) {
+                    const stats = data.data;
+                    if (stats.successful_fields !== undefined && stats.total_fields !== undefined) {
+                        this.addLog('info', `  ↳ Fields: ${stats.successful_fields}/${stats.total_fields} successful`);
+                    }
+                    if (stats.submission && stats.submission.success) {
+                        this.addLog('success', `  ↳ Form submitted successfully`);
+                    }
+                }
+                break;
+            case 'replay_error':
+                this.addLog('error', `✗ Replay error: ${data.error}`);
+                break;
+
+            // Batch automation messages
+            case 'batch_automation_started':
+                this.addLog('info', `🚀 Batch automation started - Processing ${data.total_recordings} recording(s) with profile: ${data.profile_name}`);
+                break;
+            case 'batch_automation_progress':
+                this.addLog('info', `📋 [${data.current}/${data.total}] Starting: ${data.recording_name || data.recording_id}`);
+                break;
+            case 'batch_automation_recording_progress':
+                // Individual recording step updates (can be verbose, so log selectively)
+                if (data.data && data.data.message) {
+                    this.addLog('info', `  ↳ ${data.data.message}`);
+                }
+                break;
+            case 'batch_automation_recording_completed':
+                this.addLog('success', `✓ [${data.current}/${data.total}] Completed: ${data.recording_name}`);
+                break;
+            case 'batch_automation_recording_failed':
+                this.addLog('error', `✗ [${data.current}/${data.total}] Failed: ${data.recording_id} - ${data.error}`);
+                break;
+            case 'batch_automation_completed':
+                this.isAutomationRunning = false;
+                this.updateButtonStates(false);
+                this.addLog('success', `🎉 Batch automation completed! Total: ${data.total_recordings}, Success: ${data.completed}, Failed: ${data.failed}`);
+                break;
+            case 'batch_automation_error':
+                this.isAutomationRunning = false;
+                this.updateButtonStates(false);
+                this.addLog('error', `❌ Batch automation error: ${data.error}`);
                 break;
         }
     }
@@ -633,6 +970,87 @@ class DashboardApp {
             }
         } catch (error) {
             console.error('Failed to load page:', error);
+        }
+    }
+
+    updateMetric(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    updateDashboardStats() {
+        // Update automations run count
+        this.updateMetric('automations-run-count', this.stats.totalAutomations);
+
+        // Calculate and update success rate
+        if (this.stats.totalAutomations > 0) {
+            const successRate = ((this.stats.successfulAutomations / this.stats.totalAutomations) * 100).toFixed(1);
+            this.updateMetric('success-rate-percent', `${successRate}%`);
+        } else {
+            this.updateMetric('success-rate-percent', '--');
+        }
+    }
+
+    addActivityLog(type, message, level = 'info') {
+        const activityLog = document.getElementById('activity-log');
+        if (!activityLog) return;
+
+        // Remove "no activity" placeholder if it exists
+        const placeholder = activityLog.querySelector('.text-center');
+        if (placeholder) {
+            placeholder.remove();
+        }
+
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = 'flex items-start space-x-3 p-3 bg-accent/30 rounded-lg border border-gray-200';
+
+        const icon = this.getActivityIcon(type, level);
+        const colorClass = this.getActivityColorClass(level);
+
+        entry.innerHTML = `
+            <div class="flex-shrink-0 mt-0.5">
+                ${icon}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium ${colorClass}">${this.escapeHtml(message)}</p>
+                <p class="text-xs text-muted-foreground mt-1">${time}</p>
+            </div>
+        `;
+
+        // Insert at the top
+        activityLog.insertBefore(entry, activityLog.firstChild);
+
+        // Keep only last 50 entries
+        while (activityLog.children.length > 50) {
+            activityLog.removeChild(activityLog.lastChild);
+        }
+    }
+
+    getActivityIcon(type, level) {
+        if (level === 'success') {
+            return '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+        } else if (level === 'error') {
+            return '<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+        } else if (level === 'warning') {
+            return '<svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+        } else {
+            return '<svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+        }
+    }
+
+    getActivityColorClass(level) {
+        switch (level) {
+            case 'success':
+                return 'text-green-700 dark:text-green-400';
+            case 'error':
+                return 'text-red-700 dark:text-red-400';
+            case 'warning':
+                return 'text-yellow-700 dark:text-yellow-400';
+            default:
+                return 'text-card-foreground';
         }
     }
 }

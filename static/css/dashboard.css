@@ -391,3 +391,18 @@ textarea:focus-visible {
 .log-message.log-error {
   @apply text-red-300;
 }
+
+/* Theme Toggle Button - Consistent sizing across all pages */
+#theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+#theme-toggle svg {
+  width: 24px !important;
+  height: 24px !important;
+  display: block;
+}

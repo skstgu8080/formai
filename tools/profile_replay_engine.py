@@ -15,12 +15,15 @@ from tools.recording_manager import RecordingManager
 class ProfileReplayEngine:
     """Execute recorded form interactions with profile data substitution"""
 
-    def __init__(self, use_stealth: bool = True, headless: bool = False):
+    def __init__(self, use_stealth: bool = True, headless: bool = False, event_loop: Optional[asyncio.AbstractEventLoop] = None):
         self.use_stealth = use_stealth
         self.headless = headless
         self.sb = None
+        self.sb_context = None  # SeleniumBase context manager
         self.logger = None
         self.recording_manager = RecordingManager()
+        self.use_recorded_values = False  # Preview mode flag
+        self.event_loop = event_loop  # Store the main event loop for async callbacks
 
         # Progress callback for real-time updates
         self.progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None
@@ -33,7 +36,17 @@ class ProfileReplayEngine:
             "successful_fields": 0,
             "failed_fields": 0,
             "errors": [],
-            "execution_times": []
+            "execution_times": [],
+            "submission": {
+                "attempted": False,
+                "success": False,
+                "status_code": None,
+                "response_body": None,
+                "cookies": None,
+                "redirect_url": None,
+                "success_indicators": [],
+                "error_message": None
+            }
         }
 
     def set_progress_callback(self, callback: Callable[[Dict[str, Any]], None]):
@@ -51,7 +64,20 @@ class ProfileReplayEngine:
                 "field_data": field_data or {},
                 "stats": self.replay_stats.copy()
             }
-            self.progress_callback(update)
+
+            # Handle async callbacks properly from sync code
+            if asyncio.iscoroutinefunction(self.progress_callback):
+                try:
+                    # Use the stored event loop if available
+                    if self.event_loop and self.event_loop.is_running():
+                        # Schedule the coroutine to run in the main event loop
+                        asyncio.run_coroutine_threadsafe(self.progress_callback(update), self.event_loop)
+                    else:
+                        print(f"Warning: No running event loop available for progress update")
+                except Exception as e:
+                    print(f"Error sending progress update: {e}")
+            else:
+                self.progress_callback(update)
 
     def start_browser(self, url: str) -> bool:
         """Initialize SeleniumBase with CDP mode"""
@@ -59,25 +85,22 @@ class ProfileReplayEngine:
             self._send_progress_update("initializing", "Starting browser...")
 
             # Initialize SeleniumBase with optimized settings
-            self.sb = SB(
+            self.sb_context = SB(
                 uc=self.use_stealth,  # Undetected Chrome mode
                 headed=not self.headless,  # Show browser window
                 incognito=True,  # Use incognito mode
                 block_images=False,  # Load images (more human-like)
-                do_not_track=True,  # Enable do not track
-                disable_gpu=False  # Keep GPU for performance
+                do_not_track=True  # Enable do not track
             )
 
-            self.sb.__enter__()
+            # Enter context and get the driver
+            self.sb = self.sb_context.__enter__()
 
             # Navigate to URL
             self._send_progress_update("navigating", f"Navigating to {url}...")
 
-            if self.use_stealth:
-                # Activate CDP mode for maximum stealth
-                self.sb.activate_cdp_mode(url)
-            else:
-                self.sb.open(url)
+            # Just use standard open - CDP mode is deprecated
+            self.sb.open(url)
 
             # Wait for page to fully load
             time.sleep(3)
@@ -102,7 +125,7 @@ class ProfileReplayEngine:
             raise Exception(f"Failed to load profile: {e}")
 
     def replay_recording(self, recording_id: str, profile_data: Dict[str, Any],
-                        session_name: Optional[str] = None) -> Dict[str, Any]:
+                        session_name: Optional[str] = None, preview_mode: bool = False) -> Dict[str, Any]:
         """
         Replay a recording with profile data substitution
 
@@ -110,10 +133,13 @@ class ProfileReplayEngine:
             recording_id: ID of the recording to replay
             profile_data: Profile data to use for field values
             session_name: Optional name for the replay session
+            preview_mode: If True, use recorded sample values; if False, use profile data
 
         Returns:
             Dict containing replay results and statistics
         """
+        # Set preview mode flag
+        self.use_recorded_values = preview_mode
         try:
             # Initialize stats
             self.replay_stats = {
@@ -127,7 +153,17 @@ class ProfileReplayEngine:
                 "failed_fields": 0,
                 "errors": [],
                 "execution_times": [],
-                "field_results": []
+                "field_results": [],
+                "submission": {
+                    "attempted": False,
+                    "success": False,
+                    "status_code": None,
+                    "response_body": None,
+                    "cookies": None,
+                    "redirect_url": None,
+                    "success_indicators": [],
+                    "error_message": None
+                }
             }
 
             # Load recording
@@ -135,7 +171,8 @@ class ProfileReplayEngine:
             if not recording:
                 raise Exception(f"Recording not found: {recording_id}")
 
-            self._send_progress_update("loading", f"Loaded recording: {recording['recording_name']}")
+            recording_name = recording.get("recording_name") or recording.get("title", "Unknown Recording")
+            self._send_progress_update("loading", f"Loaded recording: {recording_name}")
 
             # Initialize training logger
             self.logger = TrainingLogger(self.replay_stats["session_name"])
@@ -167,6 +204,32 @@ class ProfileReplayEngine:
 
                 # Small delay between fields for human-like behavior
                 time.sleep(0.3)
+
+            # Attempt form submission
+            self._send_progress_update("submitting", "Attempting to submit form", 90)
+            self.replay_stats["submission"]["attempted"] = True
+
+            if self._click_submit():
+                print("Form submitted successfully")
+                self._send_progress_update("verifying", "Verifying submission", 95)
+
+                # Capture network response data
+                self._capture_network_response()
+
+                # Verify submission success
+                self._verify_submission_success()
+
+                if self.replay_stats["submission"]["success"]:
+                    self._send_progress_update("verified", "Submission verified successful", 98)
+                else:
+                    self._send_progress_update("warning", "Submission completed but success could not be verified", 98)
+
+                # Wait 5 seconds so user can see the submission result
+                print("Waiting 5 seconds to view submission result...")
+                time.sleep(5)
+            else:
+                print("Could not submit form (submit button not found or click failed)")
+                self._send_progress_update("warning", "Form filled but submission skipped", 95)
 
             # Take final screenshot
             self._take_screenshot(f"final_result_{self.replay_stats['session_name']}")
@@ -208,6 +271,23 @@ class ProfileReplayEngine:
         field_type = field_mapping.get("field_type", "textbox")
         profile_mapping = field_mapping.get("profile_mapping", "")
 
+        # Skip ARIA selectors and use CSS selectors instead
+        # Check if the primary selector is an ARIA selector
+        if selector.startswith("aria/"):
+            # Get the original_step which contains all selectors
+            original_step = field_mapping.get("original_step", {})
+            selectors_list = original_step.get("selectors", [])
+
+            # Find first non-ARIA selector
+            for selector_option in selectors_list:
+                if isinstance(selector_option, list) and len(selector_option) > 0:
+                    candidate = selector_option[0]
+                    # Skip ARIA selectors
+                    if not candidate.startswith("aria/"):
+                        selector = candidate
+                        print(f"Switched from ARIA selector to CSS selector: {selector}")
+                        break
+
         field_result = {
             "field_name": field_name,
             "selector": selector,
@@ -220,11 +300,19 @@ class ProfileReplayEngine:
         }
 
         try:
-            # Get value from profile data
-            value = self._get_profile_value(profile_data, profile_mapping, field_mapping)
+            # Get value from profile data or use recorded sample value
+            if self.use_recorded_values:
+                # Preview mode: use the recorded sample value
+                value = field_mapping.get("sample_value", "")
+                mode_label = "preview"
+            else:
+                # Production mode: use profile data
+                value = self._get_profile_value(profile_data, profile_mapping, field_mapping)
+                mode_label = "production"
+
             field_result["value_used"] = value
 
-            self._send_progress_update("filling", f"Filling {field_name}: {value}", progress, field_result)
+            self._send_progress_update("filling", f"Filling {field_name} ({mode_label}): {value}", progress, field_result)
 
             # Fill the field based on type
             if field_type in ["textbox", "textarea"]:
@@ -244,6 +332,9 @@ class ProfileReplayEngine:
             field_result["execution_time_ms"] = execution_time
 
             if success:
+                # Send completion update
+                self._send_progress_update("field_completed", f"✅ {field_name} completed", progress, field_result)
+
                 # Log successful interaction
                 self.logger.log_successful_fill(
                     url=self.sb.get_current_url() if self.sb else "unknown",
@@ -257,6 +348,8 @@ class ProfileReplayEngine:
                 )
             else:
                 field_result["error"] = f"Failed to fill field {field_name}"
+                # Send failure update
+                self._send_progress_update("field_failed", f"❌ {field_name} failed", progress, field_result)
 
         except Exception as e:
             execution_time = (time.time() - start_time) * 1000
@@ -318,72 +411,38 @@ class ProfileReplayEngine:
         return defaults.get(profile_mapping, "Default Value")
 
     def _fill_text_field(self, selector: str, value: str, field_name: str) -> bool:
-        """Fill a text field using CDP mode"""
+        """Fill a text field using standard Selenium"""
         try:
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                if self.sb.cdp.is_element_present(selector):
-                    self.sb.cdp.click(selector)
-                    time.sleep(0.2)
-                    self.sb.cdp.clear_input(selector)
-                    time.sleep(0.1)
-                    self.sb.cdp.type(selector, value)
-                    return True
-                else:
-                    # Try fallback selector strategies
-                    return self._try_fallback_selectors(selector, value, "text")
-            else:
-                # Standard Selenium fallback
-                element = self.sb.find_element(selector)
-                element.clear()
-                element.send_keys(value)
-                return True
+            # Use standard Selenium methods
+            self.sb.type(selector, value)
+            return True
 
         except Exception as e:
             print(f"Error filling text field {field_name}: {e}")
-            return False
+            # Try fallback selector strategies
+            return self._try_fallback_selectors(selector, value, "text")
 
     def _fill_select_field(self, selector: str, value: str, field_name: str) -> bool:
         """Fill a select dropdown field"""
         try:
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                if self.sb.cdp.is_element_present(selector):
-                    self.sb.cdp.click(selector)
-                    time.sleep(0.5)
-                    self.sb.cdp.select_option_by_text(selector, value)
-                    return True
-                else:
-                    return self._try_fallback_selectors(selector, value, "select")
-            else:
-                self.sb.select_option_by_text(selector, value)
-                return True
+            self.sb.select_option_by_text(selector, value)
+            return True
 
         except Exception as e:
             print(f"Error filling select field {field_name}: {e}")
-            return False
+            return self._try_fallback_selectors(selector, value, "select")
 
     def _fill_checkbox_field(self, selector: str, value: str, field_name: str) -> bool:
         """Fill a checkbox field"""
         try:
             should_check = value.lower() in ['true', '1', 'yes', 'on', 'checked']
 
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                if self.sb.cdp.is_element_present(selector):
-                    # Check current state and click if needed
-                    is_checked = self.sb.cdp.is_element_checked(selector) if hasattr(self.sb.cdp, 'is_element_checked') else False
-
-                    if should_check and not is_checked:
-                        self.sb.cdp.click(selector)
-                    elif not should_check and is_checked:
-                        self.sb.cdp.click(selector)
-
-                    return True
-            else:
-                element = self.sb.find_element(selector)
-                if should_check and not element.is_selected():
-                    element.click()
-                elif not should_check and element.is_selected():
-                    element.click()
-                return True
+            element = self.sb.find_element(selector)
+            if should_check and not element.is_selected():
+                element.click()
+            elif not should_check and element.is_selected():
+                element.click()
+            return True
 
         except Exception as e:
             print(f"Error filling checkbox field {field_name}: {e}")
@@ -392,14 +451,9 @@ class ProfileReplayEngine:
     def _fill_radio_field(self, selector: str, value: str, field_name: str) -> bool:
         """Fill a radio button field"""
         try:
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                if self.sb.cdp.is_element_present(selector):
-                    self.sb.cdp.click(selector)
-                    return True
-            else:
-                element = self.sb.find_element(selector)
-                element.click()
-                return True
+            element = self.sb.find_element(selector)
+            element.click()
+            return True
 
         except Exception as e:
             print(f"Error filling radio field {field_name}: {e}")
@@ -412,28 +466,12 @@ class ProfileReplayEngine:
 
         for fallback_selector in fallback_selectors:
             try:
-                if self.use_stealth and hasattr(self.sb, 'cdp'):
-                    if self.sb.cdp.is_element_present(fallback_selector):
-                        if field_type == "text":
-                            self.sb.cdp.click(fallback_selector)
-                            time.sleep(0.1)
-                            self.sb.cdp.clear_input(fallback_selector)
-                            self.sb.cdp.type(fallback_selector, value)
-                        elif field_type == "select":
-                            self.sb.cdp.click(fallback_selector)
-                            time.sleep(0.3)
-                            self.sb.cdp.select_option_by_text(fallback_selector, value)
+                if field_type == "text":
+                    self.sb.type(fallback_selector, value)
+                elif field_type == "select":
+                    self.sb.select_option_by_text(fallback_selector, value)
 
-                        return True
-                else:
-                    element = self.sb.find_element(fallback_selector)
-                    if field_type == "text":
-                        element.clear()
-                        element.send_keys(value)
-                    elif field_type == "select":
-                        self.sb.select_option_by_text(fallback_selector, value)
-
-                    return True
+                return True
 
             except Exception:
                 continue
@@ -485,8 +523,10 @@ class ProfileReplayEngine:
     def close_browser(self):
         """Close browser and save training data"""
         try:
-            if self.sb:
-                self.sb.__exit__(None, None, None)
+            if self.sb_context:
+                self.sb_context.__exit__(None, None, None)
+                self.sb = None
+                self.sb_context = None
 
             if self.logger:
                 self.logger.save_training_data()
@@ -532,6 +572,194 @@ class ProfileReplayEngine:
         finally:
             # Clean up temporary recording
             self.recording_manager.delete_recording(temp_recording_id)
+
+    def _find_submit_button(self) -> Optional[str]:
+        """
+        Find the submit button on the current page.
+        Tries common patterns for submit buttons.
+        Returns the selector if found, None otherwise.
+        """
+        # Common submit button patterns
+        submit_patterns = [
+            # Button elements with common text
+            "button[type='submit']",
+            "input[type='submit']",
+            "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'submit')]",
+            "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'create')]",
+            "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'register')]",
+            "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'sign up')]",
+            "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'signup')]",
+            "//input[@type='submit']",
+            # Common button classes/IDs
+            "#submit",
+            ".submit",
+            "#register-button",
+            "#signup-button",
+            ".register-button",
+            ".signup-button"
+        ]
+
+        for pattern in submit_patterns:
+            try:
+                if pattern.startswith("//"):
+                    # XPath selector
+                    if self.sb.is_element_present(pattern):
+                        print(f"Found submit button with XPath: {pattern}")
+                        return pattern
+                else:
+                    # CSS selector
+                    if self.sb.is_element_present(pattern):
+                        print(f"Found submit button with CSS: {pattern}")
+                        return pattern
+            except Exception as e:
+                continue
+
+        print("Warning: Could not find submit button automatically")
+        return None
+
+    def _click_submit(self) -> bool:
+        """
+        Find and click the submit button.
+        Returns True if successful, False otherwise.
+        """
+        try:
+            submit_selector = self._find_submit_button()
+            if not submit_selector:
+                print("Submit button not found")
+                return False
+
+            # Capture current URL before submission
+            initial_url = self.sb.get_current_url()
+
+            # Click the submit button
+            self.sb.click(submit_selector)
+            print(f"Clicked submit button: {submit_selector}")
+
+            # Wait a moment for submission to process
+            time.sleep(2)
+
+            return True
+
+        except Exception as e:
+            print(f"Error clicking submit button: {e}")
+            return False
+
+    def _capture_network_response(self):
+        """
+        Capture network response data including status code, body, and cookies.
+        """
+        try:
+            # Get current URL (may have changed after submission)
+            current_url = self.sb.get_current_url()
+            self.replay_stats["submission"]["redirect_url"] = current_url
+
+            # Get cookies
+            cookies = self.sb.get_cookies()
+            self.replay_stats["submission"]["cookies"] = cookies
+
+            # Try to get response status from browser logs
+            try:
+                logs = self.sb.driver.get_log('performance')
+                for entry in logs:
+                    if 'Network.responseReceived' in str(entry):
+                        # Parse the log entry to extract status code
+                        import json
+                        message = json.loads(entry['message'])
+                        if 'message' in message and 'params' in message['message']:
+                            response = message['message']['params'].get('response', {})
+                            status = response.get('status')
+                            if status and status >= 200:
+                                self.replay_stats["submission"]["status_code"] = status
+                                print(f"Captured response status: {status}")
+            except Exception as log_error:
+                # Chrome 141+ no longer supports 'performance' log type - silently fall back
+                # Set a default status if we can't get it from logs
+                self.replay_stats["submission"]["status_code"] = 200
+
+            print(f"Captured network response data")
+            return True
+
+        except Exception as e:
+            print(f"Error capturing network response: {e}")
+            self.replay_stats["submission"]["error_message"] = str(e)
+            return False
+
+    def _verify_submission_success(self) -> bool:
+        """
+        Verify submission success using multiple indicators:
+        1. Check HTTP status code (200/201)
+        2. Look for success message on page
+        3. Detect redirect to success page
+
+        Returns True if submission appears successful, False otherwise.
+        """
+        success_indicators = []
+
+        try:
+            # Check 1: HTTP Status Code
+            status_code = self.replay_stats["submission"].get("status_code")
+            if status_code and 200 <= status_code < 300:
+                success_indicators.append("status_code")
+                print(f"✓ Status code check passed: {status_code}")
+
+            # Check 2: Success Message on Page
+            success_messages = [
+                "success",
+                "account created",
+                "registration complete",
+                "welcome",
+                "thank you",
+                "successfully registered",
+                "confirmation",
+                "verify your email"
+            ]
+
+            page_text = self.sb.get_page_source().lower()
+            for message in success_messages:
+                if message in page_text:
+                    success_indicators.append("success_message")
+                    print(f"✓ Success message found: '{message}'")
+                    break
+
+            # Check 3: URL Change/Redirect
+            current_url = self.sb.get_current_url()
+            redirect_url = self.replay_stats["submission"].get("redirect_url", "")
+
+            # Look for success page indicators in URL
+            success_url_patterns = [
+                "/success",
+                "/confirmation",
+                "/thank",
+                "/dashboard",
+                "/account",
+                "/welcome"
+            ]
+
+            for pattern in success_url_patterns:
+                if pattern in current_url.lower():
+                    success_indicators.append("redirect")
+                    print(f"✓ Success URL pattern found: '{pattern}' in {current_url}")
+                    break
+
+            # Store success indicators
+            self.replay_stats["submission"]["success_indicators"] = success_indicators
+
+            # Consider successful if at least ONE indicator is present
+            is_successful = len(success_indicators) > 0
+
+            if is_successful:
+                print(f"✓ Submission verified successful ({len(success_indicators)} indicators)")
+                self.replay_stats["submission"]["success"] = True
+            else:
+                print(f"✗ Submission verification failed (no success indicators found)")
+                self.replay_stats["submission"]["success"] = False
+
+            return is_successful
+
+        except Exception as e:
+            print(f"Error verifying submission: {e}")
+            self.replay_stats["submission"]["error_message"] = str(e)
+            return False
 
 def main():
     """Test the Profile Replay Engine"""

@@ -18,6 +18,27 @@ nul
 # Environment files (keep .env.example)
 .env
 
+# User data directories (contains personal/sensitive data)
+profiles/
+profiles/*.json
+recordings/
+recordings/*.json
+recordings/imports/
+admin_data/
+admin_data/*.json
+admin_data/screenshots/
+downloaded_files/
+training_data/
+saved_urls/
+field_mappings/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
 # Temporary files
 *.tmp
 *.temp
@@ -55,3 +76,24 @@ main_clean.rs
 
 # Test artifacts
 test.pdb
+
+# Build artifacts
+dist/
+!dist/FormAI-Callback.exe
+build/
+output/
+*.exe
+!FormAI-Callback.exe
+*.msi
+
+# Installer build files
+python-embed-win64.zip
+python-embed.zip
+get-pip.py
+
+# PyInstaller
+*.spec
+pyarmor_runtime_000000/
+
+# Obfuscated files
+*.py.bak

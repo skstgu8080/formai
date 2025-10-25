@@ -142,10 +142,6 @@ class Layout {
             '/': 'Dashboard',
             '/profiles': 'Profiles',
             '/automation': 'Automation',
-            '/saved-urls': 'Saved URLs',
-            '/saved-pages': 'Saved Pages',
-            '/previous-orders': 'Previous Orders',
-            '/account': 'Account',
             '/settings': 'Settings',
             '/recorder': 'Recorder'
         };

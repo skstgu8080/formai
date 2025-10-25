@@ -149,7 +149,7 @@ class ChromeRecorderParser:
             for selector in selector_list:
                 # Look for form element patterns
                 if any(pattern in selector.lower() for pattern in [
-                    'input', 'select', 'textarea', 'form', '[name=', '[id=', 'button[type="submit"]'
+                    'input', 'select', 'textarea', 'form', '[name=', '[id=', '#', 'button[type="submit"]'
                 ]):
                     return True
 
