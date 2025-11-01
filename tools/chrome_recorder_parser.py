@@ -90,6 +90,7 @@ class ChromeRecorderParser:
 
         # Extract basic metadata
         title = chrome_data.get('title', 'Imported Chrome Recording')
+
         url = self._extract_url_from_steps(chrome_data.get('steps', []))
 
         # Process steps to extract form field interactions
@@ -125,7 +126,7 @@ class ChromeRecorderParser:
 
     def _extract_field_mappings(self, steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract form field interactions from Chrome Recorder steps"""
-        field_mappings = []
+        field_mappings_dict = {}  # Use dict to deduplicate by selector
 
         for i, step in enumerate(steps):
             step_type = step.get('type', '')
@@ -134,8 +135,22 @@ class ChromeRecorderParser:
             if step_type in ['change', 'click'] and self._is_form_field_step(step):
                 field_mapping = self._create_field_mapping(step, i)
                 if field_mapping:
-                    field_mappings.append(field_mapping)
+                    selector = field_mapping['field_selector']
 
+                    # Keep the last occurrence (most complete value) or first if selector not seen
+                    # This deduplicates fields that have multiple change events
+                    if selector not in field_mappings_dict:
+                        field_mappings_dict[selector] = field_mapping
+                    else:
+                        # Update with last value (usually the most complete)
+                        existing = field_mappings_dict[selector]
+                        # Prefer non-empty sample values
+                        if field_mapping.get('sample_value'):
+                            existing['sample_value'] = field_mapping['sample_value']
+                        existing['step_index'] = i  # Update to latest step
+
+        # Convert dict back to list, sorted by step_index to maintain order
+        field_mappings = sorted(field_mappings_dict.values(), key=lambda x: x.get('step_index', 0))
         return field_mappings
 
     def _is_form_field_step(self, step: Dict[str, Any]) -> bool:
@@ -190,20 +205,16 @@ class ChromeRecorderParser:
 
     def _get_best_selector(self, selectors: List[List[str]]) -> Optional[str]:
         """Select the best selector from available options"""
+        # Prefer non-ARIA selectors (CSS/XPath)
         for selector_list in selectors:
             for selector in selector_list:
-                # Prefer name attributes, then IDs, then other attributes
-                if '[name=' in selector:
+                if not selector.startswith('aria/'):
                     return selector
 
+        # If only ARIA selectors available, return the first one
         for selector_list in selectors:
-            for selector in selector_list:
-                if '#' in selector or '[id=' in selector:
-                    return selector
-
-        # Return first available selector as fallback
-        if selectors and selectors[0]:
-            return selectors[0][0]
+            if selector_list and len(selector_list) > 0:
+                return selector_list[0]
 
         return None
 

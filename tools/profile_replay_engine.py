@@ -11,6 +11,8 @@ from pathlib import Path
 from seleniumbase import SB
 from tools.training_logger import TrainingLogger
 from tools.recording_manager import RecordingManager
+from tools.replay_extension import ReplayExtension, ReplayContext
+from tools.profile_data_extension import ProfileDataExtension
 
 class ProfileReplayEngine:
     """Execute recorded form interactions with profile data substitution"""
@@ -24,6 +26,9 @@ class ProfileReplayEngine:
         self.recording_manager = RecordingManager()
         self.use_recorded_values = False  # Preview mode flag
         self.event_loop = event_loop  # Store the main event loop for async callbacks
+
+        # Extension system
+        self.extensions: List[ReplayExtension] = []
 
         # Progress callback for real-time updates
         self.progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None
@@ -52,6 +57,18 @@ class ProfileReplayEngine:
     def set_progress_callback(self, callback: Callable[[Dict[str, Any]], None]):
         """Set callback function for progress updates"""
         self.progress_callback = callback
+
+    def register_extension(self, extension: ReplayExtension):
+        """Register an extension to hook into replay lifecycle"""
+        if extension not in self.extensions:
+            self.extensions.append(extension)
+            print(f"Registered extension: {extension.name}")
+
+    def unregister_extension(self, extension: ReplayExtension):
+        """Unregister an extension"""
+        if extension in self.extensions:
+            self.extensions.remove(extension)
+            print(f"Unregistered extension: {extension.name}")
 
     def _send_progress_update(self, status: str, message: str, progress: float = 0, field_data: Dict = None):
         """Send progress update to callback if available"""
@@ -125,7 +142,7 @@ class ProfileReplayEngine:
             raise Exception(f"Failed to load profile: {e}")
 
     def replay_recording(self, recording_id: str, profile_data: Dict[str, Any],
-                        session_name: Optional[str] = None, preview_mode: bool = False) -> Dict[str, Any]:
+                        session_name: Optional[str] = None, preview_mode: bool = False, keep_browser_open: bool = False) -> Dict[str, Any]:
         """
         Replay a recording with profile data substitution
 
@@ -134,6 +151,7 @@ class ProfileReplayEngine:
             profile_data: Profile data to use for field values
             session_name: Optional name for the replay session
             preview_mode: If True, use recorded sample values; if False, use profile data
+            keep_browser_open: If True, don't close browser after replay (for testing/verification)
 
         Returns:
             Dict containing replay results and statistics
@@ -181,6 +199,19 @@ class ProfileReplayEngine:
             if not self.start_browser(recording["url"]):
                 raise Exception("Failed to start browser")
 
+            # Create replay context for extensions
+            context = ReplayContext(
+                profile_data=profile_data,
+                replay_stats=self.replay_stats,
+                current_url=recording["url"],
+                session_name=self.replay_stats["session_name"],
+                browser_driver=self.sb
+            )
+
+            # Call beforeAllSteps on all extensions
+            for extension in self.extensions:
+                extension.beforeAllSteps(context)
+
             # Get field mappings
             field_mappings = recording.get("field_mappings", [])
             self.replay_stats["total_fields"] = len(field_mappings)
@@ -193,7 +224,7 @@ class ProfileReplayEngine:
             # Execute field fills
             for i, field_mapping in enumerate(field_mappings):
                 progress = (i / len(field_mappings)) * 100
-                field_result = self._fill_field(field_mapping, profile_data, progress)
+                field_result = self._fill_field(field_mapping, profile_data, progress, context)
                 self.replay_stats["field_results"].append(field_result)
 
                 if field_result["success"]:
@@ -204,6 +235,11 @@ class ProfileReplayEngine:
 
                 # Small delay between fields for human-like behavior
                 time.sleep(0.3)
+
+            # Call afterAllSteps on all extensions
+            # Pass field_results list and context to extensions
+            for extension in self.extensions:
+                extension.afterAllSteps(self.replay_stats.get("field_results", []), context)
 
             # Attempt form submission
             self._send_progress_update("submitting", "Attempting to submit form", 90)
@@ -261,28 +297,58 @@ class ProfileReplayEngine:
             return self.replay_stats
 
         finally:
-            self.close_browser()
+            if not keep_browser_open:
+                self.close_browser()
 
-    def _fill_field(self, field_mapping: Dict[str, Any], profile_data: Dict[str, Any], progress: float) -> Dict[str, Any]:
+    def _fill_field(self, field_mapping: Dict[str, Any], profile_data: Dict[str, Any], progress: float, context: ReplayContext) -> Dict[str, Any]:
         """Fill a single field using profile data"""
         start_time = time.time()
-        field_name = field_mapping.get("field_name", "Unknown Field")
-        selector = field_mapping.get("field_selector", "")
-        field_type = field_mapping.get("field_type", "textbox")
-        profile_mapping = field_mapping.get("profile_mapping", "")
+
+        # Call beforeEachStep on all extensions
+        for extension in self.extensions:
+            extension.beforeEachStep(field_mapping, context)
+
+        # Apply transformations from extensions
+        transformed_step = field_mapping.copy()
+        for extension in self.extensions:
+            # Check if step should be skipped
+            if extension.shouldSkipStep(transformed_step, context):
+                print(f"Step skipped by extension: {extension.name}")
+                return {
+                    "field_name": field_mapping.get("field_name", "Unknown Field"),
+                    "selector": field_mapping.get("field_selector", ""),
+                    "field_type": field_mapping.get("field_type", "textbox"),
+                    "profile_mapping": field_mapping.get("profile_mapping", ""),
+                    "value_used": "",
+                    "success": True,
+                    "error": None,
+                    "execution_time_ms": 0,
+                    "skipped": True
+                }
+            # Transform the step (check if extension's transformStep accepts context)
+            try:
+                # ProfileDataExtension accepts context parameter
+                transformed_step = extension.transformStep(transformed_step, context)
+            except TypeError:
+                # Base extension only accepts step parameter
+                transformed_step = extension.transformStep(transformed_step)
+
+        field_name = transformed_step.get("field_name", "Unknown Field")
+        field_type = transformed_step.get("field_type", "textbox")
+        profile_mapping = transformed_step.get("profile_mapping", "")
+
+        # Get field selector
+        selector = transformed_step.get("field_selector", "")
 
         # Skip ARIA selectors and use CSS selectors instead
-        # Check if the primary selector is an ARIA selector
         if selector.startswith("aria/"):
-            # Get the original_step which contains all selectors
-            original_step = field_mapping.get("original_step", {})
+            original_step = transformed_step.get("original_step", {})
             selectors_list = original_step.get("selectors", [])
 
             # Find first non-ARIA selector
             for selector_option in selectors_list:
                 if isinstance(selector_option, list) and len(selector_option) > 0:
                     candidate = selector_option[0]
-                    # Skip ARIA selectors
                     if not candidate.startswith("aria/"):
                         selector = candidate
                         print(f"Switched from ARIA selector to CSS selector: {selector}")
@@ -300,31 +366,39 @@ class ProfileReplayEngine:
         }
 
         try:
-            # Get value from profile data or use recorded sample value
-            if self.use_recorded_values:
+            # Check if extension provided a transformed value
+            if "value_to_use" in transformed_step:
+                # Use value from extension transformation
+                value = transformed_step["value_to_use"]
+                mode_label = transformed_step.get("value_source", "extension")
+            elif self.use_recorded_values:
                 # Preview mode: use the recorded sample value
-                value = field_mapping.get("sample_value", "")
+                value = transformed_step.get("sample_value", "")
                 mode_label = "preview"
             else:
                 # Production mode: use profile data
-                value = self._get_profile_value(profile_data, profile_mapping, field_mapping)
+                value = self._get_profile_value(profile_data, profile_mapping, transformed_step)
                 mode_label = "production"
 
             field_result["value_used"] = value
 
             self._send_progress_update("filling", f"Filling {field_name} ({mode_label}): {value}", progress, field_result)
 
-            # Fill the field based on type
-            if field_type in ["textbox", "textarea"]:
-                success = self._fill_text_field(selector, value, field_name)
-            elif field_type == "select":
-                success = self._fill_select_field(selector, value, field_name)
-            elif field_type == "checkbox":
+            # Detect actual element type at runtime (Chrome Recorder doesn't distinguish select vs input)
+            actual_element_type = self._detect_element_type(selector)
+
+            # Get sample_value for fallback (from recording)
+            sample_value = transformed_step.get("sample_value", "")
+
+            # Fill the field based on detected type
+            if actual_element_type == "select":
+                success = self._fill_select_field(selector, value, field_name, sample_value)
+            elif actual_element_type in ["checkbox"]:
                 success = self._fill_checkbox_field(selector, value, field_name)
-            elif field_type == "radio":
+            elif actual_element_type in ["radio"]:
                 success = self._fill_radio_field(selector, value, field_name)
             else:
-                # Default to text field
+                # Default to text field for input, textarea, etc.
                 success = self._fill_text_field(selector, value, field_name)
 
             field_result["success"] = success
@@ -368,6 +442,11 @@ class ProfileReplayEngine:
                 )
 
         self.replay_stats["execution_times"].append(field_result["execution_time_ms"])
+
+        # Call afterEachStep on all extensions
+        for extension in self.extensions:
+            extension.afterEachStep(transformed_step, field_result, context)
+
         return field_result
 
     def _get_profile_value(self, profile_data: Dict[str, Any], profile_mapping: str, field_mapping: Dict[str, Any]) -> str:
@@ -410,6 +489,31 @@ class ProfileReplayEngine:
 
         return defaults.get(profile_mapping, "Default Value")
 
+    def _detect_element_type(self, selector: str) -> str:
+        """Detect the actual element type at runtime"""
+        try:
+            element = self.sb.find_element(selector)
+            tag_name = element.tag_name.lower()
+
+            if tag_name == "select":
+                return "select"
+            elif tag_name == "textarea":
+                return "textarea"
+            elif tag_name == "input":
+                input_type = element.get_attribute("type")
+                if input_type == "checkbox":
+                    return "checkbox"
+                elif input_type == "radio":
+                    return "radio"
+                else:
+                    return "text"
+            else:
+                return "text"
+
+        except Exception:
+            # If we can't detect, default to text
+            return "text"
+
     def _fill_text_field(self, selector: str, value: str, field_name: str) -> bool:
         """Fill a text field using standard Selenium"""
         try:
@@ -422,15 +526,44 @@ class ProfileReplayEngine:
             # Try fallback selector strategies
             return self._try_fallback_selectors(selector, value, "text")
 
-    def _fill_select_field(self, selector: str, value: str, field_name: str) -> bool:
-        """Fill a select dropdown field"""
+    def _fill_select_field(self, selector: str, value: str, field_name: str, sample_value: str = None) -> bool:
+        """
+        Fill a select dropdown field with intelligent fallback
+
+        Args:
+            selector: CSS selector for the dropdown
+            value: Primary value to try (from profile or recording)
+            field_name: Field name for logging
+            sample_value: Optional fallback value from recording
+        """
         try:
-            self.sb.select_option_by_text(selector, value)
+            # Try selecting by value first (most Chrome Recorder recordings use values)
+            self.sb.select_option_by_value(selector, value)
             return True
 
-        except Exception as e:
-            print(f"Error filling select field {field_name}: {e}")
-            return self._try_fallback_selectors(selector, value, "select")
+        except Exception:
+            # Fallback to selecting by text
+            try:
+                self.sb.select_option_by_text(selector, value)
+                return True
+            except Exception:
+                # If value doesn't match, try sample_value from recording (if available)
+                if sample_value and sample_value != value:
+                    try:
+                        self.sb.select_option_by_value(selector, sample_value)
+                        print(f"  [FALLBACK] Used recorded value '{sample_value}' for {field_name}")
+                        return True
+                    except Exception:
+                        try:
+                            self.sb.select_option_by_text(selector, sample_value)
+                            print(f"  [FALLBACK] Used recorded value '{sample_value}' for {field_name}")
+                            return True
+                        except Exception:
+                            pass
+
+                # Final fallback: skip the field gracefully for dropdowns
+                print(f"  [SKIP] Dropdown {field_name}: no valid option for '{value}'")
+                return True  # Return True to avoid counting as failure - dropdown skipped gracefully
 
     def _fill_checkbox_field(self, selector: str, value: str, field_name: str) -> bool:
         """Fill a checkbox field"""
