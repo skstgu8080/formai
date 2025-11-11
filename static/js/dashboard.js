@@ -350,7 +350,9 @@ class DashboardApp {
                         profile_id: profileId,
                         headless: useHeadless,
                         session_name: `${recordingName}_${Date.now()}`,
-                        preview: false  // Use profile data, not recorded values
+                        preview: false,  // Use profile data, not recorded values
+                        auto_close: true,  // Auto-close browser for batch execution
+                        close_delay: 2000  // 2 second delay before closing
                     })
                 });
 

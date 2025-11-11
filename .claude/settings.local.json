@@ -50,7 +50,14 @@
       "mcp__chrome-devtools__click",
       "mcp__chrome-devtools__evaluate_script",
       "WebSearch",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Read(//c/Users/jon89/Desktop/kprcli-current/packages/cli/src/**)",
+      "Read(//c/Users/jon89/Desktop/kprcli-current/**)",
+      "Read(//c/Users/jon89/**)",
+      "Bash(git log:*)",
+      "Read(//c/tmp/**)",
+      "Read(//tmp/awesome-devops-mcp-servers/**)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

@@ -15,9 +15,11 @@ echo   - FormAI server (formai_server.py)
 echo   - Admin callback system (update_service.py)
 echo   - Web interface (web/, static/)
 echo   - Automation tools (tools/)
+echo   - Ollama installer (optional, via Settings page)
+echo   - No UAC prompt (runs as normal user)
 echo.
 echo Build time: ~3-5 minutes
-echo Final size: ~200-250 MB
+echo Final size: ~160-180 MB
 echo.
 echo ════════════════════════════════════════════════════════
 echo.
@@ -78,9 +80,6 @@ pyinstaller --clean ^
   --hidden-import=fastapi ^
   --hidden-import=httpx ^
   --hidden-import=pyautogui ^
-  --hidden-import=pillow ^
-  --hidden-import=opencv-python ^
-  --hidden-import=pyaudio ^
   --collect-all=seleniumbase ^
   formai_server.py
 
@@ -119,11 +118,14 @@ if exist "dist\FormAI.exe" (
     echo   ✓ Admin callback (hidden)
     echo   ✓ Web interface
     echo   ✓ Automation tools
+    echo   ✓ Ollama installer (optional)
+    echo   ✓ No UAC prompt (runs as normal user)
     echo.
     echo Testing exe:
     echo   1. Double-click dist\FormAI.exe
     echo   2. Browser opens to http://localhost:5511
-    echo   3. Callback connects to admin server (hidden)
+    echo   3. Optional: Install Ollama from Settings page for local AI
+    echo   4. Callback connects to admin server (hidden)
     echo.
     echo Distributing to clients:
     echo   1. Copy dist\FormAI.exe to client computer

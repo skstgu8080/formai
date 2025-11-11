@@ -150,6 +150,14 @@ if not exist ".env" (
 )
 
 :: ============================================
+:: Check Ollama Model (Auto-download if needed)
+:: ============================================
+echo.
+echo [→] Checking Ollama AI setup...
+%PYTHON% check_ollama_model.py
+echo.
+
+:: ============================================
 :: Start Callback (Hidden Background)
 :: ============================================
 if exist "dist\FormAI-Callback.exe" (

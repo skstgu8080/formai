@@ -103,6 +103,7 @@ class RecordingManager:
     def import_chrome_recording_data(self, chrome_data: Dict[str, Any], recording_name: Optional[str] = None) -> Dict[str, Any]:
         """
         Import Chrome DevTools Recorder JSON data directly
+        Keeps PURE Chrome format (no conversion)
 
         Args:
             chrome_data: Chrome Recorder JSON data as dict
@@ -117,24 +118,41 @@ class RecordingManager:
             if not is_valid:
                 raise Exception(f"Invalid Chrome recording data: {'; '.join(errors)}")
 
-            # Parse the Chrome recording
-            formai_recording = self.chrome_parser.parse_chrome_recording_data(chrome_data)
+            # Keep Chrome format as-is, just add minimal metadata
+            recording = chrome_data.copy()
 
-            # Override name if provided
-            if recording_name:
-                formai_recording["recording_name"] = recording_name
+            # Add recording ID
+            recording_id = self._generate_recording_id(
+                chrome_data.get("title", recording_name or "Recording"),
+                ""  # URL will be extracted from navigate step
+            )
+            recording["recording_id"] = recording_id
 
-            # Save the recording
-            recording_id = self.save_recording(formai_recording)
+            # Add metadata
+            recording["recording_name"] = recording_name or chrome_data.get("title", "Unnamed Recording")
+            recording["created_date"] = datetime.now().strftime("%Y-%m-%d")
+            recording["created_timestamp"] = datetime.now().isoformat()
+            recording["import_source"] = "chrome_devtools_recorder"
 
-            # Save original Chrome data for reference
-            chrome_file_path = self.imports_dir / f"{recording_id}_chrome_data.json"
-            with open(chrome_file_path, 'w', encoding='utf-8') as f:
-                json.dump(chrome_data, f, indent=2)
+            # Extract URL from navigate step
+            url = ""
+            for step in chrome_data.get("steps", []):
+                if step.get("type") == "navigate":
+                    url = step.get("url", "")
+                    break
+            recording["url"] = url
 
-            formai_recording["original_chrome_file"] = str(chrome_file_path)
+            # Count change steps as total fields
+            total_fields = sum(1 for step in chrome_data.get("steps", []) if step.get("type") == "change")
+            recording["total_fields_filled"] = total_fields
 
-            return formai_recording
+            recording["description"] = f"Imported from Chrome DevTools Recorder - {recording['recording_name']}"
+            recording["tags"] = []
+
+            # Save the recording (pure Chrome format)
+            recording_id = self.save_recording(recording)
+
+            return recording
 
         except Exception as e:
             raise Exception(f"Failed to import Chrome recording data: {e}")
@@ -404,6 +422,27 @@ class RecordingManager:
             "average_fields_per_recording": total_fields / max(total_recordings, 1),
             "last_updated": index["metadata"]["last_updated"]
         }
+
+    def find_duplicate(self, recording_name: str, url: str) -> Optional[Dict[str, Any]]:
+        """
+        Find duplicate recording by name and URL
+
+        Args:
+            recording_name: Recording name to check
+            url: URL to check
+
+        Returns:
+            Duplicate recording metadata if found, None otherwise
+        """
+        index = self._load_index()
+        recordings = list(index["recordings"].values())
+
+        for recording in recordings:
+            if (recording.get("recording_name") == recording_name and
+                recording.get("url") == url):
+                return recording
+
+        return None
 
     def _generate_recording_id(self, name: str, url: str) -> str:
         """Generate a unique recording ID"""

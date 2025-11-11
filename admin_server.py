@@ -26,6 +26,7 @@ init()
 ADMIN_PORT = 5512
 DATA_DIR = Path("admin_data")
 SCREENSHOTS_DIR = DATA_DIR / "screenshots"
+UPDATES_DIR = DATA_DIR / "updates"
 CLIENTS_FILE = DATA_DIR / "clients.json"
 COMMANDS_FILE = DATA_DIR / "commands.json"
 COMMAND_RESULTS_FILE = DATA_DIR / "command_results.json"
@@ -34,6 +35,7 @@ OFFLINE_THRESHOLD = 600  # 10 minutes
 # Ensure data directories exist
 DATA_DIR.mkdir(exist_ok=True)
 SCREENSHOTS_DIR.mkdir(exist_ok=True)
+UPDATES_DIR.mkdir(exist_ok=True)
 
 # Initialize FastAPI
 app = FastAPI(title="FormAI Admin Server", version="1.0.0")
@@ -160,9 +162,9 @@ async def startup_event():
     load_clients()
     load_commands()
     load_command_results()
-    print(f"\n{Fore.GREEN}═══════════════════════════════════════════════════════{Style.RESET_ALL}")
+    print(f"\n{Fore.GREEN}======================================================={Style.RESET_ALL}")
     print(f"{Fore.GREEN}  FormAI Admin Server Started{Style.RESET_ALL}")
-    print(f"{Fore.GREEN}═══════════════════════════════════════════════════════{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}======================================================={Style.RESET_ALL}")
     print(f"{Fore.CYAN}  Dashboard: http://localhost:{ADMIN_PORT}{Style.RESET_ALL}")
     print(f"{Fore.CYAN}  API Endpoint: http://localhost:{ADMIN_PORT}/api/heartbeat{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}  Press Ctrl+C to stop{Style.RESET_ALL}\n")
@@ -415,6 +417,183 @@ async def get_screenshot(filename: str):
     return FileResponse(screenshot_path, media_type="image/png")
 
 
+# Update Management Endpoints
+from fastapi import UploadFile, File, Form
+
+@app.post("/api/updates/upload")
+async def upload_update(
+    file: UploadFile = File(...),
+    version: str = Form(...)
+):
+    """Upload a new FormAI.exe update"""
+    import hashlib
+
+    try:
+        # Read file content
+        file_content = await file.read()
+
+        # Calculate SHA256 hash
+        sha256_hash = hashlib.sha256(file_content).hexdigest()
+        file_size = len(file_content)
+
+        # Save update file
+        update_filename = f"FormAI_{version}.exe"
+        update_path = UPDATES_DIR / update_filename
+
+        with open(update_path, 'wb') as f:
+            f.write(file)
+
+        # Save metadata
+        metadata = {
+            "version": version,
+            "filename": update_filename,
+            "original_filename": filename,
+            "size": file_size,
+            "sha256": sha256_hash,
+            "uploaded_at": datetime.now().isoformat()
+        }
+
+        metadata_path = UPDATES_DIR / f"FormAI_{version}.json"
+        with open(metadata_path, 'w') as f:
+            json.dump(metadata, f, indent=2)
+
+        print(f"{Fore.GREEN}✓ Uploaded update v{version} ({file_size} bytes, hash: {sha256_hash[:16]}...){Style.RESET_ALL}")
+
+        return {
+            "success": True,
+            "message": f"Update v{version} uploaded successfully",
+            "metadata": metadata
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/updates/list")
+async def list_updates():
+    """List all available updates"""
+    updates = []
+
+    if UPDATES_DIR.exists():
+        for metadata_file in sorted(UPDATES_DIR.glob("FormAI_*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+            try:
+                with open(metadata_file, 'r') as f:
+                    metadata = json.load(f)
+                updates.append(metadata)
+            except:
+                continue
+
+    return {
+        "total": len(updates),
+        "updates": updates
+    }
+
+
+@app.get("/api/updates/download/{version}")
+async def download_update(version: str):
+    """Serve update file for download by clients"""
+    update_filename = f"FormAI_{version}.exe"
+    update_path = UPDATES_DIR / update_filename
+
+    if not update_path.exists():
+        raise HTTPException(status_code=404, detail=f"Update v{version} not found")
+
+    return FileResponse(
+        update_path,
+        media_type="application/octet-stream",
+        filename=update_filename,
+        headers={
+            "Content-Disposition": f'attachment; filename="{update_filename}"'
+        }
+    )
+
+
+@app.post("/api/updates/deploy")
+async def deploy_update(version: str, client_ids: List[str] = None):
+    """Send update command to selected clients (or all if none specified)"""
+    import hashlib
+
+    # Get update metadata
+    metadata_path = UPDATES_DIR / f"FormAI_{version}.json"
+    if not metadata_path.exists():
+        raise HTTPException(status_code=404, detail=f"Update v{version} not found")
+
+    with open(metadata_path, 'r') as f:
+        metadata = json.load(f)
+
+    # Determine target clients
+    target_clients = client_ids if client_ids else list(clients.keys())
+
+    if not target_clients:
+        raise HTTPException(status_code=400, detail="No clients available")
+
+    # Create update command for each client
+    deployed_count = 0
+    for client_id in target_clients:
+        if client_id not in clients:
+            continue
+
+        command = {
+            "command_id": str(uuid.uuid4()),
+            "command": "update_formai",
+            "params": {
+                "version": version,
+                "sha256": metadata["sha256"],
+                "size": metadata["size"]
+            },
+            "created_at": datetime.now().isoformat(),
+            "status": "pending"
+        }
+
+        if client_id not in pending_commands:
+            pending_commands[client_id] = []
+
+        pending_commands[client_id].append(command)
+        deployed_count += 1
+
+    # Save pending commands
+    save_commands()
+
+    print(f"{Fore.GREEN}✓ Deployed update v{version} to {deployed_count} client(s){Style.RESET_ALL}")
+
+    return {
+        "success": True,
+        "message": f"Update v{version} deployed to {deployed_count} client(s)",
+        "version": version,
+        "deployed_to": deployed_count,
+        "total_clients": len(clients)
+    }
+
+
+@app.delete("/api/updates/{version}")
+async def delete_update(version: str):
+    """Delete an update and its metadata"""
+    update_filename = f"FormAI_{version}.exe"
+    metadata_filename = f"FormAI_{version}.json"
+
+    update_path = UPDATES_DIR / update_filename
+    metadata_path = UPDATES_DIR / metadata_filename
+
+    deleted = []
+
+    if update_path.exists():
+        update_path.unlink()
+        deleted.append(update_filename)
+
+    if metadata_path.exists():
+        metadata_path.unlink()
+        deleted.append(metadata_filename)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Update v{version} not found")
+
+    return {
+        "success": True,
+        "message": f"Deleted update v{version}",
+        "deleted_files": deleted
+    }
+
+
 @app.get("/")
 async def serve_admin_dashboard():
     """Serve admin dashboard"""
@@ -431,9 +610,11 @@ async def serve_admin_dashboard():
 
 
 if __name__ == "__main__":
-    print(f"\n{Fore.CYAN}╔══════════════════════════════════════════════════════╗{Style.RESET_ALL}")
-    print(f"{Fore.CYAN}║         FormAI Admin Monitoring Server           ║{Style.RESET_ALL}")
-    print(f"{Fore.CYAN}╚══════════════════════════════════════════════════════╝{Style.RESET_ALL}\n")
+    print(f"\n{Fore.CYAN}========================================================{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}         FormAI Admin Monitoring Server            {Style.RESET_ALL}")
+    print(f"{Fore.CYAN}========================================================{Style.RESET_ALL}\n")
+    print(f"{Fore.GREEN}Admin Dashboard: http://localhost:{ADMIN_PORT}{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}API Endpoints: /api/clients, /api/stats, /api/updates{Style.RESET_ALL}\n")
 
     uvicorn.run(
         app,

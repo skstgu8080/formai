@@ -47,18 +47,6 @@ class Sidebar {
                         label: 'Recorder',
                         href: '/recorder',
                         icon: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>'
-                    },
-                    {
-                        id: 'templates',
-                        label: 'Templates',
-                        href: '/templates',
-                        icon: '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="15" x2="15" y2="15"/>'
-                    },
-                    {
-                        id: 'http-submit',
-                        label: 'HTTP Submit',
-                        href: '/http-submit',
-                        icon: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>'
                     }
                 ]
             },

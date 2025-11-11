@@ -275,6 +275,28 @@ class ProfileReplayEngine:
             success_rate = (self.replay_stats["successful_fields"] / max(self.replay_stats["total_fields"], 1)) * 100
             self.replay_stats["success_rate"] = f"{success_rate:.1f}%"
 
+            # Print summary of filled fields
+            print("\n" + "="*80)
+            print("FORM FILL SUMMARY")
+            print("="*80)
+            for result in self.replay_stats["field_results"]:
+                status = "✅" if result["success"] else "❌"
+                field_name = result["field_name"]
+                value = result["value_used"]
+                profile_mapping = result.get("profile_mapping", "N/A")
+
+                print(f"{status} {field_name}")
+                print(f"   Profile Field: {profile_mapping}")
+                print(f"   Value: {value}")
+
+                if not result["success"] and result.get("error"):
+                    print(f"   Error: {result['error']}")
+                print()
+
+            print("="*80)
+            print(f"Summary: {self.replay_stats['successful_fields']}/{self.replay_stats['total_fields']} fields filled successfully ({success_rate:.1f}%)")
+            print("="*80 + "\n")
+
             # Update recording success rate
             self.recording_manager.update_recording_metadata(recording_id, {
                 "success_rate": self.replay_stats["success_rate"],
@@ -449,8 +471,103 @@ class ProfileReplayEngine:
 
         return field_result
 
+    def _detect_date_format(self, sample_value: str) -> str:
+        """
+        Detect the date format from a sample value
+        Returns format string like 'YYYY-MM-DD', 'MM/DD/YYYY', etc.
+        """
+        import re
+
+        if not sample_value or len(sample_value) < 6:
+            return "YYYY-MM-DD"  # Default to ISO format
+
+        # Check for common patterns
+        if re.match(r'\d{4}[-/]\d{1,2}[-/]\d{1,2}', sample_value):
+            # YYYY-MM-DD or YYYY/MM/DD
+            separator = '-' if '-' in sample_value else '/'
+            return f"YYYY{separator}MM{separator}DD"
+
+        elif re.match(r'\d{1,2}[-/]\d{1,2}[-/]\d{4}', sample_value):
+            # Could be MM/DD/YYYY or DD/MM/YYYY
+            separator = '-' if '-' in sample_value else '/'
+            parts = sample_value.split(separator)
+
+            # Try to determine if first part is month or day
+            first_num = int(parts[0])
+            second_num = int(parts[1])
+
+            # If first number > 12, must be day (DD/MM/YYYY)
+            if first_num > 12:
+                return f"DD{separator}MM{separator}YYYY"
+            # If second number > 12, must be DD/MM/YYYY
+            elif second_num > 12:
+                return f"DD{separator}MM{separator}YYYY"
+            else:
+                # Ambiguous - default to MM/DD/YYYY (US format)
+                return f"MM{separator}DD{separator}YYYY"
+
+        elif re.match(r'\d{1,2}[-/]\d{1,2}[-/]\d{2}', sample_value):
+            # Short year format: MM/DD/YY or DD/MM/YY
+            separator = '-' if '-' in sample_value else '/'
+            return f"MM{separator}DD{separator}YY"
+
+        # Default to ISO format
+        return "YYYY-MM-DD"
+
+    def _construct_date_in_format(self, year: str, month: str, day: str, date_format: str) -> str:
+        """
+        Construct a date string in the specified format
+
+        Args:
+            year: Year as string (e.g., "1999")
+            month: Month as string (e.g., "12")
+            day: Day as string (e.g., "15")
+            date_format: Format string like "YYYY-MM-DD", "MM/DD/YYYY", etc.
+
+        Returns:
+            Formatted date string
+        """
+        # Ensure we have string values
+        year = str(year)
+        month = str(month)
+        day = str(day)
+
+        # Determine separator from format
+        separator = '-' if '-' in date_format else '/'
+
+        # Pad month and day if needed (check format for padding)
+        if 'MM' in date_format:
+            month = month.zfill(2)
+        else:
+            month = str(int(month))  # Remove leading zeros
+
+        if 'DD' in date_format:
+            day = day.zfill(2)
+        else:
+            day = str(int(day))  # Remove leading zeros
+
+        # Handle 2-digit year
+        if date_format.count('Y') == 2:
+            year = year[-2:]  # Take last 2 digits
+
+        # Construct based on format pattern
+        format_upper = date_format.upper()
+
+        if format_upper.startswith('YYYY'):
+            # YYYY-MM-DD or YYYY/MM/DD
+            return f"{year}{separator}{month}{separator}{day}"
+        elif format_upper.startswith('MM'):
+            # MM/DD/YYYY or MM-DD-YYYY
+            return f"{month}{separator}{day}{separator}{year}"
+        elif format_upper.startswith('DD'):
+            # DD/MM/YYYY or DD-MM-YYYY
+            return f"{day}{separator}{month}{separator}{year}"
+        else:
+            # Default fallback
+            return f"{year}{separator}{month}{separator}{day}"
+
     def _get_profile_value(self, profile_data: Dict[str, Any], profile_mapping: str, field_mapping: Dict[str, Any]) -> str:
-        """Get the appropriate value from profile data"""
+        """Get the appropriate value from profile data with intelligent fallback and multi-format date support"""
         # Handle nested profile data structures
         if "data" in profile_data and isinstance(profile_data["data"], dict):
             # Handle business-profile.json format
@@ -459,8 +576,85 @@ class ProfileReplayEngine:
             # Handle direct profile format (chris.json, etc.)
             profile_values = profile_data
 
-        # Get value from profile
+        # Define alternative field names for common mappings
+        field_alternatives = {
+            'birthYear': ['dobY', 'dobYear', 'dob_year', 'birth_year', 'byear', 'year_of_birth', 'birthYear'],
+            'birthMonth': ['dobM', 'dobMonth', 'dob_month', 'birth_month', 'bmonth', 'month_of_birth', 'birthMonth'],
+            'birthDay': ['dobD', 'dobDay', 'dob_day', 'birth_day', 'bday', 'day_of_birth', 'birthDay'],
+            'firstName': ['firstName', 'first_name', 'fname', 'givenName', 'given_name'],
+            'lastName': ['lastName', 'last_name', 'lname', 'surname', 'familyName', 'family_name'],
+            'email': ['email', 'emailAddress', 'email_address', 'e_mail'],
+            'phone': ['phone', 'phoneNumber', 'phone_number', 'tel', 'telephone'],
+            'address1': ['address1', 'address_1', 'street', 'street_address', 'addressLine1'],
+            'address2': ['address2', 'address_2', 'addressLine2', 'apartment', 'apt'],
+            'city': ['city', 'town', 'locality'],
+            'state': ['state', 'province', 'region'],
+            'zip': ['zip', 'zipCode', 'zip_code', 'postalCode', 'postal_code', 'postcode'],
+            'country': ['country', 'nation', 'countryCode', 'country_code']
+        }
+
+        # Check if this is a full date field
+        selector = field_mapping.get("field_selector", "").lower()
+        field_name = field_mapping.get("field_name", "").lower()
+        sample_value = field_mapping.get("sample_value", "")
+
+        # Detect if this is a single full date input field
+        is_full_date_field = any([
+            'birthdate' in selector,
+            'birth-date' in selector,
+            'dob' in selector and 'doby' not in selector and 'dobm' not in selector and 'dobd' not in selector,
+            'birth_date' in field_name,
+            'birthdate' in field_name,
+            # Check if sample value looks like a date
+            (sample_value and len(sample_value) >= 8 and (sample_value.count('-') >= 2 or sample_value.count('/') >= 2))
+        ])
+
+        # If this is a full date field, construct the date from separate components
+        if is_full_date_field:
+            # Try to get year, month, day from profile
+            year = ""
+            month = ""
+            day = ""
+
+            # Get year
+            for alt in field_alternatives.get('birthYear', []):
+                year = profile_values.get(alt, "")
+                if year:
+                    break
+
+            # Get month
+            for alt in field_alternatives.get('birthMonth', []):
+                month = profile_values.get(alt, "")
+                if month:
+                    break
+
+            # Get day
+            for alt in field_alternatives.get('birthDay', []):
+                day = profile_values.get(alt, "")
+                if day:
+                    break
+
+            # If we found all components, construct date in the appropriate format
+            if year and month and day:
+                # Detect format from sample value
+                date_format = self._detect_date_format(sample_value)
+
+                # Construct date in detected format
+                value = self._construct_date_in_format(year, month, day, date_format)
+
+                print(f"  [DATE FORMAT] Detected: {date_format}, Constructed: {value} (Y={year}, M={month}, D={day})")
+                return value
+
+        # Try exact match first
         value = profile_values.get(profile_mapping, "")
+
+        # If no exact match, try alternatives
+        if not value and profile_mapping in field_alternatives:
+            for alt_name in field_alternatives[profile_mapping]:
+                value = profile_values.get(alt_name, "")
+                if value:
+                    print(f"  [PROFILE MAPPING] Found {profile_mapping} as '{alt_name}' = '{value}'")
+                    break
 
         # If no value in profile, use sample value
         if not value:

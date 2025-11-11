@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-SeleniumBase Automation Module - Browser automation with anti-detection
+SeleniumBase Automation Module - Browser automation with UC Mode best practices
+Following official SeleniumBase UC Mode guidelines for maximum stealth
 """
 import asyncio
 import json
@@ -14,17 +15,20 @@ from datetime import datetime
 from seleniumbase import SB
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-import pyautogui
 
-# Configure logging - only show warnings and errors by default
+# Configure logging
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Check if verbose automation logging is enabled
 AUTOMATION_VERBOSE = os.getenv("AUTOMATION_VERBOSE", "false").lower() == "true"
 
+# UC Mode configuration
+UC_RECONNECT_TIME = float(os.getenv("UC_RECONNECT_TIME", "4.0"))
+UC_INCOGNITO = os.getenv("UC_INCOGNITO", "true").lower() == "true"
+
 class SeleniumAutomation:
-    """SeleniumBase automation with CDP mode for anti-detection"""
+    """SeleniumBase automation with UC Mode best practices for anti-detection"""
 
     # Value mappings for dropdowns that use numeric values
     DROPDOWN_VALUE_MAPPINGS = {
@@ -52,12 +56,14 @@ class SeleniumAutomation:
         "Dec": "12"
     }
 
-    def __init__(self, session_id: str, profile: dict, use_stealth: bool = True):
+    def __init__(self, session_id: str, profile: dict, use_stealth: bool = True, reconnect_time: float = None):
         self.session_id = session_id
         self.profile = profile
         self.use_stealth = use_stealth
+        self.reconnect_time = reconnect_time or UC_RECONNECT_TIME
         self.sb = None
-        self.sb_context = None  # Store context manager to prevent premature closure
+        self.sb_context = None
+        self.driver = None  # Direct driver reference for UC Mode methods
         self.current_url = None
         self.field_mappings = {}
         self.load_field_mappings()
@@ -75,18 +81,17 @@ class SeleniumAutomation:
                 except:
                     pass
 
-        # Load from recordings directory (IMPORTANT: these have comprehensive field mappings)
+        # Load from recordings directory
         recordings_dir = Path("recordings")
         if recordings_dir.exists():
             for file in recordings_dir.glob("*.json"):
                 if file.name in ['recordings_index.json', 'recordings.json']:
-                    continue  # Skip index files
+                    continue
                 try:
                     with open(file, 'r', encoding='utf-8') as f:
                         recording = json.load(f)
                         if 'url' in recording and 'field_mappings' in recording:
                             url = recording['url']
-                            # Convert recording format to internal format
                             self.field_mappings[url] = recording['field_mappings']
                             if AUTOMATION_VERBOSE:
                                 logger.info(f"Loaded {len(recording['field_mappings'])} field mappings from recording: {recording.get('recording_name', file.name)}")
@@ -96,23 +101,31 @@ class SeleniumAutomation:
                     pass
 
     async def start(self, url: str) -> bool:
-        """Start browser and navigate to URL"""
+        """Start browser and navigate to URL using UC Mode best practices"""
         try:
-            # Use UC mode for undetected Chrome with CDP capabilities
-            # Store the context manager to prevent it from closing prematurely
-            self.sb_context = SB(uc=self.use_stealth, headed=True, incognito=False)
-            self.sb = self.sb_context.__enter__()
+            # Setup Chrome with full permissions (auto-grant all)
+            chrome_options = self._setup_chrome_permissions()
 
-            # Navigate to URL
+            # Use UC Mode with incognito for maximum stealth
+            self.sb_context = SB(
+                uc=self.use_stealth,
+                headed=True,
+                incognito=UC_INCOGNITO,
+                chromium_arg=chrome_options
+            )
+            self.sb = self.sb_context.__enter__()
+            self.driver = self.sb.driver  # Store driver reference
+
+            # Navigate using UC Mode's uc_open_with_reconnect
             if self.use_stealth:
-                # Activate CDP mode for enhanced stealth
-                self.sb.activate_cdp_mode(url)
+                logger.info(f"UC Mode: Opening {url} with reconnect_time={self.reconnect_time}")
+                self.driver.uc_open_with_reconnect(url, self.reconnect_time)
                 self.current_url = url
             else:
                 self.sb.open(url)
                 self.current_url = url
 
-            await asyncio.sleep(2)  # Wait for page to load
+            await asyncio.sleep(2)
             return True
         except Exception as e:
             logger.error(f"Error starting browser: {e}")
@@ -121,11 +134,61 @@ class SeleniumAutomation:
                 traceback.print_exc()
             return False
 
+    def _setup_chrome_permissions(self):
+        """Setup Chrome options for full permissions (no prompts)"""
+        options = []
+
+        # Disable all permission prompts
+        options.extend([
+            "--disable-notifications",
+            "--disable-popup-blocking",
+            "--disable-web-security",
+            "--allow-running-insecure-content",
+            "--disable-blink-features=AutomationControlled",
+            "--disable-features=IsolateOrigins,site-per-process",
+        ])
+
+        # Auto-grant all permissions via preferences
+        prefs = {
+            "profile.default_content_setting_values.notifications": 1,  # Allow notifications
+            "profile.default_content_setting_values.media_stream_mic": 1,  # Allow microphone
+            "profile.default_content_setting_values.media_stream_camera": 1,  # Allow camera
+            "profile.default_content_setting_values.geolocation": 1,  # Allow location
+            "profile.default_content_setting_values.automatic_downloads": 1,  # Allow downloads
+            "download.prompt_for_download": False,  # No download prompts
+            "download.directory_upgrade": True,
+            "safebrowsing.enabled": False,  # Disable safe browsing warnings
+            "profile.default_content_settings.popups": 0,  # Allow popups
+            "profile.password_manager_enabled": False,  # Disable password manager prompts
+            "credentials_enable_service": False,
+        }
+
+        # Create persistent profile directory for FormAI
+        profile_dir = os.path.join(os.getenv("APPDATA", "."), "FormAI", "ChromeProfile")
+        os.makedirs(profile_dir, exist_ok=True)
+
+        options.append(f"--user-data-dir={profile_dir}")
+
+        # Store prefs in a way SeleniumBase can use them
+        prefs_file = os.path.join(profile_dir, "Default", "Preferences")
+        os.makedirs(os.path.dirname(prefs_file), exist_ok=True)
+
+        try:
+            with open(prefs_file, 'w') as f:
+                json.dump({"profile": {"content_settings": {"exceptions": prefs}}}, f)
+        except:
+            pass  # If it fails, Chrome will create it
+
+        return ",".join(options)
+
     async def detect_and_fill_forms(self) -> int:
         """Detect form fields and fill them with profile data"""
         fields_filled = 0
 
         try:
+            # Handle any CAPTCHAs first
+            await self.handle_captcha()
+
             # Check if we have a recording for the current URL
             recording_mappings = self.field_mappings.get(self.current_url, [])
 
@@ -151,13 +214,11 @@ class SeleniumAutomation:
                     'zip': ['zip', 'postal', 'postcode', 'zipcode']
                 }
 
-                # Try CDP mode methods for better anti-detection
-                if self.use_stealth and hasattr(self.sb, 'cdp'):
-                    fields_filled = await self._fill_with_cdp(field_patterns)
+                if self.use_stealth:
+                    fields_filled = await self._fill_with_uc_mode(field_patterns)
                 else:
                     fields_filled = await self._fill_standard(field_patterns)
 
-                # Handle dropdowns
                 await self._handle_dropdowns()
 
             return fields_filled
@@ -170,7 +231,7 @@ class SeleniumAutomation:
             return fields_filled
 
     async def _fill_from_recording(self, field_mappings: List[Dict]) -> int:
-        """Fill form fields using recording field mappings"""
+        """Fill form fields using recording field mappings with UC Mode"""
         fields_filled = 0
         fields_skipped = 0
         total_fields = len(field_mappings)
@@ -188,7 +249,6 @@ class SeleniumAutomation:
                 # Get value from profile
                 profile_value = None
                 if profile_mapping:
-                    # Handle nested profile structure (e.g., profile.data.firstName or profile.firstName)
                     if 'data' in self.profile and isinstance(self.profile['data'], dict):
                         profile_value = self.profile['data'].get(profile_mapping)
                     if not profile_value:
@@ -200,11 +260,11 @@ class SeleniumAutomation:
                     fields_skipped += 1
                     continue
 
-                # Fill the field based on type
+                # Fill the field based on type using UC Mode methods
                 if field_type == 'select':
-                    success = await self._fill_select_field(field_selector, str(profile_value), field_name)
+                    success = await self._fill_select_uc_mode(field_selector, str(profile_value), field_name)
                 else:
-                    success = await self._fill_text_field(field_selector, str(profile_value), field_name)
+                    success = await self._fill_text_uc_mode(field_selector, str(profile_value), field_name)
 
                 if success:
                     fields_filled += 1
@@ -223,25 +283,28 @@ class SeleniumAutomation:
                 fields_skipped += 1
                 continue
 
-        # Always show summary - this is useful info
         logger.info(f"Filled {fields_filled}/{total_fields} fields, skipped {fields_skipped}")
         return fields_filled
 
-    async def _fill_text_field(self, selector: str, value: str, field_name: str = "") -> bool:
-        """Fill a text input field with anti-detection"""
+    async def _fill_text_uc_mode(self, selector: str, value: str, field_name: str = "") -> bool:
+        """Fill a text input field using UC Mode methods"""
         try:
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                # Use CDP mode for stealth
-                if self.sb.cdp.is_element_present(selector):
-                    self.sb.cdp.click(selector)
+            if self.use_stealth:
+                # Check if element exists
+                if self.sb.is_element_present(selector):
+                    # Use UC click for stealth
+                    self.driver.uc_click(selector, reconnect_time=0.5)
                     await asyncio.sleep(0.2)
-                    self.sb.cdp.clear(selector)
+
+                    # Clear and type using standard methods after UC click
+                    element = self.sb.find_element(selector)
+                    element.clear()
                     await asyncio.sleep(0.1)
-                    self.sb.cdp.type(selector, value)
+                    element.send_keys(value)
                     return True
                 else:
                     if AUTOMATION_VERBOSE:
-                        logger.debug(f"Element not found (CDP): {selector}")
+                        logger.debug(f"Element not found (UC Mode): {selector}")
                     return False
             else:
                 # Standard Selenium
@@ -252,247 +315,87 @@ class SeleniumAutomation:
                         element.clear()
                         element.send_keys(value)
                         return True
-                if AUTOMATION_VERBOSE:
-                    logger.debug(f"Element not found (Standard): {selector}")
                 return False
         except Exception as e:
             if AUTOMATION_VERBOSE:
                 logger.debug(f"Error filling text field {field_name}: {e}")
             return False
 
-    async def _fill_select_field(self, selector: str, value: str, field_name: str = "") -> bool:
-        """Fill a select dropdown field with multiple fallback strategies"""
+    async def _fill_select_uc_mode(self, selector: str, value: str, field_name: str = "") -> bool:
+        """Fill a select dropdown field using UC Mode with reconnect strategy"""
         try:
-            # Get mapped value if available
             mapped_value = self.DROPDOWN_VALUE_MAPPINGS.get(value, value)
 
             if AUTOMATION_VERBOSE:
-                logger.debug(f"SELECT Field: {field_name}, Selector: {selector}, Value: '{value}' -> '{mapped_value}', Mode: {'CDP' if self.use_stealth else 'Standard'}")
+                logger.debug(f"SELECT Field (UC Mode): {field_name}, Selector: {selector}, Value: '{value}' -> '{mapped_value}'")
 
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                result = await self._fill_select_cdp(selector, value, mapped_value, field_name)
-            else:
-                result = await self._fill_select_standard(selector, value, mapped_value, field_name)
+            if not self.sb.is_element_present(selector):
+                if AUTOMATION_VERBOSE:
+                    logger.debug(f"Select element not found: {selector}")
+                return False
 
-            if AUTOMATION_VERBOSE:
-                if result:
-                    logger.debug(f"SUCCESS: {field_name} filled with '{value}'")
-                else:
-                    logger.debug(f"FAILED: {field_name} could not be filled")
+            # Use UC click to focus on dropdown
+            self.driver.uc_click(selector, reconnect_time=0.5)
+            await asyncio.sleep(0.2)
 
-            return result
-
-        except Exception as e:
-            logger.error(f"Exception in _fill_select_field for {field_name}: {e}")
-            if AUTOMATION_VERBOSE:
-                import traceback
-                traceback.print_exc()
-            return False
-
-    async def _fill_select_cdp(self, selector: str, value: str, mapped_value: str, field_name: str) -> bool:
-        """Fill select field using CDP mode - matches Chrome DevTools recording interaction"""
-
-        # First, check if element exists and get its current state
-        if AUTOMATION_VERBOSE:
-            logger.debug("CDP: Checking element existence...")
-        if not self.sb.cdp.is_element_present(selector):
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"CDP: Element NOT found: {selector}")
-            return False
-
-        if AUTOMATION_VERBOSE:
-            logger.debug(f"CDP: Element found: {selector}")
-
-        # Get dropdown options for debugging
-        if AUTOMATION_VERBOSE:
+            # Strategy 1: Select by value using JavaScript (most reliable)
             try:
-                options_script = f"""
+                js_script = f"""
                     const select = document.querySelector('{selector}');
-                    if (select) {{
-                        return Array.from(select.options).map(opt => ({{
-                            value: opt.value,
-                            text: opt.text,
-                            selected: opt.selected
-                        }}));
-                    }}
-                    return [];
-                """
-                options = self.sb.execute_script(options_script)
-                logger.debug("CDP: Available options:")
-                for opt in options:
-                    marker = " ← CURRENT" if opt['selected'] else ""
-                    logger.debug(f"  value='{opt['value']}' text='{opt['text']}'{marker}")
-            except Exception as e:
-                logger.debug(f"CDP: Could not fetch options: {e}")
-
-        # Strategy 1: Click then Change (mimics Chrome DevTools recording)
-        if AUTOMATION_VERBOSE:
-            logger.debug("CDP: Strategy 1 - Click + Change")
-        try:
-            js_script = f"""
-                const select = document.querySelector('{selector}');
-                if (select && select.offsetParent !== null) {{
-                    console.log('Step 1: Focus and click');
-                    select.focus();
-                    select.click();
-
-                    console.log('Step 2: Set value to {mapped_value}');
-                    select.value = '{mapped_value}';
-
-                    console.log('Step 3: Trigger events');
-                    select.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                    select.dispatchEvent(new Event('input', {{ bubbles: true }}));
-
-                    console.log('Step 4: Verify - current value:', select.value);
-                    return select.value === '{mapped_value}';
-                }}
-                console.error('Element not found or not visible');
-                return false;
-            """
-            result = self.sb.execute_script(js_script)
-
-            # Verify what was actually selected
-            verify_script = f"return document.querySelector('{selector}').value;"
-            actual_value = self.sb.execute_script(verify_script)
-
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"CDP: Strategy 1 result: {result}, actual: '{actual_value}' (expected: '{mapped_value}')")
-
-            if result:
-                if AUTOMATION_VERBOSE:
-                    logger.debug("CDP: Strategy 1 SUCCESS")
-                await asyncio.sleep(0.3)
-                return True
-            else:
-                if AUTOMATION_VERBOSE:
-                    logger.debug("CDP: Strategy 1 FAILED - trying alternatives")
-        except Exception as e:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"CDP: Strategy 1 exception: {e}")
-                import traceback
-                traceback.print_exc()
-
-        # Strategy 2: Try selecting by visible text (fallback)
-        try:
-            js_script = f"""
-                const select = document.querySelector('{selector}');
-                if (select) {{
-                    select.focus();
-                    const options = Array.from(select.options);
-                    const option = options.find(opt => opt.text === '{value}' || opt.text.trim() === '{value}');
-                    if (option) {{
-                        select.value = option.value;
+                    if (select && select.offsetParent !== null) {{
+                        select.focus();
+                        select.value = '{mapped_value}';
                         select.dispatchEvent(new Event('change', {{ bubbles: true }}));
                         select.dispatchEvent(new Event('input', {{ bubbles: true }}));
-                        return true;
+                        return select.value === '{mapped_value}';
                     }}
-                }}
-                return false;
-            """
-            result = self.sb.execute_script(js_script)
-            if result:
-                if AUTOMATION_VERBOSE:
-                    logger.debug(f"Selected by text (CDP): {field_name} = {value}")
-                await asyncio.sleep(0.3)
-                return True
-        except Exception as e:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"CDP Strategy 2 failed: {e}")
+                    return false;
+                """
+                result = self.sb.execute_script(js_script)
 
-        # Strategy 3: Try partial text match (last resort)
-        try:
-            js_script = f"""
-                const select = document.querySelector('{selector}');
-                if (select) {{
-                    select.focus();
-                    const options = Array.from(select.options);
-                    const option = options.find(opt => opt.text.includes('{value}'));
-                    if (option) {{
-                        select.value = option.value;
-                        select.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                        return true;
-                    }}
-                }}
-                return false;
-            """
-            result = self.sb.execute_script(js_script)
-            if result:
-                if AUTOMATION_VERBOSE:
-                    logger.debug(f"Selected by partial text (CDP): {field_name} = {value}")
-                await asyncio.sleep(0.3)
-                return True
-        except Exception as e:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"CDP Strategy 3 failed: {e}")
-
-        if AUTOMATION_VERBOSE:
-            logger.debug(f"All CDP strategies failed for {field_name}")
-        return False
-
-    async def _fill_select_standard(self, selector: str, value: str, mapped_value: str, field_name: str) -> bool:
-        """Fill select field using standard Selenium - click first, then select"""
-        elements = self.sb.find_elements(selector)
-        if not elements or len(elements) == 0:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"Select element not found (Standard): {selector}")
-            return False
-
-        element = elements[0]
-        from selenium.webdriver.support.select import Select
-        select_element = Select(element)
-
-        # Strategy 1: Click + Select by value (matches Chrome recording pattern)
-        try:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"Attempting click+select by value for {field_name}")
-            # Step 1: Click to focus
-            element.click()
-            await asyncio.sleep(0.1)
-
-            # Step 2: Select by value
-            select_element.select_by_value(mapped_value)
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"Selected by value with click (Standard): {field_name} = {mapped_value}")
-            await asyncio.sleep(0.3)
-            return True
-        except Exception as e:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"Standard Strategy 1 (click+value) failed: {e}")
-
-        # Strategy 2: Click + Select by visible text
-        try:
-            element.click()
-            await asyncio.sleep(0.1)
-            select_element.select_by_visible_text(value)
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"Selected by text with click (Standard): {field_name} = {value}")
-            await asyncio.sleep(0.3)
-            return True
-        except Exception as e:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"Standard Strategy 2 (click+text) failed: {e}")
-
-        # Strategy 3: Try partial text match
-        try:
-            element.click()
-            await asyncio.sleep(0.1)
-            for option in select_element.options:
-                if value in option.text:
-                    select_element.select_by_value(option.get_attribute('value'))
+                if result:
                     if AUTOMATION_VERBOSE:
-                        logger.debug(f"Selected by partial text (Standard): {field_name} = {value}")
+                        logger.debug(f"SUCCESS (UC Mode): {field_name} filled with '{value}'")
                     await asyncio.sleep(0.3)
                     return True
+            except Exception as e:
+                if AUTOMATION_VERBOSE:
+                    logger.debug(f"UC Mode select strategy failed: {e}")
+
+            #Strategy 2: Try selecting by visible text
+            try:
+                js_script = f"""
+                    const select = document.querySelector('{selector}');
+                    if (select) {{
+                        const options = Array.from(select.options);
+                        const option = options.find(opt => opt.text === '{value}' || opt.text.trim() === '{value}');
+                        if (option) {{
+                            select.value = option.value;
+                            select.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                            select.dispatchEvent(new Event('input', {{ bubbles: true }}));
+                            return true;
+                        }}
+                    }}
+                    return false;
+                """
+                result = self.sb.execute_script(js_script)
+                if result:
+                    if AUTOMATION_VERBOSE:
+                        logger.debug(f"Selected by text (UC Mode): {field_name} = {value}")
+                    await asyncio.sleep(0.3)
+                    return True
+            except Exception as e:
+                if AUTOMATION_VERBOSE:
+                    logger.debug(f"UC Mode text selection failed: {e}")
+
+            return False
+
         except Exception as e:
-            if AUTOMATION_VERBOSE:
-                logger.debug(f"Standard Strategy 3 (partial) failed: {e}")
+            logger.error(f"Exception in _fill_select_uc_mode for {field_name}: {e}")
+            return False
 
-        if AUTOMATION_VERBOSE:
-            logger.debug(f"All Standard strategies failed for {field_name}")
-        return False
-
-    async def _fill_with_cdp(self, field_patterns: Dict) -> int:
-        """Fill forms using CDP mode for anti-detection"""
+    async def _fill_with_uc_mode(self, field_patterns: Dict) -> int:
+        """Fill forms using UC Mode methods for anti-detection"""
         fields_filled = 0
 
         for field_type, patterns in field_patterns.items():
@@ -503,7 +406,6 @@ class SeleniumAutomation:
 
             for pattern in patterns:
                 try:
-                    # Try different selector strategies
                     selectors = [
                         f"input[name*='{pattern}']",
                         f"input[id*='{pattern}']",
@@ -513,19 +415,19 @@ class SeleniumAutomation:
 
                     for selector in selectors:
                         try:
-                            if self.sb.cdp.is_element_present(selector):
-                                # Use CDP click and type for stealth
-                                self.sb.cdp.click(selector)
-                                await asyncio.sleep(0.3)  # Human-like delay
+                            if self.sb.is_element_present(selector):
+                                # Use UC click with reconnect
+                                self.driver.uc_click(selector, reconnect_time=0.5)
+                                await asyncio.sleep(0.3)
 
-                                # Clear existing text first
-                                self.sb.cdp.clear(selector)
+                                # Type value
+                                element = self.sb.find_element(selector)
+                                element.clear()
                                 await asyncio.sleep(0.2)
+                                element.send_keys(value)
 
-                                # Type with human-like speed
-                                self.sb.cdp.type(selector, value)
                                 fields_filled += 1
-                                await asyncio.sleep(0.5)  # Pause between fields
+                                await asyncio.sleep(0.5)
                                 break
                         except:
                             continue
@@ -546,7 +448,6 @@ class SeleniumAutomation:
 
             for pattern in patterns:
                 try:
-                    # Find elements matching pattern
                     elements = self.sb.find_elements(
                         f"input[name*='{pattern}' i], input[id*='{pattern}' i], textarea[name*='{pattern}' i]"
                     )
@@ -566,7 +467,6 @@ class SeleniumAutomation:
     async def _handle_dropdowns(self):
         """Detect and handle dropdown selections"""
         try:
-            # Common dropdown patterns for states, countries, etc.
             dropdown_patterns = {
                 'state': ['state', 'province', 'region'],
                 'country': ['country', 'nation'],
@@ -582,12 +482,10 @@ class SeleniumAutomation:
 
                 for pattern in patterns:
                     try:
-                        # Find select elements
                         selects = self.sb.find_elements(f"select[name*='{pattern}' i], select[id*='{pattern}' i]")
 
                         for select_element in selects:
                             if select_element.is_displayed():
-                                # Use SeleniumBase select method
                                 self.sb.select_option_by_text(select_element, value)
                                 await asyncio.sleep(0.3)
                                 break
@@ -596,14 +494,13 @@ class SeleniumAutomation:
         except:
             pass
 
-    async def click_element(self, selector: str) -> bool:
-        """Click an element with anti-detection"""
+    async def click_element(self, selector: str, use_reconnect: bool = True) -> bool:
+        """Click an element using UC Mode uc_click for stealth"""
         try:
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                # Use CDP click for stealth
-                if self.sb.cdp.is_element_present(selector):
-                    self.sb.cdp.click(selector)
-                    return True
+            if self.use_stealth and use_reconnect:
+                # Use UC Mode uc_click with reconnect
+                self.driver.uc_click(selector, reconnect_time=self.reconnect_time)
+                return True
             else:
                 # Standard click
                 self.sb.click(selector)
@@ -614,14 +511,15 @@ class SeleniumAutomation:
     async def type_text(self, selector: str, text: str) -> bool:
         """Type text with human-like behavior"""
         try:
-            if self.use_stealth and hasattr(self.sb, 'cdp'):
-                # CDP typing
-                self.sb.cdp.click(selector)
+            if self.use_stealth:
+                # Use UC click first, then type
+                self.driver.uc_click(selector, reconnect_time=0.5)
                 await asyncio.sleep(0.2)
-                self.sb.cdp.type(selector, text)
+                element = self.sb.find_element(selector)
+                element.clear()
+                element.send_keys(text)
                 return True
             else:
-                # Standard typing
                 element = self.sb.find_element(selector)
                 element.clear()
                 element.send_keys(text)
@@ -648,7 +546,6 @@ class SeleniumAutomation:
         fields = []
 
         try:
-            # Find all input fields
             inputs = self.sb.find_elements("input, textarea, select")
 
             for element in inputs:
@@ -689,14 +586,18 @@ class SeleniumAutomation:
         self.field_mappings[url] = mappings
 
     async def handle_captcha(self) -> bool:
-        """Handle CAPTCHA challenges (basic implementation)"""
+        """Handle CAPTCHA challenges using UC Mode built-in methods"""
         try:
+            if not self.use_stealth:
+                return True
+
             # Check for common CAPTCHA indicators
             captcha_indicators = [
                 "recaptcha",
                 "captcha",
                 "challenge",
-                "verify you're human"
+                "verify you're human",
+                "turnstile"
             ]
 
             page_source = self.sb.get_page_source().lower()
@@ -704,12 +605,30 @@ class SeleniumAutomation:
             for indicator in captcha_indicators:
                 if indicator in page_source:
                     logger.warning(f"CAPTCHA detected: {indicator}")
-                    # Here you could integrate with CAPTCHA solving services
-                    # or use PyAutoGUI for manual solving assistance
-                    return False
+
+                    # Use UC Mode's built-in CAPTCHA handling
+                    try:
+                        logger.info("Attempting to handle CAPTCHA using uc_gui_handle_captcha")
+                        self.driver.uc_gui_handle_captcha()
+                        logger.info("CAPTCHA handling completed")
+                        await asyncio.sleep(2)
+                        return True
+                    except Exception as e:
+                        logger.error(f"UC Mode CAPTCHA handling failed: {e}")
+                        # Fallback: try uc_gui_click_captcha
+                        try:
+                            logger.info("Trying uc_gui_click_captcha as fallback")
+                            self.driver.uc_gui_click_captcha()
+                            logger.info("CAPTCHA click completed")
+                            await asyncio.sleep(2)
+                            return True
+                        except Exception as e2:
+                            logger.error(f"CAPTCHA click failed: {e2}")
+                            return False
 
             return True
-        except:
+        except Exception as e:
+            logger.error(f"Error in handle_captcha: {e}")
             return True
 
     async def close(self):
@@ -718,6 +637,7 @@ class SeleniumAutomation:
             if self.sb_context:
                 self.sb_context.__exit__(None, None, None)
                 self.sb = None
+                self.driver = None
                 self.sb_context = None
         except Exception as e:
             logger.error(f"Error closing browser: {e}")
@@ -735,19 +655,18 @@ class SeleniumAutomation:
         except:
             return {}
 
+
 class FormFieldDetector:
     """Smart form field detection and mapping"""
 
     @staticmethod
     def detect_field_type(element_info: Dict) -> Optional[str]:
         """Detect the type of form field based on attributes"""
-        # Check input type
         input_type = element_info.get('type', '').lower()
         name = element_info.get('name', '').lower()
         id_attr = element_info.get('id', '').lower()
         placeholder = element_info.get('placeholder', '').lower()
 
-        # Combined attributes for detection
         combined = f"{name} {id_attr} {placeholder} {input_type}"
 
         # Detection rules
@@ -783,7 +702,6 @@ class FormFieldDetector:
             field_type = FormFieldDetector.detect_field_type(field)
 
             if field_type and field_type in profile:
-                # Create selector for the field
                 if field.get('id'):
                     selector = f"#{field['id']}"
                 elif field.get('name'):

@@ -428,12 +428,26 @@ Example:
                                        class="w-full px-3 py-2 bg-background text-foreground border border-input rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                             </div>
 
+                            <!-- AI Training Option -->
+                            <div class="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
+                                <input type="checkbox" id="trainAI" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                <label for="trainAI" class="text-sm font-medium text-foreground cursor-pointer">
+                                    Train AI with this recording (analyze field mappings)
+                                </label>
+                            </div>
+
                             <!-- Import Button -->
                             <button id="importBtn" onclick="importChromeRecording()" disabled
                                     class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                 Import Recording
                             </button>
                         </div>
+                    </div>
+
+                    <!-- AI Analysis Results (hidden by default) -->
+                    <div id="aiAnalysisSection" class="bg-card rounded-lg shadow-sm border border-border p-6 mb-6 hidden">
+                        <h2 class="text-xl font-semibold text-card-foreground mb-4">AI Analysis Results</h2>
+                        <div id="aiAnalysisContent"></div>
                     </div>
 
                     <!-- Recordings Library -->
@@ -503,6 +517,31 @@ Example:
                     </label>
                 </div>
 
+                <!-- Speed Controls -->
+                <div class="mb-4 p-3 bg-background rounded-md border border-input">
+                    <h4 class="text-sm font-medium text-foreground mb-3">Replay Speed</h4>
+
+                    <!-- Step Delay -->
+                    <div class="mb-3">
+                        <label for="stepDelay" class="block text-xs text-muted-foreground mb-1">
+                            Delay between steps: <span id="stepDelayValue">1000</span>ms
+                        </label>
+                        <input type="range" id="stepDelay" min="0" max="3000" value="1000" step="100"
+                               class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                               oninput="document.getElementById('stepDelayValue').textContent = this.value">
+                    </div>
+
+                    <!-- Random Variation -->
+                    <div>
+                        <label for="randomVariation" class="block text-xs text-muted-foreground mb-1">
+                            Random variation: ± <span id="randomVariationValue">500</span>ms
+                        </label>
+                        <input type="range" id="randomVariation" min="0" max="1000" value="500" step="50"
+                               class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                               oninput="document.getElementById('randomVariationValue').textContent = this.value">
+                    </div>
+                </div>
+
                 <!-- Progress -->
                 <div id="replayProgress" class="hidden mb-4">
                     <div class="text-sm text-muted-foreground mb-2">Progress: <span id="progressText">0%</span></div>
@@ -515,8 +554,8 @@ Example:
                 <!-- Buttons -->
                 <div class="flex gap-3">
                     <button id="startReplayBtn" onclick="startReplay()"
-                            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                        Start Replay
+                            class="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+                        Replay (Chrome DevTools)
                     </button>
                     <button onclick="closeReplayModal()"
                             class="px-4 py-2 text-foreground border border-input rounded-md hover:bg-accent transition-colors">
@@ -564,6 +603,7 @@ Example:
     <script src="/static/js/system-status.js"></script>
     <script>
         let currentRecordingId = null;
+        let currentAnalysis = null;
         let profiles = [];
         let recordings = [];
         let allRecordings = [];
@@ -724,10 +764,17 @@ Example:
                     const result = await response.json();
                     showAlert(`Recording imported successfully: ${result.recording_name}`, 'success');
 
+                    // Check if AI training is enabled
+                    const trainAI = document.getElementById('trainAI').checked;
+                    if (trainAI) {
+                        await analyzeWithAI(result.recording_id);
+                    }
+
                     // Reset form
                     fileInput.value = '';
                     jsonTextarea.value = '';
                     document.getElementById('recordingName').value = '';
+                    document.getElementById('trainAI').checked = false;
                     document.getElementById('importBtn').disabled = true;
 
                     // Reload recordings
@@ -740,6 +787,183 @@ Example:
                 console.error('Import error:', error);
                 showAlert('Import failed: Invalid JSON file', 'error');
             }
+        }
+
+        // AI Training Functions
+        async function analyzeWithAI(recordingId) {
+            try {
+                currentRecordingId = recordingId;
+                showAlert('Analyzing recording with AI...', 'info');
+
+                const response = await fetch(`/api/ai/analyze-recording/${recordingId}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    currentAnalysis = await response.json();
+                    displayAIAnalysis(currentAnalysis);
+                    showAlert('AI analysis complete!', 'success');
+                } else {
+                    const error = await response.json();
+                    showAlert(`AI analysis failed: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                console.error('AI analysis error:', error);
+                showAlert('AI analysis failed: ' + error.message, 'error');
+            }
+        }
+
+        function displayAIAnalysis(data) {
+            const ai = data.ai_analysis;
+            const section = document.getElementById('aiAnalysisSection');
+            const content = document.getElementById('aiAnalysisContent');
+
+            // Calculate confidence percentage
+            const confidence = (ai.avg_confidence * 100).toFixed(0);
+            const confidenceColor = ai.avg_confidence >= 0.9 ? 'text-green-500' :
+                                    ai.avg_confidence >= 0.7 ? 'text-yellow-500' : 'text-red-500';
+            const confidenceBg = ai.avg_confidence >= 0.9 ? 'bg-green-500' :
+                                 ai.avg_confidence >= 0.7 ? 'bg-yellow-500' : 'bg-red-500';
+
+            // Build HTML
+            let html = `
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Analysis Summary</h3>
+                        <span class="${confidenceBg} text-white px-3 py-1 rounded-full text-sm font-medium">
+                            ${confidence}% Confidence
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-background p-4 rounded-md border border-border">
+                            <div class="text-muted-foreground text-sm">Form Category</div>
+                            <div class="text-lg font-semibold mt-1">${ai.form_category || 'Unknown'}</div>
+                        </div>
+                        <div class="bg-background p-4 rounded-md border border-border">
+                            <div class="text-muted-foreground text-sm">Fields Detected</div>
+                            <div class="text-lg font-semibold mt-1">${ai.field_count || 0}</div>
+                        </div>
+                        <div class="bg-background p-4 rounded-md border border-border">
+                            <div class="text-muted-foreground text-sm">Training Value</div>
+                            <div class="text-lg font-semibold mt-1">${ai.training_value || 'Unknown'}</div>
+                        </div>
+                    </div>
+
+                    <h3 class="font-semibold mb-3">Field Mappings - Review & Confirm</h3>
+                    <div class="space-y-3">
+            `;
+
+            // Add each field
+            ai.fields.forEach((field, index) => {
+                const fieldConf = (field.ai_confidence * 100).toFixed(0);
+                const fieldConfColor = field.ai_confidence >= 0.9 ? 'text-green-500' :
+                                      field.ai_confidence >= 0.7 ? 'text-yellow-500' : 'text-red-500';
+
+                html += `
+                    <div class="border border-border rounded-md p-4 bg-background">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <input type="checkbox" id="confirm-${index}" checked
+                                           class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <label for="confirm-${index}" class="font-medium">
+                                        ${field.field_name || 'Unknown Field'}
+                                    </label>
+                                    <span class="${fieldConfColor} text-sm font-medium">${fieldConf}%</span>
+                                </div>
+                                <div class="text-sm text-muted-foreground mb-2">
+                                    Mapped to: <span class="font-medium text-foreground">${field.ai_profile_mapping}</span>
+                                </div>
+                                <div class="text-xs text-muted-foreground">
+                                    ${field.ai_reasoning || 'No reasoning provided'}
+                                </div>
+                            </div>
+                            <button onclick="correctMapping(${index})"
+                                    class="text-sm text-blue-500 hover:text-blue-600 ml-4 px-3 py-1 border border-blue-500 rounded hover:bg-blue-50">
+                                Correct
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
+                        <button onclick="saveAllConfirmed()"
+                                class="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 py-2 rounded-md">
+                            Save All Correct Mappings
+                        </button>
+                        <button onclick="closeAIAnalysis()"
+                                class="bg-background hover:bg-muted border border-border px-6 py-2 rounded-md">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            section.classList.remove('hidden');
+
+            // Scroll to analysis section
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function correctMapping(fieldIndex) {
+            const newMapping = prompt('Enter correct profile field mapping:');
+            if (newMapping && currentRecordingId) {
+                await confirmMapping(fieldIndex, newMapping, false);
+                // Update the display
+                const field = currentAnalysis.ai_analysis.fields[fieldIndex];
+                field.ai_profile_mapping = newMapping;
+                displayAIAnalysis(currentAnalysis);
+                showAlert('Mapping corrected and saved for training', 'success');
+            }
+        }
+
+        async function confirmMapping(fieldIndex, mapping, wasCorrect) {
+            try {
+                await fetch('/api/ai/confirm-mapping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recording_id: currentRecordingId,
+                        field_index: fieldIndex,
+                        confirmed_mapping: mapping,
+                        was_correct: wasCorrect
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to confirm mapping:', error);
+            }
+        }
+
+        async function saveAllConfirmed() {
+            if (!currentRecordingId || !currentAnalysis) return;
+
+            const fields = currentAnalysis.ai_analysis.fields;
+            let savedCount = 0;
+
+            for (let i = 0; i < fields.length; i++) {
+                const field = fields[i];
+                const checkbox = document.getElementById(`confirm-${i}`);
+
+                if (checkbox && checkbox.checked) {
+                    await confirmMapping(i, field.ai_profile_mapping, true);
+                    savedCount++;
+                }
+            }
+
+            showAlert(`Saved ${savedCount} confirmed mappings to training library!`, 'success');
+            closeAIAnalysis();
+        }
+
+        function closeAIAnalysis() {
+            document.getElementById('aiAnalysisSection').classList.add('hidden');
+            currentRecordingId = null;
+            currentAnalysis = null;
         }
 
         // Search recordings
@@ -793,10 +1017,12 @@ Example:
             currentRecordingId = null;
         }
 
-        // Start replay
+        // Start replay (Chrome DevTools + AI)
         async function startReplay() {
             const profileId = document.getElementById('profileSelect').value;
             const headless = document.getElementById('headlessMode').checked;
+            const stepDelay = parseInt(document.getElementById('stepDelay').value);
+            const randomVariation = parseInt(document.getElementById('randomVariation').value);
 
             if (!profileId) {
                 showAlert('Please select a profile', 'error');
@@ -812,13 +1038,16 @@ Example:
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         profile_id: profileId,
-                        headless: headless
+                        headless: headless,
+                        step_delay: stepDelay,
+                        random_variation: randomVariation
                     })
                 });
 
                 if (response.ok) {
                     const result = await response.json();
-                    monitorReplayProgress(result.task_id);
+                    showAlert('Chrome DevTools Replay started!', 'success');
+                    monitorReplayProgress(result.session_id);
                 } else {
                     const error = await response.json();
                     showAlert(`Replay failed: ${error.detail}`, 'error');
@@ -832,22 +1061,32 @@ Example:
         }
 
         // Monitor replay progress via WebSocket
-        function monitorReplayProgress(taskId) {
+        function monitorReplayProgress(sessionId) {
             const ws = new WebSocket(`ws://localhost:5511/ws`);
 
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
 
-                if (data.task_id === taskId) {
-                    updateProgress(data.progress, data.message);
+                // Support both session_id (new) and task_id (old)
+                if (data.session_id === sessionId || data.task_id === sessionId) {
+                    // Extract progress data
+                    const progressData = data.data || data;
+                    const progress = progressData.progress || 0;
+                    const message = progressData.message || data.message || '';
+                    const status = progressData.status || data.status;
 
-                    if (data.status === 'completed') {
+                    updateProgress(progress, message);
+
+                    if (status === 'completed') {
                         showAlert('Replay completed successfully!', 'success');
+                        document.getElementById('startReplayBtn').disabled = false;
+                        document.getElementById('startCdpReplayBtn').disabled = false;
                         closeReplayModal();
                         ws.close();
-                    } else if (data.status === 'failed') {
-                        showAlert(`Replay failed: ${data.message}`, 'error');
+                    } else if (status === 'failed' || status === 'error') {
+                        showAlert(`Replay failed: ${message}`, 'error');
                         document.getElementById('startReplayBtn').disabled = false;
+                        document.getElementById('startCdpReplayBtn').disabled = false;
                         ws.close();
                     }
                 }
@@ -857,6 +1096,7 @@ Example:
                 console.error('WebSocket error:', error);
                 showAlert('Connection error during replay', 'error');
                 document.getElementById('startReplayBtn').disabled = false;
+                document.getElementById('startCdpReplayBtn').disabled = false;
             };
         }
 

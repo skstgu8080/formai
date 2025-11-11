@@ -185,6 +185,156 @@
                             </div>
                         </div>
 
+                        <!-- AI API Keys -->
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-medium text-card-foreground">AI API Keys</h3>
+                                    <p class="text-sm text-muted-foreground">Configure API keys for AI-powered form filling</p>
+                                </div>
+                                <a href="/docs/ai-providers" target="_blank" class="text-xs text-blue-500 hover:underline">
+                                    📚 Compare Providers
+                                </a>
+                            </div>
+                            <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                                <p class="text-xs text-blue-700 dark:text-blue-300">
+                                    💡 <strong>Tip:</strong> Use Ollama for free, private, offline AI. No API keys needed!
+                                    <a href="https://ollama.com/download" target="_blank" class="underline font-medium">Download Ollama</a>
+                                </p>
+                            </div>
+                            <div id="api-keys-container" class="space-y-4">
+                                <!-- API key forms will be inserted here -->
+                            </div>
+                        </div>
+
+                        <!-- Ollama AI Model -->
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-medium text-card-foreground">Ollama AI Model</h3>
+                                    <p class="text-sm text-muted-foreground">Select AI model for form field analysis</p>
+                                </div>
+                                <span id="ollama-status-badge" class="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+                                    Checking...
+                                </span>
+                            </div>
+
+                            <!-- Current Model Info -->
+                            <div id="current-model-info" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md hidden">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                            Current: <span id="current-model-name">llama3.2</span>
+                                        </p>
+                                        <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                            <span id="current-model-desc">Fast, lightweight (2GB) - Perfect for most forms</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ollama Not Installed Warning -->
+                            <div id="ollama-not-installed" class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md hidden">
+                                <p class="text-sm font-medium text-yellow-900 dark:text-yellow-100 mb-2">
+                                    ⚠️ Ollama is not installed
+                                </p>
+                                <p class="text-xs text-yellow-700 dark:text-yellow-300 mb-3">
+                                    Install Ollama to enable offline AI features. No API keys or internet required!
+                                </p>
+                                <a href="https://ollama.com/download" target="_blank"
+                                   class="inline-flex items-center px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded-md transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Download Ollama
+                                </a>
+                            </div>
+
+                            <!-- Model Selector -->
+                            <div id="model-selector-container" class="space-y-4 hidden">
+                                <div>
+                                    <label class="block text-sm font-medium text-card-foreground mb-2">
+                                        Select AI Model
+                                    </label>
+                                    <select id="ollama-model-select"
+                                            class="w-full px-3 py-2 bg-background border border-gray-300 rounded-md text-sm text-card-foreground focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <option value="llama3.2" data-size="2GB" data-speed="Fast" data-accuracy="85-90%">
+                                            llama3.2 - Recommended (2GB, Fast, 85-90% accuracy)
+                                        </option>
+                                        <option value="qwen2.5-coder" data-size="4.7GB" data-speed="Fast" data-accuracy="92-95%">
+                                            qwen2.5-coder - Technical Forms (4.7GB, Fast, 92-95% accuracy)
+                                        </option>
+                                        <option value="llama3.1:8b" data-size="4.7GB" data-speed="Moderate" data-accuracy="93-96%">
+                                            llama3.1:8b - Maximum Accuracy (4.7GB, Moderate, 93-96% accuracy)
+                                        </option>
+                                        <option value="mistral" data-size="4.1GB" data-speed="Fast" data-accuracy="90-93%">
+                                            mistral - Alternative (4.1GB, Fast, 90-93% accuracy)
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Model Details -->
+                                <div id="model-details" class="p-3 bg-muted/50 rounded-md border border-gray-200">
+                                    <div class="grid grid-cols-3 gap-3 text-xs">
+                                        <div>
+                                            <span class="text-muted-foreground">Size:</span>
+                                            <span id="model-size" class="ml-1 font-medium text-card-foreground">2GB</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-muted-foreground">Speed:</span>
+                                            <span id="model-speed" class="ml-1 font-medium text-card-foreground">Fast</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-muted-foreground">Accuracy:</span>
+                                            <span id="model-accuracy" class="ml-1 font-medium text-card-foreground">85-90%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Model Actions -->
+                                <div class="flex gap-2">
+                                    <button id="download-model-btn"
+                                            class="flex-1 px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground text-sm rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                        </svg>
+                                        Download Model
+                                    </button>
+                                    <button id="switch-model-btn"
+                                            class="flex-1 px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground text-sm rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        Switch Model
+                                    </button>
+                                </div>
+
+                                <!-- Download Progress -->
+                                <div id="download-progress" class="hidden">
+                                    <div class="mb-2 flex justify-between text-xs">
+                                        <span class="text-muted-foreground">Downloading model...</span>
+                                        <span id="download-percentage" class="font-medium text-card-foreground">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="download-progress-bar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                    <p id="download-status" class="text-xs text-muted-foreground mt-1">
+                                        Initializing...
+                                    </p>
+                                </div>
+
+                                <!-- Installed Models -->
+                                <div class="mt-4">
+                                    <p class="text-xs font-medium text-muted-foreground mb-2">Installed Models:</p>
+                                    <div id="installed-models-list" class="space-y-1">
+                                        <!-- Populated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
                         <!-- Notification Settings -->
                         <div class="bg-card border border-gray-200 rounded-lg p-6">
                             <h3 class="text-lg font-medium text-card-foreground mb-4">Notification Settings</h3>
@@ -355,12 +505,20 @@
         class SettingsManager {
             constructor() {
                 this.settings = {};
+                this.apiKeys = {};
+                this.ollamaStatus = null;
+                this.installProgress = null;
+                this.progressInterval = null;
                 this.init();
             }
 
             init() {
                 this.loadSettings();
+                this.loadApiKeys();
+                this.checkOllamaStatus();
                 this.bindEvents();
+                this.checkOllamaModelStatus();
+                this.bindOllamaEvents();
                 this.initializeTheme();
             }
 
@@ -591,10 +749,447 @@
                 }
             }
 
+            async loadApiKeys() {
+                try {
+                    const response = await fetch('/api/api-keys');
+                    if (response.ok) {
+                        this.apiKeys = await response.json();
+                    }
+                } catch (error) {
+                    console.error('Failed to load API keys:', error);
+                }
+                this.renderApiKeys();
+            }
+
+            renderApiKeys() {
+                const container = document.getElementById('api-keys-container');
+                if (!container) return;
+
+                const services = [
+                    { id: 'ollama', name: 'Ollama (Local)', placeholder: 'http://localhost:11434', isUrl: true, description: 'Free local AI - Download from ollama.com' },
+                    { id: 'openai', name: 'OpenAI', placeholder: 'sk-...', description: 'GPT-4, GPT-3.5' },
+                    { id: 'anthropic', name: 'Anthropic (Claude)', placeholder: 'sk-ant-...', description: 'Claude Sonnet/Opus' },
+                    { id: 'google', name: 'Google AI', placeholder: 'AIza...', description: 'Gemini models' },
+                    { id: 'openrouter', name: 'OpenRouter', placeholder: 'sk-or-...', description: 'Multiple models' }
+                ];
+
+                container.innerHTML = services.map(service => {
+                    const keyData = this.apiKeys[service.id] || {};
+                    const configured = keyData.configured || false;
+                    const maskedKey = keyData.masked_key || '';
+
+                    return `
+                        <div class="border border-input rounded-md p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-medium text-card-foreground">${service.name}</h4>
+                                    <p class="text-xs text-muted-foreground">
+                                        ${service.description || ''}
+                                    </p>
+                                    <p class="text-xs ${configured ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}">
+                                        ${configured ? `✓ Configured ${maskedKey ? '(' + maskedKey + ')' : ''}` : 'Not configured'}
+                                    </p>
+                                </div>
+                                <span class="px-2 py-1 rounded-full text-xs ${configured ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}">
+                                    ${configured ? '✓' : '✗'}
+                                </span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <input
+                                    type="${service.isUrl ? 'text' : 'password'}"
+                                    id="${service.id}-api-key"
+                                    placeholder="${service.placeholder}"
+                                    value="${service.id === 'ollama' && !configured ? 'http://localhost:11434' : ''}"
+                                    class="flex-1 px-3 py-2 bg-background border border-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm"
+                                >
+                                <button
+                                    onclick="settingsManager.saveApiKey('${service.id}')"
+                                    class="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-md text-sm transition-colors whitespace-nowrap"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                            ${service.id === 'ollama' ? this.renderOllamaActions() : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderOllamaActions() {
+                // Show installation progress if installing
+                if (this.installProgress && this.installProgress.status === 'installing') {
+                    return `
+                        <div class="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
+                            <div class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
+                                Installing Ollama... ${this.installProgress.percentage}%
+                            </div>
+                            <div class="w-full bg-blue-100 dark:bg-blue-900 rounded-full h-2 mb-1">
+                                <div class="bg-blue-500 h-2 rounded-full transition-all" style="width: ${this.installProgress.percentage}%"></div>
+                            </div>
+                            <div class="text-xs text-muted-foreground">${this.installProgress.message}</div>
+                        </div>
+                    `;
+                }
+
+                // Show install button if Ollama is not installed
+                if (this.ollamaStatus && !this.ollamaStatus.installed) {
+                    return `
+                        <div class="mt-2">
+                            <button
+                                onclick="settingsManager.installOllama()"
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                            >
+                                Auto-Install Ollama (Free Local AI)
+                            </button>
+                            <div class="mt-1 text-xs text-muted-foreground text-center">
+                                Or <a href="https://ollama.com/download" target="_blank" class="text-blue-500 hover:underline">download manually</a>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Show status if installed
+                if (this.ollamaStatus && this.ollamaStatus.installed) {
+                    const statusColor = this.ollamaStatus.running ? 'green' : 'yellow';
+                    const statusText = this.ollamaStatus.running ? 'Running' : 'Installed (not running)';
+                    const modelsText = this.ollamaStatus.models_available && this.ollamaStatus.models_available.length > 0
+                        ? `Models: ${this.ollamaStatus.models_available.join(', ')}`
+                        : 'No models installed - Run: ollama pull llama3.2';
+
+                    return `
+                        <div class="mt-2 text-xs">
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-block w-2 h-2 rounded-full bg-${statusColor}-500"></span>
+                                <span class="text-${statusColor}-600 dark:text-${statusColor}-400 font-medium">${statusText}</span>
+                            </div>
+                            <div class="mt-1 text-muted-foreground">${modelsText}</div>
+                        </div>
+                    `;
+                }
+
+                // Default: show manual download link
+                return `
+                    <div class="mt-2 text-xs text-muted-foreground">
+                        <a href="https://ollama.com/download" target="_blank" class="text-blue-500 hover:underline">Download Ollama</a> •
+                        After install: <code class="bg-muted px-1 rounded">ollama pull llama3.2</code>
+                    </div>
+                `;
+            }
+
+            async saveApiKey(service) {
+                const input = document.getElementById(`${service}-api-key`);
+                const apiKey = input.value.trim();
+
+                if (!apiKey) {
+                    alert('Please enter an API key');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/api-keys', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ service, api_key: apiKey })
+                    });
+
+                    if (response.ok) {
+                        alert(`API key saved for ${service}`);
+                        input.value = '';
+                        await this.loadApiKeys();
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.detail}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to save API key:', error);
+                    alert('Failed to save API key');
+                }
+            }
+
+            async checkOllamaStatus() {
+                try {
+                    const response = await fetch('/api/ollama/status');
+                    if (response.ok) {
+                        this.ollamaStatus = await response.json();
+                        this.renderApiKeys(); // Re-render to show install button if needed
+                    }
+                } catch (error) {
+                    console.error('Failed to check Ollama status:', error);
+                }
+            }
+
+            async installOllama() {
+                try {
+                    const response = await fetch('/api/ollama/install', { method: 'POST' });
+                    if (response.ok) {
+                        // Start polling for progress
+                        this.startProgressPolling();
+                    } else {
+                        const error = await response.json();
+                        alert(`Installation failed: ${error.message || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to start installation:', error);
+                    alert('Failed to start installation');
+                }
+            }
+
+            startProgressPolling() {
+                // Poll every 2 seconds
+                this.progressInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch('/api/ollama/install-progress');
+                        if (response.ok) {
+                            this.installProgress = await response.json();
+                            this.renderApiKeys(); // Re-render to show progress
+
+                            // Stop polling when complete or error
+                            if (this.installProgress.status === 'complete' || this.installProgress.status === 'error') {
+                                clearInterval(this.progressInterval);
+                                this.progressInterval = null;
+
+                                // Refresh status
+                                await this.checkOllamaStatus();
+
+                                if (this.installProgress.status === 'complete') {
+                                    alert('Ollama installed successfully! You can now use local AI.');
+                                } else {
+                                    alert(`Installation failed: ${this.installProgress.message}`);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to get progress:', error);
+                    }
+                }, 2000);
+            }
+
+            async checkOllamaModelStatus() {
+                try {
+                    const response = await fetch('/api/ollama/status');
+                    if (response.ok) {
+                        const status = await response.json();
+                        this.updateOllamaUI(status);
+                    }
+                } catch (error) {
+                    console.error('Failed to check Ollama status:', error);
+                    this.updateOllamaUI({ installed: false, running: false });
+                }
+            }
+
+            updateOllamaUI(status) {
+                const statusBadge = document.getElementById('ollama-status-badge');
+                const currentModelInfo = document.getElementById('current-model-info');
+                const notInstalledWarning = document.getElementById('ollama-not-installed');
+                const modelSelectorContainer = document.getElementById('model-selector-container');
+
+                if (!status.installed) {
+                    // Ollama not installed
+                    if (statusBadge) statusBadge.textContent = 'Not Installed';
+                    if (statusBadge) statusBadge.className = 'text-xs px-2 py-1 rounded-full bg-red-200 text-red-700';
+                    if (notInstalledWarning) notInstalledWarning.classList.remove('hidden');
+                    if (currentModelInfo) currentModelInfo.classList.add('hidden');
+                    if (modelSelectorContainer) modelSelectorContainer.classList.add('hidden');
+                } else if (!status.running) {
+                    // Ollama installed but not running
+                    if (statusBadge) statusBadge.textContent = 'Not Running';
+                    if (statusBadge) statusBadge.className = 'text-xs px-2 py-1 rounded-full bg-yellow-200 text-yellow-700';
+                    if (notInstalledWarning) notInstalledWarning.classList.add('hidden');
+                    if (currentModelInfo) currentModelInfo.classList.add('hidden');
+                    if (modelSelectorContainer) modelSelectorContainer.classList.add('hidden');
+                } else {
+                    // Ollama running - show model selector
+                    if (statusBadge) statusBadge.textContent = 'Running';
+                    if (statusBadge) statusBadge.className = 'text-xs px-2 py-1 rounded-full bg-green-200 text-green-700';
+                    if (notInstalledWarning) notInstalledWarning.classList.add('hidden');
+                    if (modelSelectorContainer) modelSelectorContainer.classList.remove('hidden');
+
+                    // Update current model info
+                    if (status.current_model && currentModelInfo) {
+                        currentModelInfo.classList.remove('hidden');
+                        const modelNameEl = document.getElementById('current-model-name');
+                        const modelDescEl = document.getElementById('current-model-desc');
+                        if (modelNameEl) modelNameEl.textContent = status.current_model;
+                        if (modelDescEl) {
+                            // Update description based on model
+                            const descriptions = {
+                                'llama3.2': 'Fast, lightweight (2GB) - Perfect for most forms',
+                                'qwen2.5-coder': 'Technical forms specialist (4.7GB)',
+                                'llama3.1:8b': 'Maximum accuracy (4.7GB)',
+                                'mistral': 'Alternative choice (4.1GB)'
+                            };
+                            modelDescEl.textContent = descriptions[status.current_model] || '';
+                        }
+                    }
+
+                    // Update installed models list
+                    if (status.models_available && status.models_available.length > 0) {
+                        this.updateInstalledModelsList(status.models_available);
+                    }
+                }
+            }
+
+            updateInstalledModelsList(models) {
+                const listContainer = document.getElementById('installed-models-list');
+                if (!listContainer) return;
+
+                listContainer.innerHTML = models.map(model => `
+                    <div class="text-xs text-muted-foreground flex items-center">
+                        <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        ${model}
+                    </div>
+                `).join('');
+            }
+
+            async downloadOllamaModel() {
+                const modelSelect = document.getElementById('ollama-model-select');
+                const downloadBtn = document.getElementById('download-model-btn');
+                const progressContainer = document.getElementById('download-progress');
+                const progressBar = document.getElementById('download-progress-bar');
+                const progressPercentage = document.getElementById('download-percentage');
+                const progressStatus = document.getElementById('download-status');
+
+                if (!modelSelect) return;
+
+                const modelName = modelSelect.value;
+
+                // Show progress UI
+                if (downloadBtn) downloadBtn.disabled = true;
+                if (progressContainer) progressContainer.classList.remove('hidden');
+
+                try {
+                    const response = await fetch('/api/ollama/download-model', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model_name: modelName })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to start download');
+                    }
+
+                    // Poll for progress
+                    this.pollDownloadProgress(modelName);
+                } catch (error) {
+                    console.error('Failed to download model:', error);
+                    alert('Failed to start model download');
+                    if (downloadBtn) downloadBtn.disabled = false;
+                    if (progressContainer) progressContainer.classList.add('hidden');
+                }
+            }
+
+            async pollDownloadProgress(modelName) {
+                const progressBar = document.getElementById('download-progress-bar');
+                const progressPercentage = document.getElementById('download-percentage');
+                const progressStatus = document.getElementById('download-status');
+                const downloadBtn = document.getElementById('download-model-btn');
+                const progressContainer = document.getElementById('download-progress');
+
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch(`/api/ollama/download-progress?model=${modelName}`);
+                        if (response.ok) {
+                            const progress = await response.json();
+
+                            // Update progress UI
+                            if (progressBar) progressBar.style.width = `${progress.percentage}%`;
+                            if (progressPercentage) progressPercentage.textContent = `${progress.percentage}%`;
+                            if (progressStatus) progressStatus.textContent = progress.status;
+
+                            // Check if complete
+                            if (progress.percentage >= 100 || progress.status.includes('complete')) {
+                                clearInterval(pollInterval);
+                                if (downloadBtn) downloadBtn.disabled = false;
+                                if (progressContainer) {
+                                    setTimeout(() => {
+                                        progressContainer.classList.add('hidden');
+                                    }, 2000);
+                                }
+                                // Refresh status
+                                await this.checkOllamaModelStatus();
+                                alert(`Model ${modelName} downloaded successfully!`);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to get progress:', error);
+                        clearInterval(pollInterval);
+                        if (downloadBtn) downloadBtn.disabled = false;
+                    }
+                }, 2000); // Poll every 2 seconds
+            }
+
+            async switchOllamaModel() {
+                const modelSelect = document.getElementById('ollama-model-select');
+                const switchBtn = document.getElementById('switch-model-btn');
+
+                if (!modelSelect) return;
+
+                const modelName = modelSelect.value;
+
+                if (switchBtn) switchBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/api/ollama/set-model', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model_name: modelName })
+                    });
+
+                    if (response.ok) {
+                        alert(`Switched to model: ${modelName}`);
+                        await this.checkOllamaModelStatus();
+                    } else {
+                        const error = await response.json();
+                        alert(`Failed to switch model: ${error.detail || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to switch model:', error);
+                    alert('Failed to switch model');
+                } finally {
+                    if (switchBtn) switchBtn.disabled = false;
+                }
+            }
+
+            updateModelDetails() {
+                const modelSelect = document.getElementById('ollama-model-select');
+                const modelSize = document.getElementById('model-size');
+                const modelSpeed = document.getElementById('model-speed');
+                const modelAccuracy = document.getElementById('model-accuracy');
+
+                if (!modelSelect) return;
+
+                const selectedOption = modelSelect.options[modelSelect.selectedIndex];
+                if (modelSize) modelSize.textContent = selectedOption.dataset.size || '';
+                if (modelSpeed) modelSpeed.textContent = selectedOption.dataset.speed || '';
+                if (modelAccuracy) modelAccuracy.textContent = selectedOption.dataset.accuracy || '';
+            }
+
+            bindOllamaEvents() {
+                const modelSelect = document.getElementById('ollama-model-select');
+                const downloadBtn = document.getElementById('download-model-btn');
+                const switchBtn = document.getElementById('switch-model-btn');
+
+                if (modelSelect) {
+                    modelSelect.addEventListener('change', () => this.updateModelDetails());
+                }
+
+                if (downloadBtn) {
+                    downloadBtn.addEventListener('click', () => this.downloadOllamaModel());
+                }
+
+                if (switchBtn) {
+                    switchBtn.addEventListener('click', () => this.switchOllamaModel());
+                }
+            }
+
+
         }
 
+        let settingsManager;
         document.addEventListener('DOMContentLoaded', () => {
-            new SettingsManager();
+            settingsManager = new SettingsManager();
         });
     </script>
     <script src="/static/js/theme.js"></script>

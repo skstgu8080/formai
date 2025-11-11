@@ -4,6 +4,17 @@ FormAI Server - FastAPI with SeleniumBase automation
 """
 import os
 import sys
+import ctypes
+
+# ============================================
+# Admin Privilege Check (Windows)
+# ============================================
+def is_admin():
+    """Check if running with administrator privileges"""
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
 # Fix for PyInstaller --noconsole (stdout/stderr are None)
 if sys.stdout is None:
@@ -36,11 +47,11 @@ from datetime import datetime
 import uuid
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks, UploadFile
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks, UploadFile, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import uvicorn
 
 # PyInstaller path utilities (for bundled executable support)
@@ -57,6 +68,7 @@ from tools.profile_replay_engine import ProfileReplayEngine
 from tools.enhanced_field_mapper import EnhancedFieldMapper
 from tools.chrome_recorder_parser import ChromeRecorderParser
 from tools.live_recorder import LiveRecorder
+from tools.ai_recording_analyzer import AIRecordingAnalyzer
 
 # Import browser-use automation (optional)
 try:
@@ -70,6 +82,9 @@ except ImportError:
 from client_callback import ClientCallback
 from dotenv import load_dotenv
 
+# Import Ollama installer
+from tools.ollama_installer import OllamaInstaller, get_installer
+
 # Load environment variables
 load_dotenv()
 
@@ -78,11 +93,23 @@ profiles: Dict[str, dict] = {}
 active_sessions: Dict[str, any] = {}
 websocket_connections: List[WebSocket] = []
 
+# Ollama installation state
+ollama_installation_progress = {
+    "status": "idle",  # idle, installing, complete, error
+    "percentage": 0,
+    "message": "",
+    "result": None
+}
+
+# Model download progress tracking
+model_download_progress = {}
+
 # Initialize recording components
 recording_manager = RecordingManager()
 field_mapper = EnhancedFieldMapper()
 chrome_parser = ChromeRecorderParser()
 live_recorder = LiveRecorder()
+ai_analyzer = AIRecordingAnalyzer()
 
 # Initialize callback client (hardcoded admin server URL, runs hidden)
 admin_callback = ClientCallback(
@@ -94,8 +121,7 @@ admin_callback = ClientCallback(
 # Pydantic models
 class Profile(BaseModel):
     # Allow extra fields from the frontend form
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
     # Core fields
     id: Optional[str] = None
@@ -183,6 +209,10 @@ class RecordingReplayRequest(BaseModel):
     headless: Optional[bool] = False
     session_name: Optional[str] = None
     preview: Optional[bool] = True  # Default to preview mode (use recorded values)
+    step_delay: Optional[int] = 1000  # Delay between steps in milliseconds
+    random_variation: Optional[int] = 500  # Random variation in delay
+    auto_close: Optional[bool] = True  # Auto-close browser after replay (default: True)
+    close_delay: Optional[int] = 2000  # Delay before closing browser in milliseconds
 
 class TemplateReplayRequest(BaseModel):
     profile_id: str
@@ -367,6 +397,31 @@ async def lifespan(app: FastAPI):
     for dir_name in ['profiles', 'field_mappings', 'recordings']:
         Path(dir_name).mkdir(exist_ok=True)
 
+    # Check Ollama status (informational only, no auto-install)
+    async def check_ollama_status():
+        """Check if Ollama is available for local AI"""
+        try:
+            installer = get_installer()
+            status = installer.check_installation()
+
+            if status["installed"] and status["running"]:
+                models = status.get("models_available", [])
+                if models:
+                    print(f"{Fore.GREEN}[Ollama] Local AI ready - Models: {', '.join(models)}{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.YELLOW}[Ollama] Ollama running but no models installed{Style.RESET_ALL}")
+                    print(f"{Fore.YELLOW}[Ollama] Run: ollama pull llama3.2{Style.RESET_ALL}")
+            elif status["installed"]:
+                print(f"{Fore.YELLOW}[Ollama] Ollama installed but not running{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.CYAN}[Ollama] Local AI not installed - Download from Settings page or ollama.com{Style.RESET_ALL}")
+
+        except Exception:
+            pass  # Silent fail - not critical
+
+    # Check Ollama in background (don't block server startup)
+    asyncio.create_task(check_ollama_status())
+
     print(f"Server ready at http://localhost:5511")
 
     # Start callback system
@@ -417,11 +472,6 @@ async def automation_page():
 async def recorder_page():
     """Serve the recorder page"""
     return FileResponse(str(BASE_PATH / "web" / "recorder.html"))
-
-@app.get("/templates")
-async def templates_page():
-    """Serve the templates page"""
-    return FileResponse(str(BASE_PATH / "web" / "templates.html"))
 
 @app.get("/settings")
 async def settings_page():
@@ -524,6 +574,65 @@ async def start_automation(request: AutomationRequest, background_tasks: Backgro
         "profile": profile['name']
     })
 
+@app.post("/api/automation/start-ai")
+async def start_ai_automation(request: AutomationRequest):
+    """Start AI-powered form filling using Playwright MCP (no recording needed)"""
+    try:
+        # Load profile
+        if request.profile_id not in profiles:
+            raise HTTPException(status_code=404, detail="Profile not found")
+
+        profile = profiles[request.profile_id]
+
+        # Import AI form filler and MCP controller
+        from tools.ai_form_filler import get_ai_form_filler
+        from tools.mcp_controller import get_mcp_controller
+
+        ai_filler = get_ai_form_filler()
+        mcp_controller = get_mcp_controller()
+
+        # Normalize profile data
+        if 'data' in profile:
+            profile_data = profile['data']
+        else:
+            profile_data = profile
+
+        # Fill form intelligently using AI
+        result = await ai_filler.fill_form_intelligently(
+            url=request.url,
+            profile=profile_data,
+            mcp_controller=mcp_controller
+        )
+
+        # Send progress updates via WebSocket
+        await websocket_manager.send_json({
+            "type": "ai_automation_complete",
+            "data": {
+                "status": result.get("status"),
+                "url": result.get("url"),
+                "fields_filled": result.get("fields_filled", 0),
+                "detected_fields": result.get("detected_fields", 0),
+                "mapped_fields": result.get("mapped_fields", 0)
+            }
+        })
+
+        return JSONResponse(content={
+            "success": result.get("status") in ["success", "partial"],
+            "status": result.get("status"),
+            "message": f"AI filled {result.get('fields_filled', 0)} fields",
+            "result": result
+        })
+
+    except Exception as e:
+        logger.error(f"AI automation error: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": str(e)
+            }
+        )
+
 @app.get("/api/field-mappings")
 async def get_field_mappings():
     """Get all saved field mappings"""
@@ -562,6 +671,21 @@ async def save_field_mapping(mapping: FieldMapping):
 async def import_chrome_recording(request: ChromeRecordingImport):
     """Import a Chrome DevTools Recorder JSON"""
     try:
+        # Parse the Chrome recording to get the name and URL
+        from tools.chrome_recorder_parser import ChromeRecorderParser
+        parser = ChromeRecorderParser()
+        parsed_data = parser.parse_chrome_recording_data(request.chrome_data)
+        recording_name = request.recording_name or parsed_data.get("recording_name", "Unnamed")
+        recording_url = parsed_data.get("url", "")
+
+        # Check for duplicate before importing
+        duplicate = recording_manager.find_duplicate(recording_name, recording_url)
+        if duplicate:
+            raise HTTPException(
+                status_code=409,  # 409 Conflict
+                detail=f"Recording '{recording_name}' for URL '{recording_url}' already exists (ID: {duplicate['recording_id']}). Please use a different name or delete the existing recording first."
+            )
+
         recording = recording_manager.import_chrome_recording_data(
             chrome_data=request.chrome_data,
             recording_name=request.recording_name
@@ -621,8 +745,8 @@ async def delete_recording(recording_id: str):
     return JSONResponse(content={"message": "Recording deleted"})
 
 @app.post("/api/recordings/{recording_id}/replay")
-async def replay_recording(recording_id: str, request: RecordingReplayRequest, background_tasks: BackgroundTasks):
-    """Replay a recording with profile data"""
+async def replay_recording(recording_id: str, request: RecordingReplayRequest):
+    """Replay a recording using Chrome DevTools Protocol (Playwright) with AI value replacement"""
     if request.profile_id not in profiles:
         raise HTTPException(status_code=404, detail="Profile not found")
 
@@ -633,11 +757,45 @@ async def replay_recording(recording_id: str, request: RecordingReplayRequest, b
     profile = profiles[request.profile_id]
     session_id = str(uuid.uuid4())
 
-    # Create replay engine with event loop for async progress callbacks
-    event_loop = asyncio.get_event_loop()
-    replay_engine = ProfileReplayEngine(use_stealth=True, headless=request.headless, event_loop=event_loop)
+    # Get OpenRouter API key from api_keys directory
+    import os
+    import base64
+    from pathlib import Path
+
+    api_key = None
+
+    # First try to load from api_keys/openrouter.json
+    openrouter_key_file = Path("api_keys/openrouter.json")
+    if openrouter_key_file.exists():
+        try:
+            with open(openrouter_key_file, 'r', encoding='utf-8') as f:
+                key_data = json.load(f)
+                encrypted_key = key_data.get("encrypted_key", "")
+                if encrypted_key:
+                    # Decode base64 and remove salt prefix
+                    decoded = base64.b64decode(encrypted_key).decode()
+                    # Remove "formai_local_salt" prefix
+                    api_key = decoded.replace("formai_local_salt", "")
+        except Exception as e:
+            logger.warning(f"Failed to load OpenRouter key from api_keys: {e}")
+
+    # Fallback to environment variable
+    if not api_key:
+        api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    if not api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="OpenRouter API key not configured. Please add it in Settings or .env file"
+        )
+
+    # Import Puppeteer Replay modules (EXACT Chrome DevTools replay)
+    from tools.puppeteer_replay_wrapper import PuppeteerReplayWrapper
+    from tools.ai_value_replacer import AIValueReplacer
 
     # Set up progress callback
+    replay_engine = PuppeteerReplayWrapper()
+
     async def progress_callback(update):
         await broadcast_message({
             "type": "replay_progress",
@@ -648,21 +806,85 @@ async def replay_recording(recording_id: str, request: RecordingReplayRequest, b
     replay_engine.set_progress_callback(progress_callback)
     active_sessions[session_id] = replay_engine
 
-    # Run replay in background
-    background_tasks.add_task(
-        run_recording_replay,
-        session_id,
-        recording_id,
-        profile,
-        request.session_name,
-        request.preview
-    )
+    # Run Puppeteer Replay in background (EXACT Chrome behavior)
+    async def run_puppeteer_replay():
+        try:
+            # Step 1: AI maps profile values
+            await broadcast_message({
+                "type": "replay_progress",
+                "session_id": session_id,
+                "data": {
+                    "status": "ai_mapping",
+                    "message": "AI is mapping profile data to form fields...",
+                    "progress": 5
+                }
+            })
+
+            replacer = AIValueReplacer(api_key)
+            modified_recording = replacer.replace_recording_values(recording, profile)
+
+            # Extract profile values as selector mappings
+            profile_values = {}
+            for step in modified_recording.get('steps', []):
+                if step.get('type') == 'change' and step.get('selectors'):
+                    selectors = step.get('selectors', [[]])
+                    if selectors and selectors[0]:
+                        selector = selectors[0][0]
+                        value = step.get('value', '')
+                        if value:
+                            profile_values[selector] = value
+
+            # Step 2: Replay with Puppeteer (EXACT Chrome behavior)
+            await broadcast_message({
+                "type": "replay_progress",
+                "session_id": session_id,
+                "data": {
+                    "status": "starting",
+                    "message": "Starting Puppeteer Replay (EXACT Chrome DevTools)...",
+                    "progress": 10
+                }
+            })
+
+            result = await replay_engine.replay_recording(
+                recording=recording,  # Original recording
+                profile_values=profile_values,  # AI-mapped values
+                headless=request.headless,
+                step_delay=request.step_delay,
+                random_variation=request.random_variation,
+                auto_close=request.auto_close,
+                close_delay=request.close_delay
+            )
+
+            # Send completion message
+            await broadcast_message({
+                "type": "replay_complete",
+                "session_id": session_id,
+                "data": result
+            })
+
+        except Exception as e:
+            logger.error(f"Puppeteer Replay failed: {e}", exc_info=True)
+            await broadcast_message({
+                "type": "replay_error",
+                "session_id": session_id,
+                "data": {
+                    "error": str(e),
+                    "message": f"Replay failed: {str(e)}"
+                }
+            })
+        finally:
+            if session_id in active_sessions:
+                del active_sessions[session_id]
+
+    # Start replay in background
+    asyncio.create_task(run_puppeteer_replay())
 
     return JSONResponse(content={
         "session_id": session_id,
-        "message": "Recording replay started",
+        "message": "Chrome DevTools Replay started (EXACT Chrome + AI)",
         "recording_name": recording.get("recording_name") or recording.get("title", "Unknown"),
-        "profile_name": profile.get("profileName", "Unknown")
+        "profile_name": profile.get("profileName", "Unknown"),
+        "mode": "chrome_devtools"
     })
 
 @app.get("/api/recordings/stats")
@@ -771,6 +993,216 @@ async def analyze_recording(recording_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# AI-Powered Recording Analysis Endpoints
+
+@app.post("/api/ai/analyze-recording/{recording_id}")
+async def ai_analyze_recording(recording_id: str, profile_id: Optional[str] = None):
+    """
+    Analyze a recording with AI to automatically identify field types and suggest mappings
+    """
+    recording = recording_manager.get_recording(recording_id)
+    if not recording:
+        raise HTTPException(status_code=404, detail="Recording not found")
+
+    try:
+        # Get profile if provided
+        profile = None
+        if profile_id and profile_id in profiles:
+            profile = profiles[profile_id]
+
+        # Run AI analysis
+        analyzed_recording = await ai_analyzer.analyze_recording(recording, profile)
+
+        # Save the enhanced recording with AI analysis
+        recording_manager.save_recording(analyzed_recording)
+
+        await broadcast_message({
+            "type": "recording_ai_analyzed",
+            "data": {
+                "recording_id": recording_id,
+                "analysis": analyzed_recording.get('ai_analysis', {})
+            }
+        })
+
+        return JSONResponse(content={
+            "success": True,
+            "recording_id": recording_id,
+            "ai_analysis": analyzed_recording.get('ai_analysis', {}),
+            "message": "AI analysis complete"
+        })
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": str(e),
+                "message": "AI analysis failed"
+            }
+        )
+
+@app.post("/api/ai/confirm-mapping")
+async def confirm_ai_mapping(request: Request):
+    """
+    User confirms or corrects AI field mappings
+    This becomes training data for future improvements
+    """
+    try:
+        data = await request.json()
+        recording_id = data.get('recording_id')
+        field_index = data.get('field_index')
+        confirmed_mapping = data.get('confirmed_mapping')
+        was_correct = data.get('was_correct', True)
+
+        if not all([recording_id, field_index is not None, confirmed_mapping]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+
+        recording = recording_manager.get_recording(recording_id)
+        if not recording:
+            raise HTTPException(status_code=404, detail="Recording not found")
+
+        # Update the AI analysis with user confirmation
+        ai_analysis = recording.get('ai_analysis', {})
+        fields = ai_analysis.get('fields', [])
+
+        if field_index >= len(fields):
+            raise HTTPException(status_code=400, detail="Invalid field index")
+
+        # Mark field as user-confirmed
+        fields[field_index]['user_confirmed'] = True
+        fields[field_index]['confirmed_mapping'] = confirmed_mapping
+        fields[field_index]['ai_was_correct'] = was_correct
+
+        # If user corrected, this is high-value training data
+        if not was_correct:
+            fields[field_index]['training_value'] = 'high'
+            fields[field_index]['correction_reason'] = data.get('correction_reason', '')
+
+        # Recalculate overall confidence
+        confirmed_fields = [f for f in fields if f.get('user_confirmed')]
+        if confirmed_fields:
+            ai_analysis['user_confirmed_count'] = len(confirmed_fields)
+            ai_analysis['user_corrections'] = len([f for f in confirmed_fields if not f.get('ai_was_correct')])
+
+        # Save updated recording
+        recording['ai_analysis'] = ai_analysis
+        recording_manager.save_recording(recording)
+
+        return JSONResponse(content={
+            "success": True,
+            "message": "Mapping confirmed and saved",
+            "training_value": fields[field_index].get('training_value', 'medium')
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/ai/recording-library")
+async def get_ai_recording_library(
+    category: Optional[str] = None,
+    min_confidence: Optional[float] = None,
+    training_value: Optional[str] = None
+):
+    """
+    Get all AI-analyzed recordings (the training library)
+    Optionally filter by category, confidence, or training value
+    """
+    try:
+        all_recordings = recording_manager.list_recordings()
+
+        # Filter to only AI-analyzed recordings
+        ai_recordings = [
+            r for r in all_recordings
+            if r.get('ai_analysis', {}).get('status') == 'analyzed'
+        ]
+
+        # Apply filters
+        if category:
+            ai_recordings = [
+                r for r in ai_recordings
+                if r.get('ai_analysis', {}).get('form_category') == category
+            ]
+
+        if min_confidence is not None:
+            ai_recordings = [
+                r for r in ai_recordings
+                if r.get('ai_analysis', {}).get('avg_confidence', 0) >= min_confidence
+            ]
+
+        if training_value:
+            ai_recordings = [
+                r for r in ai_recordings
+                if r.get('ai_analysis', {}).get('training_value') == training_value
+            ]
+
+        # Calculate library stats
+        stats = {
+            "total_analyzed_recordings": len(ai_recordings),
+            "categories": {},
+            "avg_confidence": 0,
+            "high_value_recordings": 0
+        }
+
+        if ai_recordings:
+            # Category breakdown
+            for rec in ai_recordings:
+                cat = rec.get('ai_analysis', {}).get('form_category', 'unknown')
+                stats['categories'][cat] = stats['categories'].get(cat, 0) + 1
+
+            # Average confidence
+            confidences = [r.get('ai_analysis', {}).get('avg_confidence', 0) for r in ai_recordings]
+            stats['avg_confidence'] = round(sum(confidences) / len(confidences), 2)
+
+            # High value count
+            stats['high_value_recordings'] = len([
+                r for r in ai_recordings
+                if r.get('ai_analysis', {}).get('training_value') == 'high'
+            ])
+
+        return JSONResponse(content={
+            "recordings": ai_recordings,
+            "stats": stats
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/ai/training-examples")
+async def get_training_examples(limit: int = 5):
+    """
+    Get few-shot learning examples from the recording library
+    Used to improve future AI analyses
+    """
+    try:
+        all_recordings = recording_manager.list_recordings()
+
+        # Get high-value, high-confidence recordings
+        ai_recordings = [
+            r for r in all_recordings
+            if r.get('ai_analysis', {}).get('status') == 'analyzed'
+            and r.get('ai_analysis', {}).get('training_value') == 'high'
+            and r.get('ai_analysis', {}).get('avg_confidence', 0) > 0.8
+        ]
+
+        # Sort by confidence and limit
+        ai_recordings.sort(
+            key=lambda r: r.get('ai_analysis', {}).get('avg_confidence', 0),
+            reverse=True
+        )
+        ai_recordings = ai_recordings[:limit]
+
+        # Generate few-shot prompt
+        few_shot_prompt = ai_analyzer.generate_few_shot_examples(ai_recordings, limit=limit)
+
+        return JSONResponse(content={
+            "examples": ai_recordings,
+            "few_shot_prompt": few_shot_prompt,
+            "count": len(ai_recordings)
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Live Recording Endpoints
 
 @app.post("/api/recording/live/start")
@@ -852,12 +1284,299 @@ async def get_api_keys():
                     service_name = file.stem
                     api_keys[service_name] = {
                         "configured": bool(key_data.get("api_key") or key_data.get("key")),
-                        "service": service_name
+                        "service": service_name,
+                        "masked_key": key_data.get("api_key", "")[:8] + "..." if key_data.get("api_key") else ""
                     }
             except:
                 pass
 
     return JSONResponse(content=api_keys)
+
+@app.post("/api/api-keys")
+async def save_api_key(request: Request):
+    """Save API key or configuration for a service"""
+    try:
+        data = await request.json()
+        service = data.get("service")
+        api_key = data.get("api_key")
+
+        if not service or not api_key:
+            raise HTTPException(status_code=400, detail="Service and API key are required")
+
+        # Create api_keys directory if it doesn't exist
+        api_keys_dir = Path("api_keys")
+        api_keys_dir.mkdir(exist_ok=True)
+
+        # Save API key or URL (for Ollama)
+        key_file = api_keys_dir / f"{service}.json"
+
+        # For Ollama, store as base_url instead of api_key
+        if service == 'ollama':
+            key_data = {
+                "service": service,
+                "api_key": api_key,  # Store URL in api_key field for consistency
+                "base_url": api_key,
+                "updated_at": datetime.now().isoformat()
+            }
+        else:
+            key_data = {
+                "service": service,
+                "api_key": api_key,
+                "updated_at": datetime.now().isoformat()
+            }
+
+        with open(key_file, 'w', encoding='utf-8') as f:
+            json.dump(key_data, f, indent=2)
+
+        logger.info(f"API key saved for service: {service}")
+
+        return JSONResponse(content={
+            "success": True,
+            "message": f"{'Configuration' if service == 'ollama' else 'API key'} saved for {service}",
+            "service": service,
+            "configured": True
+        })
+
+    except Exception as e:
+        logger.error(f"Error saving API key: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/ollama/status")
+async def get_ollama_status():
+    """Check Ollama installation and running status"""
+    try:
+        installer = get_installer()
+        status = installer.check_installation()
+
+        # Add current model from .env
+        current_model = os.getenv("OLLAMA_MODEL", "llama3.2")
+        status["current_model"] = current_model
+
+        return JSONResponse(content=status)
+    except Exception as e:
+        logger.error(f"Error checking Ollama status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/ollama/install")
+async def install_ollama(background_tasks: BackgroundTasks):
+    """Trigger Ollama installation in background"""
+    global ollama_installation_progress
+
+    # Check if already installing
+    if ollama_installation_progress["status"] == "installing":
+        return JSONResponse(content={
+            "success": False,
+            "message": "Installation already in progress"
+        })
+
+    # Reset progress
+    ollama_installation_progress = {
+
+        "status": "installing",
+        "percentage": 0,
+        "message": "Starting installation...",
+        "result": None
+    }
+
+    # Start installation in background
+    async def run_installation():
+        global ollama_installation_progress
+
+        def progress_callback(status: str, percentage: int, message: str):
+            ollama_installation_progress["status"] = status
+            ollama_installation_progress["percentage"] = percentage
+            ollama_installation_progress["message"] = message
+
+        try:
+            installer = get_installer(progress_callback)
+            result = installer.install_complete()
+
+            ollama_installation_progress["result"] = result
+            if result["success"]:
+                ollama_installation_progress["status"] = "complete"
+                ollama_installation_progress["percentage"] = 100
+                ollama_installation_progress["message"] = result["message"]
+            else:
+                ollama_installation_progress["status"] = "error"
+                ollama_installation_progress["message"] = result["message"]
+
+        except Exception as e:
+            logger.error(f"Installation error: {e}", exc_info=True)
+            ollama_installation_progress["status"] = "error"
+            ollama_installation_progress["message"] = str(e)
+
+    background_tasks.add_task(run_installation)
+
+    return JSONResponse(content={
+        "success": True,
+        "message": "Installation started in background"
+    })
+
+@app.get("/api/ollama/install-progress")
+async def get_install_progress():
+    """Get current installation progress"""
+    global ollama_installation_progress
+    return JSONResponse(content=ollama_installation_progress)
+
+@app.post("/api/ollama/download-model")
+async def download_model(request: Request, background_tasks: BackgroundTasks):
+    """Download a specific Ollama model"""
+    global model_download_progress
+
+    try:
+        data = await request.json()
+        model_name = data.get("model_name")
+
+        if not model_name:
+            raise HTTPException(status_code=400, detail="model_name is required")
+
+        # Check if already downloading
+        if model_name in model_download_progress and model_download_progress[model_name]["status"] == "downloading":
+            return JSONResponse(content={
+                "success": False,
+                "message": "Model download already in progress"
+            })
+
+        # Initialize progress tracking
+        model_download_progress[model_name] = {
+            "status": "downloading",
+            "percentage": 0,
+            "message": "Starting download..."
+        }
+
+        # Start download in background
+        async def run_download():
+            global model_download_progress
+
+            try:
+                # Run ollama pull command
+                process = subprocess.Popen(
+                    ['ollama', 'pull', model_name],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1
+                )
+
+                # Monitor progress
+                for line in process.stdout:
+                    line = line.strip()
+                    if line:
+                        # Parse progress from ollama output
+                        if 'pulling' in line.lower():
+                            model_download_progress[model_name]["message"] = line
+                        elif '%' in line:
+                            # Try to extract percentage
+                            try:
+                                percent_str = line.split('%')[0].split()[-1]
+                                percentage = int(float(percent_str))
+                                model_download_progress[model_name]["percentage"] = percentage
+                                model_download_progress[model_name]["message"] = line
+                            except:
+                                model_download_progress[model_name]["message"] = line
+
+                process.wait()
+
+                if process.returncode == 0:
+                    model_download_progress[model_name]["status"] = "complete"
+                    model_download_progress[model_name]["percentage"] = 100
+                    model_download_progress[model_name]["message"] = "Download complete"
+                else:
+                    model_download_progress[model_name]["status"] = "error"
+                    model_download_progress[model_name]["message"] = "Download failed"
+
+            except Exception as e:
+                logger.error(f"Model download error: {e}", exc_info=True)
+                model_download_progress[model_name]["status"] = "error"
+                model_download_progress[model_name]["message"] = str(e)
+
+        background_tasks.add_task(run_download)
+
+        return JSONResponse(content={
+            "success": True,
+            "message": f"Started downloading {model_name}"
+        })
+
+    except Exception as e:
+        logger.error(f"Error starting model download: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/ollama/download-progress")
+async def get_download_progress(model: str):
+    """Get download progress for a specific model"""
+    global model_download_progress
+
+    if model not in model_download_progress:
+        return JSONResponse(content={
+            "status": "not_started",
+            "percentage": 0,
+            "message": "Download not started"
+        })
+
+    return JSONResponse(content=model_download_progress[model])
+
+@app.post("/api/ollama/set-model")
+async def set_model(request: Request):
+    """Set the active Ollama model in .env"""
+    try:
+        data = await request.json()
+        model_name = data.get("model_name")
+
+        if not model_name:
+            raise HTTPException(status_code=400, detail="model_name is required")
+
+        # Check if model is installed
+        installer = get_installer()
+        status = installer.check_installation()
+
+        if not status["installed"] or not status["running"]:
+            raise HTTPException(status_code=400, detail="Ollama is not installed or not running")
+
+        if model_name not in status["models_available"]:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Model {model_name} is not installed. Please download it first."
+            )
+
+        # Update .env file
+        env_path = Path(".env")
+        if env_path.exists():
+            # Read current .env
+            with open(env_path, 'r') as f:
+                env_lines = f.readlines()
+
+            # Update or add OLLAMA_MODEL
+            found = False
+            for i, line in enumerate(env_lines):
+                if line.startswith("OLLAMA_MODEL="):
+                    env_lines[i] = f"OLLAMA_MODEL={model_name}\n"
+                    found = True
+                    break
+
+            if not found:
+                env_lines.append(f"\nOLLAMA_MODEL={model_name}\n")
+
+            # Write back
+            with open(env_path, 'w') as f:
+                f.writelines(env_lines)
+        else:
+            # Create .env file
+            with open(env_path, 'w') as f:
+                f.write(f"OLLAMA_MODEL={model_name}\n")
+
+        # Update environment variable in current process
+        os.environ["OLLAMA_MODEL"] = model_name
+
+        return JSONResponse(content={
+            "success": True,
+            "message": f"Active model set to {model_name}"
+        })
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting model: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/status")
 async def get_status():
@@ -1151,497 +1870,6 @@ async def run_template_replay(session_id: str, template_id: str, profile: dict, 
         # Clean up session
         if session_id in active_sessions:
             del active_sessions[session_id]
-
-# ===== HTTP Form Submission Feature =====
-# New parallel feature - doesn't touch existing automation
-
-from tools.http_form_submitter import HTTPFormSubmitter, SubmissionConfig, SubmissionResult
-from tools.retry_handler import RetryConfig
-from tools.rate_limiter import RateLimitConfig
-
-# Global HTTP submitter instance
-http_submitter = None
-
-def get_http_submitter():
-    """Get or create HTTP submitter instance"""
-    global http_submitter
-    if http_submitter is None:
-        config = SubmissionConfig(
-            retry_config=RetryConfig(max_retries=3, base_delay=1.0),
-            rate_limit_config=RateLimitConfig(requests_per_second=10.0)
-        )
-        http_submitter = HTTPFormSubmitter(config)
-    return http_submitter
-
-@app.post("/api/http-submit/import-fetch")
-async def import_fetch_code(request: dict):
-    """Import JavaScript fetch() code from DevTools"""
-    try:
-        fetch_code = request.get("code", "")
-        submitter = get_http_submitter()
-        parsed = submitter.import_fetch_code(fetch_code)
-        return {"success": True, "data": parsed.to_dict()}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.post("/api/http-submit/import-har")
-async def import_har_file(file: UploadFile):
-    """Import HAR file from DevTools or Burp Suite"""
-    try:
-        content = await file.read()
-        import json
-        har_data = json.loads(content)
-
-        submitter = get_http_submitter()
-        from tools.request_parser import HARParser
-        parser = HARParser()
-        requests = parser.parse(har_data)
-
-        return {
-            "success": True,
-            "data": [r.to_dict() for r in requests],
-            "count": len(requests)
-        }
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.post("/api/http-submit/import-curl")
-async def import_curl_command(request: dict):
-    """Import cURL command from DevTools"""
-    try:
-        curl_cmd = request.get("command", "")
-        submitter = get_http_submitter()
-        parsed = submitter.import_curl_command(curl_cmd)
-        return {"success": True, "data": parsed.to_dict()}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.post("/api/http-submit/analyze")
-async def analyze_form_http(request: dict):
-    """Analyze form at URL without browser"""
-    try:
-        url = request.get("url", "")
-        submitter = get_http_submitter()
-        analysis = submitter.analyze_form(url)
-        return {"success": True, "data": analysis}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.post("/api/http-submit/submit")
-async def submit_form_http(request: dict):
-    """Submit form via direct HTTP"""
-    try:
-        url = request.get("url", "")
-        form_data = request.get("form_data", {})
-        method = request.get("method", "POST")
-        detect_csrf = request.get("detect_csrf", True)
-
-        submitter = get_http_submitter()
-        result = submitter.submit_form(
-            url=url,
-            form_data=form_data,
-            method=method,
-            detect_csrf=detect_csrf
-        )
-
-        return {"success": True, "data": result.to_dict()}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.post("/api/http-submit/submit-with-profile")
-async def submit_with_profile_http(request: dict):
-    """Submit form using profile data"""
-    try:
-        url = request.get("url", "")
-        profile_id = request.get("profile_id", "")
-        field_mappings = request.get("field_mappings", {})
-        method = request.get("method", "POST")
-
-        # Load profile
-        profile_path = Path("profiles") / f"{profile_id}.json"
-        if not profile_path.exists():
-            return {"success": False, "error": f"Profile {profile_id} not found"}
-
-        with open(profile_path, 'r') as f:
-            profile = json.load(f)
-
-        # Normalize profile (handle nested structure)
-        if 'data' in profile:
-            profile_data = profile['data']
-        else:
-            profile_data = profile
-
-        submitter = get_http_submitter()
-        result = submitter.submit_with_profile(
-            url=url,
-            profile_data=profile_data,
-            field_mappings=field_mappings,
-            method=method
-        )
-
-        return {"success": True, "data": result.to_dict()}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.post("/api/http-submit/batch")
-async def submit_batch_http(request: dict):
-    """Submit form for multiple profiles"""
-    try:
-        url = request.get("url", "")
-        profile_ids = request.get("profile_ids", [])
-        field_mappings = request.get("field_mappings", {})
-        method = request.get("method", "POST")
-
-        # Load profiles
-        profiles = []
-        for profile_id in profile_ids:
-            profile_path = Path("profiles") / f"{profile_id}.json"
-            if profile_path.exists():
-                with open(profile_path, 'r') as f:
-                    profile = json.load(f)
-                    # Normalize
-                    if 'data' in profile:
-                        profiles.append(profile['data'])
-                    else:
-                        profiles.append(profile)
-
-        submitter = get_http_submitter()
-        results = submitter.submit_batch(
-            url=url,
-            profiles=profiles,
-            field_mappings=field_mappings,
-            method=method
-        )
-
-        return {
-            "success": True,
-            "data": [r.to_dict() for r in results],
-            "total": len(results),
-            "successful": sum(1 for r in results if r.success)
-        }
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.get("/api/http-submit/stats")
-async def get_rate_limit_stats(url: str = None):
-    """Get rate limiting statistics"""
-    try:
-        submitter = get_http_submitter()
-        stats = submitter.get_rate_limit_stats(url)
-        return {"success": True, "data": stats}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.post("/api/http-submit/reset-rate-limit")
-async def reset_rate_limit(request: dict):
-    """Reset rate limiter for URL or all domains"""
-    try:
-        url = request.get("url")
-        submitter = get_http_submitter()
-        submitter.reset_rate_limiter(url)
-        return {"success": True, "message": "Rate limiter reset"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@app.get("/http-submit")
-async def http_submit_page():
-    """HTTP submission UI page"""
-    return FileResponse(str(BASE_PATH / "web" / "http_submit.html"))
-
-# ============================================================================
-# Saved Request Templates API
-# ============================================================================
-
-saved_request_manager = None
-
-def get_saved_request_manager():
-    """Get or create saved request manager"""
-    global saved_request_manager
-    if saved_request_manager is None:
-        from tools.saved_request_manager import SavedRequestManager
-        saved_request_manager = SavedRequestManager()
-    return saved_request_manager
-
-@app.post("/api/saved-requests/save")
-async def save_request_template(request: dict):
-    """Save a new request template"""
-    try:
-        manager = get_saved_request_manager()
-
-        # Extract data from request
-        name = request.get("name", "Untitled Template")
-        url = request.get("url")
-        method = request.get("method", "POST")
-        headers = request.get("headers", {})
-        form_data = request.get("form_data", {})
-        field_mappings = request.get("field_mappings", {})
-        detect_csrf = request.get("detect_csrf", True)
-        description = request.get("description", "")
-        tags = request.get("tags", [])
-
-        if not url:
-            return JSONResponse(
-                status_code=400,
-                content={"success": False, "error": "URL is required"}
-            )
-
-        # Create template
-        template = manager.create_from_parsed_request(
-            name=name,
-            url=url,
-            method=method,
-            headers=headers,
-            form_data=form_data,
-            field_mappings=field_mappings,
-            detect_csrf=detect_csrf,
-            description=description,
-            tags=tags
-        )
-
-        return {
-            "success": True,
-            "template": template.to_dict(),
-            "message": f"Template '{name}' saved successfully"
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to save template: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
-
-@app.get("/api/saved-requests")
-async def list_saved_requests(search: Optional[str] = None):
-    """List all saved request templates"""
-    try:
-        manager = get_saved_request_manager()
-
-        if search:
-            templates = manager.search(search)
-        else:
-            templates = manager.list_all()
-
-        return {
-            "success": True,
-            "templates": [t.to_dict() for t in templates],
-            "count": len(templates)
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to list templates: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
-
-@app.get("/api/saved-requests/{template_id}")
-async def get_saved_request(template_id: str):
-    """Get specific template by ID"""
-    try:
-        manager = get_saved_request_manager()
-        template = manager.get(template_id)
-
-        if not template:
-            return JSONResponse(
-                status_code=404,
-                content={"success": False, "error": "Template not found"}
-            )
-
-        return {
-            "success": True,
-            "template": template.to_dict()
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to get template {template_id}: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
-
-@app.put("/api/saved-requests/{template_id}")
-async def update_saved_request(template_id: str, request: dict):
-    """Update existing template"""
-    try:
-        manager = get_saved_request_manager()
-
-        # Get allowed update fields
-        updates = {}
-        allowed_fields = ["name", "url", "method", "headers", "form_data_template",
-                         "field_mappings", "detect_csrf", "description", "tags"]
-
-        for field in allowed_fields:
-            if field in request:
-                updates[field] = request[field]
-
-        template = manager.update(template_id, updates)
-
-        if not template:
-            return JSONResponse(
-                status_code=404,
-                content={"success": False, "error": "Template not found"}
-            )
-
-        return {
-            "success": True,
-            "template": template.to_dict(),
-            "message": "Template updated successfully"
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to update template {template_id}: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
-
-@app.delete("/api/saved-requests/{template_id}")
-async def delete_saved_request(template_id: str):
-    """Delete template by ID"""
-    try:
-        manager = get_saved_request_manager()
-        deleted = manager.delete(template_id)
-
-        if not deleted:
-            return JSONResponse(
-                status_code=404,
-                content={"success": False, "error": "Template not found"}
-            )
-
-        return {
-            "success": True,
-            "message": "Template deleted successfully"
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to delete template {template_id}: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
-
-@app.post("/api/saved-requests/execute-batch")
-async def execute_batch_templates(request: dict):
-    """Execute multiple templates with one profile"""
-    try:
-        manager = get_saved_request_manager()
-        submitter = get_http_submitter()
-
-        # Get parameters
-        template_ids = request.get("template_ids", [])
-        profile_id = request.get("profile_id")
-
-        if not template_ids:
-            return JSONResponse(
-                status_code=400,
-                content={"success": False, "error": "No templates selected"}
-            )
-
-        if not profile_id:
-            return JSONResponse(
-                status_code=400,
-                content={"success": False, "error": "No profile selected"}
-            )
-
-        # Load profile
-        profile_path = Path("profiles") / f"{profile_id}.json"
-        if not profile_path.exists():
-            return JSONResponse(
-                status_code=404,
-                content={"success": False, "error": f"Profile '{profile_id}' not found"}
-            )
-
-        with open(profile_path, 'r', encoding='utf-8') as f:
-            profile = json.load(f)
-
-        # Execute each template
-        results = []
-
-        for template_id in template_ids:
-            template = manager.get(template_id)
-
-            if not template:
-                results.append({
-                    "template_id": template_id,
-                    "template_name": "Unknown",
-                    "success": False,
-                    "error": "Template not found"
-                })
-                continue
-
-            try:
-                # Merge profile data with template
-                form_data = template.merge_with_profile(profile)
-
-                # Submit request
-                result = submitter.submit_form(
-                    url=template.url,
-                    form_data=form_data,
-                    method=template.method,
-                    headers=template.headers,
-                    detect_csrf=template.detect_csrf
-                )
-
-                results.append({
-                    "template_id": template_id,
-                    "template_name": template.name,
-                    "url": template.url,
-                    "success": result.success,
-                    "status_code": result.status_code,
-                    "attempts": result.attempts,
-                    "timing": result.timing,
-                    "error": result.error_message if not result.success else None
-                })
-
-            except Exception as e:
-                logger.error(f"Failed to execute template {template_id}: {e}", exc_info=True)
-                results.append({
-                    "template_id": template_id,
-                    "template_name": template.name,
-                    "success": False,
-                    "error": str(e)
-                })
-
-        # Calculate summary
-        successful = sum(1 for r in results if r["success"])
-        failed = len(results) - successful
-
-        return {
-            "success": True,
-            "summary": {
-                "total": len(results),
-                "successful": successful,
-                "failed": failed
-            },
-            "results": results
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to execute batch: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
-
-@app.get("/api/saved-requests/stats")
-async def get_saved_requests_stats():
-    """Get statistics about saved templates"""
-    try:
-        manager = get_saved_request_manager()
-        stats = manager.get_stats()
-
-        return {
-            "success": True,
-            "stats": stats
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to get stats: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
 
 # Static file serving (works in both dev and PyInstaller bundle)
 app.mount("/static", StaticFiles(directory=str(BASE_PATH / "static")), name="static")

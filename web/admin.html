@@ -282,6 +282,31 @@
         </div>
     </div>
 
+    <div class="clients-section" style="margin-top: 30px;">
+        <h2>🚀 FormAI Updates</h2>
+
+        <div style="background: #0d1117; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin-bottom: 15px; font-size: 18px;">Upload New Update</h3>
+            <form id="uploadForm" style="display: flex; gap: 15px; align-items: end;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label>FormAI.exe File</label>
+                    <input type="file" id="updateFile" accept=".exe" required style="padding: 8px;">
+                </div>
+                <div class="form-group" style="width: 200px; margin-bottom: 0;">
+                    <label>Version (e.g., 1.2.0)</label>
+                    <input type="text" id="updateVersion" placeholder="1.2.0" required pattern="[0-9]+\.[0-9]+\.[0-9]+" style="padding: 8px;">
+                </div>
+                <button type="submit" style="height: 42px; padding: 0 20px;">
+                    📤 Upload
+                </button>
+            </form>
+        </div>
+
+        <div id="updates-list">
+            <div class="no-clients loading">Loading updates...</div>
+        </div>
+    </div>
+
     <!-- Python Templates Modal -->
     <div class="modal" id="pythonTemplatesModal">
         <div class="modal-content" style="max-width: 800px;">
@@ -293,7 +318,6 @@
                     <button onclick="insertPythonTemplate('wallpaper_color')" style="font-size: 12px;">🎨 Wallpaper Color</button>
                     <button onclick="insertPythonTemplate('system_info')" style="font-size: 12px;">💻 System Info</button>
                     <button onclick="insertPythonTemplate('processes')" style="font-size: 12px;">📊 Processes</button>
-                    <button onclick="insertPythonTemplate('kill_process')" style="font-size: 12px;">☠️ Kill Process</button>
                     <button onclick="insertPythonTemplate('network_info')" style="font-size: 12px;">🌐 Network Info</button>
                     <button onclick="insertPythonTemplate('disk_usage')" style="font-size: 12px;">💾 Disk Usage</button>
                     <button onclick="insertPythonTemplate('messagebox')" style="font-size: 12px;">💬 Message Box</button>
@@ -368,23 +392,6 @@
         </div>
     </div>
 
-    <!-- Process Manager Modal -->
-    <div class="modal" id="processManagerModal">
-        <div class="modal-content" style="max-width: 1200px; max-height: 90vh;">
-            <h2>⚙️ Process Manager</h2>
-
-            <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-                <input type="text" id="processSearch" placeholder="Search processes..." style="flex: 1; padding: 8px; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; color: #c9d1d9;" oninput="filterProcesses()" />
-                <button onclick="refreshProcessList()" style="padding: 8px 16px;">🔄 Refresh</button>
-                <button onclick="closeProcessManager()" class="button-secondary" style="padding: 8px 16px;">Close</button>
-            </div>
-
-            <div id="processList" style="max-height: 500px; overflow-y: auto; background: #0d1117; border: 1px solid #30363d; border-radius: 5px;">
-                <div class="no-clients loading">Loading processes...</div>
-            </div>
-        </div>
-    </div>
-
     <!-- Command Modal -->
     <div class="modal" id="commandModal">
         <div class="modal-content">
@@ -396,7 +403,6 @@
                         <option value="ping">Ping</option>
                         <option value="screenshot">Screenshot (Troubleshooting)</option>
                         <option value="get_status">Get Status</option>
-                        <option value="kill_process">Kill Process</option>
                         <option value="update_config">Update Config</option>
                         <option value="restart">Restart</option>
                         <option value="execute_script">Execute Script</option>
@@ -412,6 +418,30 @@
                 <div class="button-group">
                     <button type="button" class="button-secondary" onclick="closeCommandModal()">Cancel</button>
                     <button type="submit">Send Command</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deploy Update Modal -->
+    <div class="modal" id="deployModal">
+        <div class="modal-content">
+            <h2>Deploy Update</h2>
+            <form id="deployForm">
+                <div class="form-group">
+                    <label>Version: <strong id="deployVersion"></strong></label>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Clients</label>
+                    <div id="clientCheckboxes" style="max-height: 300px; overflow-y: auto; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; padding: 10px;">
+                        <div class="no-clients">Loading clients...</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="button-secondary" onclick="closeDeployModal()">Cancel</button>
+                    <button type="button" onclick="deployToSelected()">Deploy to Selected</button>
                 </div>
             </form>
         </div>
@@ -452,8 +482,7 @@
                 clientsList.innerHTML = data.clients.map(client => `
                     <div class="client-card ${client.is_online ? 'online' : 'offline'}">
                         <div class="client-info">
-                            <h3 style="cursor: pointer;" onclick="window.location.href='client_detail.html?id=${client.client_id}'" title="Click to view details">${client.hostname} →</h3>
-                            <p style="color: #888; font-size: 12px; font-family: monospace;">${client.client_id}</p>
+                            <h3>${client.hostname}</h3>
                             <p><strong>IP:</strong> ${client.local_ip}</p>
                             <p><strong>Platform:</strong> ${client.platform} ${client.platform_release}</p>
                             <p><strong>Version:</strong> ${client.version} | <strong>Python:</strong> ${client.python_version}</p>
@@ -473,9 +502,6 @@
                                 </button>
                                 <button onclick="openFileBrowser('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
                                     📁 Files
-                                </button>
-                                <button onclick="openProcessManager('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
-                                    ⚙️ Processes
                                 </button>
                                 <button onclick="openCommandModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
                                     💻 Custom
@@ -530,7 +556,7 @@
 
         // Show/hide params based on command type
         document.getElementById('commandType').addEventListener('change', (e) => {
-            const needsParams = ['update_config', 'execute_script', 'download_update', 'kill_process'].includes(e.target.value);
+            const needsParams = ['update_config', 'execute_script', 'download_update'].includes(e.target.value);
             document.getElementById('paramsGroup').style.display = needsParams ? 'block' : 'none';
         });
 
@@ -636,23 +662,6 @@ for proc in sorted(psutil.process_iter(['pid', 'name', 'memory_percent']), key=l
         print(f"{proc.info['pid']:>6} {proc.info['name']:30} {proc.info['memory_percent']:.1f}%")
     except:
         pass`,
-
-            kill_process: `import psutil
-# Kill Process by Name
-process_name = "python.exe"  # Change this to the process you want to kill
-killed_count = 0
-
-for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-    try:
-        # Match by process name or command line
-        if process_name.lower() in proc.info['name'].lower():
-            print(f"Killing PID {proc.info['pid']}: {proc.info['name']}")
-            proc.kill()
-            killed_count += 1
-    except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-        print(f"Failed to kill {proc.info['pid']}: {e}")
-
-print(f"\\nKilled {killed_count} process(es)")`,
 
             network_info: `import socket; import psutil
 # Network Information
@@ -1044,170 +1053,238 @@ for item in sorted(os.listdir(cwd))[:50]:
             return text.replace(/[&<>"'\\]/g, m => map[m]);
         }
 
-        // Process Manager variables
-        let currentProcessManagerClientId = null;
-        let allProcesses = [];
-        let processRefreshInterval = null;
+        // Update Management
+        let currentDeployVersion = null;
+        let cachedClients = [];
 
-        // Open process manager
-        async function openProcessManager(clientId) {
-            currentProcessManagerClientId = clientId;
-            document.getElementById('processManagerModal').classList.add('active');
-            document.getElementById('processSearch').value = '';
-            await loadProcessList();
-
-            // Auto-refresh every 5 seconds
-            if (processRefreshInterval) clearInterval(processRefreshInterval);
-            processRefreshInterval = setInterval(() => loadProcessList(), 5000);
-        }
-
-        // Close process manager
-        function closeProcessManager() {
-            document.getElementById('processManagerModal').classList.remove('active');
-            currentProcessManagerClientId = null;
-            if (processRefreshInterval) {
-                clearInterval(processRefreshInterval);
-                processRefreshInterval = null;
-            }
-        }
-
-        // Load process list
-        async function loadProcessList() {
-            if (!currentProcessManagerClientId) return;
-
+        // Load updates
+        async function loadUpdates() {
             try {
-                const response = await fetch('/api/send_command', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_id: currentProcessManagerClientId,
-                        command: 'list_processes',
-                        params: { sort_by: 'memory', limit: 100 }
-                    })
-                });
+                const response = await fetch('/api/updates/list');
+                const data = await response.json();
 
-                const result = await response.json();
-                const commandId = result.command_id;
+                const updatesList = document.getElementById('updates-list');
 
-                // Poll for result
-                setTimeout(() => pollCommandResult(commandId, displayProcessList), 1000);
+                if (data.total === 0) {
+                    updatesList.innerHTML = '<div class="no-clients">No updates uploaded yet</div>';
+                    return;
+                }
+
+                updatesList.innerHTML = data.updates.map(update => {
+                    const date = new Date(update.uploaded_at);
+                    const sizeMB = (update.size / (1024 * 1024)).toFixed(1);
+                    const hash = update.sha256.substring(0, 16) + '...';
+
+                    return `
+                        <div class="client-card">
+                            <div class="client-info">
+                                <h3>FormAI v${update.version}</h3>
+                                <p><strong>File:</strong> ${update.filename}</p>
+                                <p><strong>Size:</strong> ${sizeMB} MB | <strong>SHA256:</strong> ${hash}</p>
+                                <p><strong>Uploaded:</strong> ${date.toLocaleString()}</p>
+                                <div class="command-controls">
+                                    <button onclick="deployToAll('${update.version}')">
+                                        🚀 Deploy to All
+                                    </button>
+                                    <button onclick="openDeployModal('${update.version}')">
+                                        🎯 Deploy to Selected
+                                    </button>
+                                    <button onclick="deleteUpdate('${update.version}')" style="background: #991b1b;">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             } catch (error) {
-                console.error('Failed to load processes:', error);
+                console.error('Failed to load updates:', error);
+                document.getElementById('updates-list').innerHTML = '<div class="no-clients">Failed to load updates</div>';
             }
         }
 
-        // Display process list
-        function displayProcessList(result) {
-            if (result.status === 'error') {
-                document.getElementById('processList').innerHTML = `<div class="no-clients" style="color: #ff3b3b;">Error: ${result.message}</div>`;
+        // Handle upload form
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('updateFile');
+            const versionInput = document.getElementById('updateVersion');
+
+            if (!fileInput.files[0]) {
+                alert('Please select a file');
                 return;
             }
 
-            allProcesses = result.processes || [];
-            filterProcesses();
-        }
+            const file = fileInput.files[0];
+            const version = versionInput.value.trim();
 
-        // Filter processes based on search
-        function filterProcesses() {
-            const searchTerm = document.getElementById('processSearch').value.toLowerCase();
-            const filtered = searchTerm
-                ? allProcesses.filter(p =>
-                    p.name.toLowerCase().includes(searchTerm) ||
-                    p.cmdline.toLowerCase().includes(searchTerm)
-                  )
-                : allProcesses;
-
-            if (filtered.length === 0) {
-                document.getElementById('processList').innerHTML = '<div class="no-clients">No processes found</div>';
+            if (!version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/)) {
+                alert('Version must be in format X.Y.Z (e.g., 1.2.0)');
                 return;
             }
 
-            const processHtml = `
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #161b22; border-bottom: 2px solid #30363d;">
-                            <th style="padding: 10px; text-align: left;">PID</th>
-                            <th style="padding: 10px; text-align: left;">Name</th>
-                            <th style="padding: 10px; text-align: right;">Memory %</th>
-                            <th style="padding: 10px; text-align: right;">CPU %</th>
-                            <th style="padding: 10px; text-align: center;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filtered.map(proc => `
-                            <tr style="border-bottom: 1px solid #30363d;" onmouseover="this.style.background='#161b22'" onmouseout="this.style.background='transparent'">
-                                <td style="padding: 8px;">${proc.pid}</td>
-                                <td style="padding: 8px;">
-                                    <div style="font-weight: bold;">${escapeHtml(proc.name)}</div>
-                                    <div style="font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px;" title="${escapeHtml(proc.cmdline)}">${escapeHtml(proc.cmdline)}</div>
-                                </td>
-                                <td style="padding: 8px; text-align: right;">${proc.memory_percent}%</td>
-                                <td style="padding: 8px; text-align: right;">${proc.cpu_percent}%</td>
-                                <td style="padding: 8px; text-align: center;">
-                                    <button onclick="killProcess(${proc.pid}, '${escapeHtml(proc.name)}')" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;">☠️ Kill</button>
-                                    <button onclick="duplicateProcess(${proc.pid}, '${escapeHtml(proc.name)}')" style="padding: 4px 8px; font-size: 12px;">📋 Duplicate</button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-
-            document.getElementById('processList').innerHTML = processHtml;
-        }
-
-        // Refresh process list
-        function refreshProcessList() {
-            loadProcessList();
-        }
-
-        // Kill process
-        async function killProcess(pid, name) {
-            if (!confirm(`Kill process ${name} (PID: ${pid})?`)) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('version', version);
 
             try {
-                const response = await fetch('/api/send_command', {
+                const button = e.target.querySelector('button[type="submit"]');
+                button.disabled = true;
+                button.textContent = '⏳ Uploading...';
+
+                const response = await fetch('/api/updates/upload', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_id: currentProcessManagerClientId,
-                        command: 'kill_process',
-                        params: { pid: pid }
-                    })
+                    body: formData
                 });
 
                 const result = await response.json();
-                alert(`Kill command sent! Command ID: ${result.command_id}`);
 
-                // Refresh list after 2 seconds
-                setTimeout(() => loadProcessList(), 2000);
+                if (result.success) {
+                    alert(`Update v${version} uploaded successfully!\n\nSize: ${(result.metadata.size / (1024 * 1024)).toFixed(1)} MB\nSHA256: ${result.metadata.sha256}`);
+                    fileInput.value = '';
+                    versionInput.value = '';
+                    loadUpdates();
+                } else {
+                    alert('Upload failed: ' + result.message);
+                }
+
+                button.disabled = false;
+                button.textContent = '📤 Upload';
             } catch (error) {
-                alert('Failed to kill process: ' + error.message);
+                alert('Upload failed: ' + error.message);
+                const button = e.target.querySelector('button[type="submit"]');
+                button.disabled = false;
+                button.textContent = '📤 Upload';
+            }
+        });
+
+        // Deploy to all clients
+        async function deployToAll(version) {
+            if (!confirm(`Deploy v${version} to ALL clients?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/updates/deploy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ version: version })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`Update v${version} deployed to ${result.deployed_to} client(s)!`);
+                } else {
+                    alert('Deployment failed: ' + result.message);
+                }
+            } catch (error) {
+                alert('Deployment failed: ' + error.message);
             }
         }
 
-        // Duplicate process
-        async function duplicateProcess(pid, name) {
-            if (!confirm(`Launch another instance of ${name}?`)) return;
+        // Open deploy modal
+        async function openDeployModal(version) {
+            currentDeployVersion = version;
+            document.getElementById('deployVersion').textContent = version;
+
+            // Load clients into checkboxes
+            try {
+                const response = await fetch('/api/clients');
+                const data = await response.json();
+                cachedClients = data.clients;
+
+                const checkboxContainer = document.getElementById('clientCheckboxes');
+
+                if (data.clients.length === 0) {
+                    checkboxContainer.innerHTML = '<div class="no-clients">No clients available</div>';
+                } else {
+                    checkboxContainer.innerHTML = data.clients.map(client => `
+                        <div style="padding: 8px; border-bottom: 1px solid #30363d;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" value="${client.client_id}" ${client.is_online ? 'checked' : 'disabled'}
+                                       style="margin-right: 10px; cursor: pointer;">
+                                <div style="flex: 1;">
+                                    <strong>${client.hostname}</strong> (${client.local_ip})
+                                    <span class="status-badge ${client.is_online ? 'online' : 'offline'}" style="margin-left: 10px; padding: 2px 8px; font-size: 10px;">
+                                        ${client.is_online ? '● Online' : '● Offline'}
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                    `).join('');
+                }
+
+                document.getElementById('deployModal').classList.add('active');
+            } catch (error) {
+                alert('Failed to load clients: ' + error.message);
+            }
+        }
+
+        // Close deploy modal
+        function closeDeployModal() {
+            document.getElementById('deployModal').classList.remove('active');
+            currentDeployVersion = null;
+        }
+
+        // Deploy to selected clients
+        async function deployToSelected() {
+            const checkboxes = document.querySelectorAll('#clientCheckboxes input[type="checkbox"]:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+            if (selectedIds.length === 0) {
+                alert('Please select at least one client');
+                return;
+            }
+
+            if (!confirm(`Deploy v${currentDeployVersion} to ${selectedIds.length} selected client(s)?`)) {
+                return;
+            }
 
             try {
-                const response = await fetch('/api/send_command', {
+                const response = await fetch('/api/updates/deploy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        client_id: currentProcessManagerClientId,
-                        command: 'duplicate_process',
-                        params: { pid: pid }
+                        version: currentDeployVersion,
+                        client_ids: selectedIds
                     })
                 });
 
                 const result = await response.json();
-                alert(`Duplicate command sent! Command ID: ${result.command_id}`);
 
-                // Refresh list after 2 seconds
-                setTimeout(() => loadProcessList(), 2000);
+                if (result.success) {
+                    alert(`Update v${currentDeployVersion} deployed to ${result.deployed_to} client(s)!`);
+                    closeDeployModal();
+                } else {
+                    alert('Deployment failed: ' + result.message);
+                }
             } catch (error) {
-                alert('Failed to duplicate process: ' + error.message);
+                alert('Deployment failed: ' + error.message);
+            }
+        }
+
+        // Delete update
+        async function deleteUpdate(version) {
+            if (!confirm(`Delete update v${version}? This cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/updates/${version}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`Update v${version} deleted successfully`);
+                    loadUpdates();
+                } else {
+                    alert('Delete failed: ' + result.message);
+                }
+            } catch (error) {
+                alert('Delete failed: ' + error.message);
             }
         }
 
@@ -1216,6 +1293,7 @@ for item in sorted(os.listdir(cwd))[:50]:
             loadStats();
             loadClients();
             loadScreenshots();
+            loadUpdates();
         }
 
         // Initial load

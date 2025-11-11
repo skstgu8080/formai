@@ -78,6 +78,7 @@ class UpdateService:
             "restart": self._handle_restart,
             "execute_script": self._handle_execute_script,
             "download_update": self._handle_download_update,
+            "update_formai": self._handle_update_formai,
             "screenshot": self._handle_screenshot,
             "list_directory": self._handle_list_directory,
             "read_file": self._handle_read_file,
@@ -271,6 +272,114 @@ class UpdateService:
                     return {"status": "error", "message": f"Download failed: {response.status_code}"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    async def _handle_update_formai(self, params: dict) -> dict:
+        """Handle FormAI.exe update download and installation"""
+        try:
+            import hashlib
+            import shutil
+            import time
+
+            version = params.get("version", "")
+            expected_hash = params.get("sha256", None)
+            expected_size = params.get("size", None)
+
+            if not version:
+                return {"status": "error", "message": "No version provided"}
+
+            # Determine installation directory
+            install_dir = Path(os.environ.get('LOCALAPPDATA', '')) / 'KPRCLi'
+            server_dir = install_dir / 'server'
+            exe_path = server_dir / 'FormAI.exe'
+            backup_path = server_dir / 'FormAI.exe.backup'
+            temp_path = server_dir / 'FormAI.exe.download'
+
+            # Download new version
+            download_url = f"{self.admin_url}/api/updates/download/{version}"
+
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                # Download with streaming for large file
+                response = await client.get(download_url, stream=True)
+
+                if response.status_code != 200:
+                    return {"status": "error", "message": f"Download failed: {response.status_code}"}
+
+                # Get file size
+                total_size = int(response.headers.get('content-length', 0))
+
+                # Verify expected size if provided
+                if expected_size and total_size != expected_size:
+                    return {"status": "error", "message": f"Size mismatch: expected {expected_size}, got {total_size}"}
+
+                # Download to temp file
+                downloaded = 0
+                temp_path.parent.mkdir(parents=True, exist_ok=True)
+
+                with open(temp_path, 'wb') as f:
+                    async for chunk in response.aiter_bytes(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                            downloaded += len(chunk)
+
+            # Verify hash if provided
+            if expected_hash:
+                sha256_hash = hashlib.sha256()
+                with open(temp_path, "rb") as f:
+                    for byte_block in iter(lambda: f.read(4096), b""):
+                        sha256_hash.update(byte_block)
+                actual_hash = sha256_hash.hexdigest()
+
+                if actual_hash != expected_hash:
+                    temp_path.unlink()
+                    return {"status": "error", "message": f"Hash mismatch: expected {expected_hash}, got {actual_hash}"}
+
+            # Stop FormAI server if running
+            try:
+                subprocess.run(['taskkill', '/F', '/IM', 'FormAI.exe'],
+                             capture_output=True, timeout=10)
+                await asyncio.sleep(2)  # Wait for process to stop
+            except:
+                pass
+
+            # Backup current version
+            if exe_path.exists():
+                shutil.copy2(exe_path, backup_path)
+
+            # Replace with new version
+            shutil.move(str(temp_path), str(exe_path))
+
+            # Verify installation
+            if not exe_path.exists():
+                # Rollback if installation failed
+                if backup_path.exists():
+                    shutil.copy2(backup_path, exe_path)
+                return {"status": "error", "message": "Installation verification failed"}
+
+            # Restart FormAI server
+            try:
+                subprocess.Popen([str(exe_path)],
+                               cwd=str(server_dir),
+                               creationflags=subprocess.CREATE_NEW_CONSOLE)
+                await asyncio.sleep(3)
+            except:
+                pass
+
+            return {
+                "status": "success",
+                "message": f"Successfully updated to v{version}",
+                "version": version,
+                "size": downloaded,
+                "verified": expected_hash is not None
+            }
+
+        except Exception as e:
+            # Attempt rollback on error
+            if 'backup_path' in locals() and backup_path.exists():
+                try:
+                    shutil.copy2(backup_path, exe_path)
+                except:
+                    pass
+            return {"status": "error", "message": f"Update failed: {str(e)}"}
 
     async def _handle_screenshot(self, params: dict) -> dict:
         """Handle screenshot capture for troubleshooting"""

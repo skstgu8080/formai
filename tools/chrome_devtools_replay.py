@@ -1,44 +1,52 @@
-#!/usr/bin/env python3
 """
-Chrome DevTools MCP Replay Engine
-Replays recordings using Chrome DevTools MCP tools
+Chrome DevTools Replay Engine using Playwright
+
+Replays Chrome DevTools recordings natively using Playwright,
+exactly like Chrome's native replay functionality.
 """
+
 import asyncio
 import json
+import logging
 from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime
-from pathlib import Path
+from playwright.async_api import async_playwright, Page, Browser, BrowserContext
+
+logger = logging.getLogger(__name__)
 
 
 class ChromeDevToolsReplay:
-    """Replay recordings using Chrome DevTools MCP"""
+    """Replay Chrome DevTools recordings using Playwright"""
 
-    def __init__(self, mcp_tools: Dict[str, Callable]):
-        """
-        Initialize replay engine with MCP tools
-
-        Args:
-            mcp_tools: Dictionary of MCP tool functions (navigate_page, fill, click, etc.)
-        """
-        self.mcp_tools = mcp_tools
+    def __init__(self):
+        """Initialize replay engine"""
+        self.playwright = None
+        self.browser: Optional[Browser] = None
+        self.context: Optional[BrowserContext] = None
+        self.page: Optional[Page] = None
         self.progress_callback = None
         self.replay_stats = {
             "start_time": None,
             "end_time": None,
             "recording_id": None,
-            "total_fields": 0,
-            "successful_fields": 0,
-            "failed_fields": 0,
+            "total_steps": 0,
+            "successful_steps": 0,
+            "failed_steps": 0,
             "errors": [],
-            "execution_times": [],
-            "field_results": []
+            "step_results": []
         }
 
     def set_progress_callback(self, callback: Callable[[Dict[str, Any]], None]):
         """Set callback function for progress updates"""
         self.progress_callback = callback
 
-    async def _send_progress_update(self, status: str, message: str, progress: float = 0, field_data: Dict = None):
+    async def _send_progress_update(
+        self,
+        status: str,
+        message: str,
+        progress: float = 0,
+        step_data: Dict = None
+    ):
         """Send progress update to callback if available"""
         if self.progress_callback:
             update = {
@@ -46,7 +54,7 @@ class ChromeDevToolsReplay:
                 "message": message,
                 "progress": progress,
                 "timestamp": datetime.now().isoformat(),
-                "field_data": field_data or {},
+                "step_data": step_data or {},
                 "stats": self.replay_stats.copy()
             }
             if asyncio.iscoroutinefunction(self.progress_callback):
@@ -54,19 +62,47 @@ class ChromeDevToolsReplay:
             else:
                 self.progress_callback(update)
 
+    async def initialize_browser(self, headless: bool = False):
+        """Initialize Playwright browser"""
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.launch(
+            headless=headless,
+            args=[
+                '--disable-blink-features=AutomationControlled',
+                '--no-sandbox',
+                '--disable-setuid-sandbox'
+            ]
+        )
+        self.context = await self.browser.new_context(
+            viewport={'width': 1280, 'height': 720},
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        )
+        self.page = await self.context.new_page()
+        logger.info("Playwright browser initialized")
+
+    async def close_browser(self):
+        """Close Playwright browser"""
+        if self.page:
+            await self.page.close()
+        if self.context:
+            await self.context.close()
+        if self.browser:
+            await self.browser.close()
+        if self.playwright:
+            await self.playwright.stop()
+        logger.info("Playwright browser closed")
+
     async def replay_recording(
         self,
         recording: Dict[str, Any],
-        profile: Optional[Dict[str, Any]] = None,
-        use_recorded_values: bool = True
+        headless: bool = False
     ) -> Dict[str, Any]:
         """
-        Replay a recording using Chrome DevTools MCP
+        Replay a Chrome DevTools recording using Playwright.
 
         Args:
-            recording: Recording data with steps
-            profile: Optional profile data for production mode
-            use_recorded_values: If True, use values from recording; if False, use profile
+            recording: Recording data with steps (should have profile values already replaced)
+            headless: Run in headless mode
 
         Returns:
             Dict with replay results
@@ -76,59 +112,33 @@ class ChromeDevToolsReplay:
             self.replay_stats["recording_id"] = recording.get("recording_id", "unknown")
 
             recording_name = recording.get("recording_name") or recording.get("title", "Unknown Recording")
-            await self._send_progress_update("loading", f"Loaded recording: {recording_name}")
+            await self._send_progress_update("loading", f"Starting replay: {recording_name}")
+
+            # Initialize browser
+            await self.initialize_browser(headless=headless)
 
             # Get steps from recording
             steps = recording.get("steps", [])
             if not steps:
                 raise Exception("No steps found in recording")
 
-            self.replay_stats["total_fields"] = len([s for s in steps if s.get("type") == "change"])
-
-            # Navigate to starting URL
-            start_url = recording.get("url")
-            if not start_url:
-                raise Exception("No URL found in recording")
-
-            await self._send_progress_update("navigating", f"Navigating to {start_url}...", 5)
-
-            # Use Chrome DevTools MCP to navigate
-            navigate_result = await self.mcp_tools["navigate_page"](url=start_url)
-
-            await self._send_progress_update("navigated", "Page loaded successfully", 10)
-
-            # Wait a bit for page to load
-            await asyncio.sleep(2)
-
-            # Take snapshot to see page structure
-            await self._send_progress_update("analyzing", "Analyzing page structure...", 15)
-            snapshot = await self.mcp_tools["take_snapshot"]()
+            self.replay_stats["total_steps"] = len(steps)
 
             # Replay each step
             total_steps = len(steps)
             for idx, step in enumerate(steps):
-                step_progress = 15 + (idx / total_steps * 75)
+                step_progress = 10 + (idx / total_steps * 85)
+                await self._replay_step(step, idx, step_progress)
 
-                step_type = step.get("type")
-
-                if step_type == "navigate":
-                    # Already handled initial navigation
-                    continue
-
-                elif step_type == "change":
-                    # Fill form field
-                    await self._replay_fill_step(step, profile, use_recorded_values, step_progress)
-
-                elif step_type == "click":
-                    # Click element
-                    await self._replay_click_step(step, step_progress)
-
-                # Small delay between steps for human-like behavior
-                await asyncio.sleep(0.5)
+                # Small delay between steps for stability
+                await asyncio.sleep(0.3)
 
             # Replay completed successfully
             self.replay_stats["end_time"] = datetime.now().isoformat()
             await self._send_progress_update("completed", "Replay completed successfully!", 100)
+
+            # Keep browser open for a moment to see results
+            await asyncio.sleep(2)
 
             return {
                 "success": True,
@@ -138,6 +148,7 @@ class ChromeDevToolsReplay:
 
         except Exception as e:
             error_msg = str(e)
+            logger.error(f"Replay failed: {error_msg}", exc_info=True)
             self.replay_stats["errors"].append(error_msg)
             self.replay_stats["end_time"] = datetime.now().isoformat()
             await self._send_progress_update("error", f"Replay failed: {error_msg}", 0)
@@ -148,125 +159,264 @@ class ChromeDevToolsReplay:
                 "error": error_msg
             }
 
-    async def _replay_fill_step(
-        self,
-        step: Dict[str, Any],
-        profile: Optional[Dict[str, Any]],
-        use_recorded_values: bool,
-        progress: float
-    ):
-        """Replay a fill/change step"""
+        finally:
+            await self.close_browser()
+
+    async def _replay_step(self, step: Dict[str, Any], idx: int, progress: float):
+        """
+        Replay a single step from the recording.
+
+        This mimics Chrome DevTools native replay behavior.
+        """
+        step_type = step.get("type", "")
+        logger.info(f"Step {idx + 1}: {step_type}")
+
         try:
-            field_mapping = step.get("field_mapping", {})
-            form_field = field_mapping.get("form_field", "unknown")
-            profile_field = field_mapping.get("profile_field", "")
+            if step_type == "setViewport":
+                await self._replay_set_viewport(step, progress)
 
-            # Determine which value to use
-            if use_recorded_values:
-                # Use the recorded value (preview mode)
-                value = step.get("value", "")
-                mode = "preview"
+            elif step_type == "navigate":
+                await self._replay_navigate(step, progress)
+
+            elif step_type == "click":
+                await self._replay_click(step, progress)
+
+            elif step_type == "change":
+                await self._replay_change(step, progress)
+
+            elif step_type == "keyDown":
+                await self._replay_key_down(step, progress)
+
+            elif step_type == "keyUp":
+                await self._replay_key_up(step, progress)
+
+            elif step_type == "scroll":
+                await self._replay_scroll(step, progress)
+
+            elif step_type == "waitForElement":
+                await self._replay_wait_for_element(step, progress)
+
             else:
-                # Use profile value (production mode)
-                if not profile:
-                    raise Exception("No profile provided for production mode")
-                value = profile.get(profile_field, "")
-                mode = "production"
+                logger.warning(f"Unknown step type: {step_type}")
 
-            await self._send_progress_update(
-                "filling",
-                f"Filling {form_field} ({mode} mode)...",
-                progress,
-                {"field": form_field, "mode": mode}
-            )
-
-            # Get selectors - try aria label first, then CSS
-            selectors = step.get("selectors", [])
-
-            # Try to find element using selectors
-            element_found = False
-            for selector_list in selectors:
-                if not selector_list:
-                    continue
-
-                selector = selector_list[0] if isinstance(selector_list, list) else selector_list
-
-                # For aria selectors, extract the label
-                if selector.startswith("aria/"):
-                    aria_label = selector.replace("aria/", "")
-
-                    # Use Chrome DevTools MCP to fill the field
-                    try:
-                        # First, take snapshot to find element UID
-                        snapshot = await self.mcp_tools["take_snapshot"]()
-
-                        # Search for element in snapshot by aria label or text
-                        # This is simplified - in reality we'd parse the snapshot
-                        # For now, we'll use a heuristic to find the element
-
-                        # Try to fill using aria label directly
-                        # Note: This is a simplified approach
-                        # In production, we'd parse the snapshot to find the exact UID
-
-                        await self.mcp_tools["fill"](
-                            uid=f"aria_{aria_label.lower().replace(' ', '_')}",
-                            value=value
-                        )
-
-                        element_found = True
-                        break
-                    except Exception as e:
-                        # Try next selector
-                        continue
-
-            if element_found:
-                self.replay_stats["successful_fields"] += 1
-                self.replay_stats["field_results"].append({
-                    "field": form_field,
-                    "status": "success",
-                    "value": value[:20] + "..." if len(value) > 20 else value
-                })
-            else:
-                self.replay_stats["failed_fields"] += 1
-                self.replay_stats["field_results"].append({
-                    "field": form_field,
-                    "status": "failed",
-                    "error": "Element not found"
-                })
+            self.replay_stats["successful_steps"] += 1
+            self.replay_stats["step_results"].append({
+                "step": idx + 1,
+                "type": step_type,
+                "status": "success"
+            })
 
         except Exception as e:
-            self.replay_stats["failed_fields"] += 1
-            self.replay_stats["errors"].append(f"Field {form_field}: {str(e)}")
-            await self._send_progress_update("warning", f"Failed to fill {form_field}: {str(e)}", progress)
+            error_msg = f"Step {idx + 1} ({step_type}) failed: {str(e)}"
+            logger.error(error_msg)
+            self.replay_stats["failed_steps"] += 1
+            self.replay_stats["errors"].append(error_msg)
+            self.replay_stats["step_results"].append({
+                "step": idx + 1,
+                "type": step_type,
+                "status": "failed",
+                "error": str(e)
+            })
 
-    async def _replay_click_step(self, step: Dict[str, Any], progress: float):
-        """Replay a click step"""
-        try:
-            target = step.get("target", "unknown")
-            await self._send_progress_update("clicking", f"Clicking {target}...", progress)
+    async def _replay_set_viewport(self, step: Dict[str, Any], progress: float):
+        """Set viewport size"""
+        width = step.get("width", 1280)
+        height = step.get("height", 720)
+        await self.page.set_viewport_size({"width": width, "height": height})
+        await self._send_progress_update("viewport", f"Set viewport: {width}x{height}", progress)
 
-            # Get selectors
-            selectors = step.get("selectors", [])
+    async def _replay_navigate(self, step: Dict[str, Any], progress: float):
+        """Navigate to URL"""
+        url = step.get("url", "")
+        await self._send_progress_update("navigating", f"Navigating to {url}", progress)
 
-            # Try to click using selectors
-            for selector_list in selectors:
-                if not selector_list:
+        # Wait for navigation to complete
+        await self.page.goto(url, wait_until="networkidle", timeout=30000)
+
+        await self._send_progress_update("navigated", f"Loaded {url}", progress)
+
+    async def _replay_click(self, step: Dict[str, Any], progress: float):
+        """Click element"""
+        selectors = step.get("selectors", [])
+        target = step.get("target", "element")
+
+        await self._send_progress_update("clicking", f"Clicking {target}", progress)
+
+        # Try each selector until one works
+        element = await self._find_element(selectors)
+        if element:
+            await element.click()
+            logger.info(f"Clicked element: {target}")
+        else:
+            raise Exception(f"Could not find element to click: {target}")
+
+    async def _replay_change(self, step: Dict[str, Any], progress: float):
+        """Fill form field (change event)"""
+        selectors = step.get("selectors", [])
+        value = step.get("value", "")
+
+        # Extract field name for logging
+        field_name = "field"
+        if selectors and selectors[0]:
+            first_selector = selectors[0][0] if isinstance(selectors[0], list) else selectors[0]
+            if first_selector.startswith("aria/"):
+                field_name = first_selector.replace("aria/", "")
+            elif first_selector.startswith("#"):
+                field_name = first_selector[1:]
+
+        await self._send_progress_update("filling", f"Filling {field_name}: {value}", progress)
+
+        # Try each selector until one works
+        element = await self._find_element(selectors)
+        if element:
+            # Clear existing value first
+            await element.fill("")
+            # Fill with new value
+            await element.fill(value)
+            logger.info(f"Filled {field_name} with: {value}")
+        else:
+            raise Exception(f"Could not find element to fill: {field_name}")
+
+    async def _replay_key_down(self, step: Dict[str, Any], progress: float):
+        """Send key down event"""
+        key = step.get("key", "")
+        if key:
+            await self.page.keyboard.down(key)
+
+    async def _replay_key_up(self, step: Dict[str, Any], progress: float):
+        """Send key up event"""
+        key = step.get("key", "")
+        if key:
+            await self.page.keyboard.up(key)
+
+    async def _replay_scroll(self, step: Dict[str, Any], progress: float):
+        """Scroll page"""
+        x = step.get("x", 0)
+        y = step.get("y", 0)
+        await self.page.evaluate(f"window.scrollTo({x}, {y})")
+
+    async def _replay_wait_for_element(self, step: Dict[str, Any], progress: float):
+        """Wait for element to appear"""
+        selectors = step.get("selectors", [])
+        await self._find_element(selectors, timeout=10000)
+
+    async def _find_element(self, selectors: List[List[str]], timeout: int = 5000):
+        """
+        Find element using multiple selector strategies.
+
+        Chrome DevTools recordings provide multiple selectors in priority order.
+        We try each one until we find a match.
+
+        Args:
+            selectors: List of selector groups (ARIA, CSS, XPath, etc.)
+            timeout: Timeout in milliseconds
+
+        Returns:
+            ElementHandle or None
+        """
+        if not selectors:
+            return None
+
+        for selector_group in selectors:
+            if not selector_group:
+                continue
+
+            for selector in selector_group if isinstance(selector_group, list) else [selector_group]:
+                try:
+                    # Handle different selector types
+                    if selector.startswith("aria/"):
+                        # ARIA selector - convert to role/label selector
+                        aria_label = selector.replace("aria/", "")
+
+                        # Try different ARIA selector strategies
+                        strategies = [
+                            f"[aria-label='{aria_label}']",
+                            f"[placeholder='{aria_label}']",
+                            f"label:has-text('{aria_label}') + input",
+                            f"input[name*='{aria_label.lower()}']",
+                            f"input[id*='{aria_label.lower()}']"
+                        ]
+
+                        for strategy in strategies:
+                            try:
+                                element = await self.page.wait_for_selector(
+                                    strategy,
+                                    timeout=timeout,
+                                    state="visible"
+                                )
+                                if element:
+                                    return element
+                            except:
+                                continue
+
+                    elif selector.startswith("xpath/"):
+                        # XPath selector
+                        xpath = selector.replace("xpath/", "")
+                        element = await self.page.wait_for_selector(
+                            f"xpath={xpath}",
+                            timeout=timeout,
+                            state="visible"
+                        )
+                        if element:
+                            return element
+
+                    elif selector.startswith("pierce/"):
+                        # Pierce selector (shadow DOM)
+                        pierce_selector = selector.replace("pierce/", "")
+                        element = await self.page.wait_for_selector(
+                            pierce_selector,
+                            timeout=timeout,
+                            state="visible"
+                        )
+                        if element:
+                            return element
+
+                    else:
+                        # Regular CSS selector
+                        element = await self.page.wait_for_selector(
+                            selector,
+                            timeout=timeout,
+                            state="visible"
+                        )
+                        if element:
+                            return element
+
+                except Exception as e:
+                    # Try next selector
+                    logger.debug(f"Selector failed: {selector} - {str(e)}")
                     continue
 
-                selector = selector_list[0] if isinstance(selector_list, list) else selector_list
+        return None
 
-                if selector.startswith("aria/"):
-                    aria_label = selector.replace("aria/", "")
 
-                    try:
-                        await self.mcp_tools["click"](
-                            element=aria_label,
-                            uid=f"aria_{aria_label.lower().replace(' ', '_')}"
-                        )
-                        break
-                    except Exception as e:
-                        continue
+async def replay_recording_with_profile(
+    recording: Dict[str, Any],
+    profile: Dict[str, Any],
+    api_key: str,
+    headless: bool = False
+) -> Dict[str, Any]:
+    """
+    Convenience function to replay recording with AI value replacement.
 
-        except Exception as e:
-            self.replay_stats["errors"].append(f"Click {target}: {str(e)}")
-            await self._send_progress_update("warning", f"Failed to click {target}: {str(e)}", progress)
+    Args:
+        recording: Chrome DevTools recording
+        profile: User profile data
+        api_key: OpenRouter API key for AI value replacement
+        headless: Run browser in headless mode
+
+    Returns:
+        Replay results
+    """
+    from .ai_value_replacer import AIValueReplacer
+
+    # Step 1: Replace values with profile data
+    logger.info("Replacing recording values with profile data...")
+    replacer = AIValueReplacer(api_key)
+    modified_recording = replacer.replace_recording_values(recording, profile)
+
+    # Step 2: Replay modified recording
+    logger.info("Replaying modified recording...")
+    replay_engine = ChromeDevToolsReplay()
+    result = await replay_engine.replay_recording(modified_recording, headless=headless)
+
+    return result
