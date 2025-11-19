@@ -97,3 +97,5 @@ pyarmor_runtime_000000/
 
 # Obfuscated files
 *.py.bak
+api_keys/
+.claude/settings.local.json

@@ -40,6 +40,7 @@ init()
 print(f"{Fore.CYAN}Initializing KPR...{Style.RESET_ALL}", flush=True)
 
 import json
+import logging
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -87,6 +88,17 @@ from tools.ollama_installer import OllamaInstaller, get_installer
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('formai_server.log', encoding='utf-8')
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # Global state
 profiles: Dict[str, dict] = {}
@@ -770,12 +782,16 @@ async def replay_recording(recording_id: str, request: RecordingReplayRequest):
         try:
             with open(openrouter_key_file, 'r', encoding='utf-8') as f:
                 key_data = json.load(f)
+                # Check for encrypted_key first (base64 encoded)
                 encrypted_key = key_data.get("encrypted_key", "")
                 if encrypted_key:
                     # Decode base64 and remove salt prefix
                     decoded = base64.b64decode(encrypted_key).decode()
                     # Remove "formai_local_salt" prefix
                     api_key = decoded.replace("formai_local_salt", "")
+                # Fallback to plain api_key field
+                elif key_data.get("api_key"):
+                    api_key = key_data.get("api_key")
         except Exception as e:
             logger.warning(f"Failed to load OpenRouter key from api_keys: {e}")
 
