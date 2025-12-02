@@ -1,0 +1,324 @@
+# FormAI Release Workflow
+# Builds and releases FormAI for Windows, macOS, and Linux
+# Triggered on version tags (v1.0.0, v1.2.3, etc.)
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean `
+            --onefile `
+            --name FormAI `
+            --icon=NONE `
+            --add-data "web;web" `
+            --add-data "static;static" `
+            --add-data "tools;tools" `
+            --add-data "package.json;." `
+            --add-data "client_callback.py;." `
+            --add-data "update_service.py;." `
+            --hidden-import=uvicorn.logging `
+            --hidden-import=uvicorn.loops `
+            --hidden-import=uvicorn.loops.auto `
+            --hidden-import=uvicorn.protocols `
+            --hidden-import=uvicorn.protocols.http `
+            --hidden-import=uvicorn.protocols.http.auto `
+            --hidden-import=uvicorn.protocols.websockets `
+            --hidden-import=uvicorn.protocols.websockets.auto `
+            --hidden-import=uvicorn.lifespan `
+            --hidden-import=uvicorn.lifespan.on `
+            --hidden-import=seleniumbase `
+            --hidden-import=selenium `
+            --hidden-import=fastapi `
+            --hidden-import=httpx `
+            --hidden-import=client_callback `
+            --hidden-import=update_service `
+            --collect-all=seleniumbase `
+            formai_server.py
+
+      - name: Create release archive
+        run: |
+          cd dist
+          Compress-Archive -Path FormAI.exe -DestinationPath formai-windows-x64.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: formai-windows-x64
+          path: dist/formai-windows-x64.zip
+
+  build-macos-intel:
+    runs-on: macos-13  # Intel Mac
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean \
+            --onefile \
+            --name formai \
+            --add-data "web:web" \
+            --add-data "static:static" \
+            --add-data "tools:tools" \
+            --add-data "package.json:." \
+            --add-data "client_callback.py:." \
+            --add-data "update_service.py:." \
+            --hidden-import=uvicorn.logging \
+            --hidden-import=uvicorn.loops \
+            --hidden-import=uvicorn.loops.auto \
+            --hidden-import=uvicorn.protocols \
+            --hidden-import=uvicorn.protocols.http \
+            --hidden-import=uvicorn.protocols.http.auto \
+            --hidden-import=uvicorn.protocols.websockets \
+            --hidden-import=uvicorn.protocols.websockets.auto \
+            --hidden-import=uvicorn.lifespan \
+            --hidden-import=uvicorn.lifespan.on \
+            --hidden-import=seleniumbase \
+            --hidden-import=selenium \
+            --hidden-import=fastapi \
+            --hidden-import=httpx \
+            --hidden-import=client_callback \
+            --hidden-import=update_service \
+            --collect-all=seleniumbase \
+            formai_server.py
+
+      - name: Create release archive
+        run: |
+          cd dist
+          tar -czvf formai-macos-x64.tar.gz formai
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: formai-macos-x64
+          path: dist/formai-macos-x64.tar.gz
+
+  build-macos-arm:
+    runs-on: macos-14  # Apple Silicon
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean \
+            --onefile \
+            --name formai \
+            --add-data "web:web" \
+            --add-data "static:static" \
+            --add-data "tools:tools" \
+            --add-data "package.json:." \
+            --add-data "client_callback.py:." \
+            --add-data "update_service.py:." \
+            --hidden-import=uvicorn.logging \
+            --hidden-import=uvicorn.loops \
+            --hidden-import=uvicorn.loops.auto \
+            --hidden-import=uvicorn.protocols \
+            --hidden-import=uvicorn.protocols.http \
+            --hidden-import=uvicorn.protocols.http.auto \
+            --hidden-import=uvicorn.protocols.websockets \
+            --hidden-import=uvicorn.protocols.websockets.auto \
+            --hidden-import=uvicorn.lifespan \
+            --hidden-import=uvicorn.lifespan.on \
+            --hidden-import=seleniumbase \
+            --hidden-import=selenium \
+            --hidden-import=fastapi \
+            --hidden-import=httpx \
+            --hidden-import=client_callback \
+            --hidden-import=update_service \
+            --collect-all=seleniumbase \
+            formai_server.py
+
+      - name: Create release archive
+        run: |
+          cd dist
+          tar -czvf formai-macos-arm64.tar.gz formai
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: formai-macos-arm64
+          path: dist/formai-macos-arm64.tar.gz
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxext-dev libxrender-dev libxtst-dev
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean \
+            --onefile \
+            --name formai \
+            --add-data "web:web" \
+            --add-data "static:static" \
+            --add-data "tools:tools" \
+            --add-data "package.json:." \
+            --add-data "client_callback.py:." \
+            --add-data "update_service.py:." \
+            --hidden-import=uvicorn.logging \
+            --hidden-import=uvicorn.loops \
+            --hidden-import=uvicorn.loops.auto \
+            --hidden-import=uvicorn.protocols \
+            --hidden-import=uvicorn.protocols.http \
+            --hidden-import=uvicorn.protocols.http.auto \
+            --hidden-import=uvicorn.protocols.websockets \
+            --hidden-import=uvicorn.protocols.websockets.auto \
+            --hidden-import=uvicorn.lifespan \
+            --hidden-import=uvicorn.lifespan.on \
+            --hidden-import=seleniumbase \
+            --hidden-import=selenium \
+            --hidden-import=fastapi \
+            --hidden-import=httpx \
+            --hidden-import=client_callback \
+            --hidden-import=update_service \
+            --collect-all=seleniumbase \
+            formai_server.py
+
+      - name: Create release archive
+        run: |
+          cd dist
+          tar -czvf formai-linux-x64.tar.gz formai
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: formai-linux-x64
+          path: dist/formai-linux-x64.tar.gz
+
+  release:
+    needs: [build-windows, build-macos-intel, build-macos-arm, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: FormAI ${{ steps.version.outputs.version }}
+          body: |
+            ## FormAI ${{ steps.version.outputs.version }}
+
+            ### Installation
+
+            **Windows (PowerShell):**
+            ```powershell
+            irm https://raw.githubusercontent.com/skstgu8080/formai/master/install.ps1 | iex
+            ```
+
+            **macOS / Linux:**
+            ```bash
+            curl -sSL https://raw.githubusercontent.com/skstgu8080/formai/master/install.sh | bash
+            ```
+
+            ### Manual Download
+
+            Download the appropriate file for your platform:
+            - **Windows x64:** `formai-windows-x64.zip`
+            - **macOS Intel:** `formai-macos-x64.tar.gz`
+            - **macOS Apple Silicon:** `formai-macos-arm64.tar.gz`
+            - **Linux x64:** `formai-linux-x64.tar.gz`
+
+            ### What's New
+
+            See [CHANGELOG.md](https://github.com/skstgu8080/formai/blob/master/CHANGELOG.md) for details.
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/formai-windows-x64/formai-windows-x64.zip
+            artifacts/formai-macos-x64/formai-macos-x64.tar.gz
+            artifacts/formai-macos-arm64/formai-macos-arm64.tar.gz
+            artifacts/formai-linux-x64/formai-linux-x64.tar.gz
+            install.sh
+            install.ps1
