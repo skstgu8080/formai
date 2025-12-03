@@ -40,9 +40,15 @@ def main():
         run_worker()
     else:
         print("Starting FormAI in WEB mode...")
-        # Import and run the main server
-        import formai_server
-        # The server starts automatically on import via uvicorn
+        import uvicorn
+        from formai_server import app
+        print("\nServer starting on http://localhost:5511")
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=5511,
+            log_level="info"
+        )
 
 
 if __name__ == "__main__":

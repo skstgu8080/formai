@@ -5,6 +5,34 @@ All notable changes to FormAI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2025-12-03
+
+### Added
+- **Recording Editor UI** - Visual editor to modify selectors and field mappings
+  - Edit CSS/XPath selectors for form fields
+  - Re-map profile fields to form fields
+  - View alternative selectors from original recording
+  - Apply suggested mappings with one click
+- **Form Validation** - Validate profile data before form submission
+  - Email format validation
+  - Phone number format validation
+  - Password strength checking
+  - Required field detection
+  - Pre-replay validation with warnings
+- **CAPTCHA Solving Integration** - Support for solving CAPTCHAs automatically
+  - 2Captcha API support
+  - Anti-Captcha API support
+  - reCAPTCHA v2/v3 solving
+  - hCaptcha solving
+  - Image CAPTCHA solving
+  - API key configuration in Settings page
+
+### Changed
+- Added Edit button to recording cards on Recorder page
+- Enhanced Settings page with CAPTCHA service configuration
+
+---
+
 ## [Unreleased]
 
 ### Added

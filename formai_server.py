@@ -434,6 +434,45 @@ async def lifespan(app: FastAPI):
 
     asyncio.create_task(check_for_updates())
 
+    # Auto-restart monitor for pending updates (when idle)
+    async def update_restart_monitor():
+        """Monitor for pending updates and restart when idle"""
+        from tools.auto_updater import AutoUpdater
+        updater = AutoUpdater()
+
+        while True:
+            await asyncio.sleep(10)  # Check every 10 seconds
+
+            try:
+                if updater.has_pending_update() and len(active_sessions) == 0:
+                    pending_version = updater.get_pending_version()
+                    logger.info(f"Update {pending_version} ready, system idle - restarting...")
+                    print(f"{Fore.CYAN}[Update] Version {pending_version} ready, restarting to apply...{Style.RESET_ALL}")
+
+                    # Broadcast to connected WebSocket clients
+                    restart_msg = json.dumps({
+                        "type": "server_restarting",
+                        "reason": "update",
+                        "version": pending_version
+                    })
+                    for client in connected_clients:
+                        try:
+                            await client.send_text(restart_msg)
+                        except:
+                            pass
+
+                    # Give clients 2 seconds to receive message
+                    await asyncio.sleep(2)
+
+                    # Trigger restart
+                    import os
+                    import sys
+                    os.execv(sys.executable, [sys.executable] + sys.argv)
+            except Exception as e:
+                logger.debug(f"Update monitor check: {e}")
+
+    asyncio.create_task(update_restart_monitor())
+
     yield  # Server runs here
 
     # Shutdown (silent)
@@ -490,6 +529,11 @@ async def recorder_page():
 async def settings_page():
     """Serve the settings page"""
     return FileResponse(str(BASE_PATH / "web" / "settings.html"))
+
+@app.get("/recording-editor")
+async def recording_editor_page():
+    """Serve the recording editor page"""
+    return FileResponse(str(BASE_PATH / "web" / "recording-editor.html"))
 
 
 @app.get("/api/profiles")
@@ -920,6 +964,222 @@ async def analyze_recording(recording_id: str):
         })
 
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Recording Editor API Endpoints
+
+class FieldMappingsUpdate(BaseModel):
+    field_mappings: List[Dict[str, Any]]
+
+class SelectorTestRequest(BaseModel):
+    selector: str
+
+@app.put("/api/recordings/{recording_id}/field-mappings")
+async def update_field_mappings(recording_id: str, request: FieldMappingsUpdate):
+    """Update field mappings for a recording"""
+    recording = recording_manager.get_recording(recording_id)
+    if not recording:
+        raise HTTPException(status_code=404, detail="Recording not found")
+
+    try:
+        # Update field mappings
+        recording["field_mappings"] = request.field_mappings
+        recording["updated_at"] = datetime.now().isoformat()
+
+        # Save the updated recording
+        recording_manager.save_recording(recording)
+
+        await broadcast_message({
+            "type": "recording_updated",
+            "data": {
+                "recording_id": recording_id,
+                "total_fields": len(request.field_mappings)
+            }
+        })
+
+        return JSONResponse(content={
+            "success": True,
+            "message": "Field mappings updated",
+            "total_fields": len(request.field_mappings)
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating field mappings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/recordings/{recording_id}/test-selector")
+async def test_selector(recording_id: str, request: SelectorTestRequest):
+    """Test if a CSS selector finds elements on the recording's URL"""
+    recording = recording_manager.get_recording(recording_id)
+    if not recording:
+        raise HTTPException(status_code=404, detail="Recording not found")
+
+    # For now, return a simulated response
+    # In a full implementation, this would use a headless browser to test
+    # the selector against the actual page
+
+    # Check if we have an active session that could test this
+    if active_sessions:
+        # Try to test with an active session
+        for session_id, session in active_sessions.items():
+            if hasattr(session, 'test_selector'):
+                try:
+                    result = await session.test_selector(request.selector)
+                    return JSONResponse(content=result)
+                except Exception:
+                    pass
+
+    # Return info that testing requires active session
+    return JSONResponse(content={
+        "found": None,
+        "count": 0,
+        "message": "Selector testing requires an active browser session. Start a replay to enable live testing.",
+        "selector": request.selector
+    })
+
+# Form Validation API
+
+class ValidateRequest(BaseModel):
+    recording_id: str
+    profile_id: str
+
+@app.post("/api/validate")
+async def validate_form_data(request: ValidateRequest):
+    """Validate profile data against recording field requirements"""
+    from tools.form_validator import get_validator
+
+    # Get recording
+    recording = recording_manager.get_recording(request.recording_id)
+    if not recording:
+        raise HTTPException(status_code=404, detail="Recording not found")
+
+    # Get profile
+    if request.profile_id not in profiles:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    profile = profiles[request.profile_id]
+
+    # Run validation
+    validator = get_validator()
+    result = validator.validate_recording_with_profile(recording, profile)
+
+    return JSONResponse(content=result.to_dict())
+
+@app.get("/api/recordings/{recording_id}/validate/{profile_id}")
+async def validate_recording_profile(recording_id: str, profile_id: str):
+    """Validate profile data against recording - GET endpoint for convenience"""
+    from tools.form_validator import get_validator
+
+    # Get recording
+    recording = recording_manager.get_recording(recording_id)
+    if not recording:
+        raise HTTPException(status_code=404, detail="Recording not found")
+
+    # Get profile
+    if profile_id not in profiles:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    profile = profiles[profile_id]
+
+    # Run validation
+    validator = get_validator()
+    result = validator.validate_recording_with_profile(recording, profile)
+
+    return JSONResponse(content=result.to_dict())
+
+# CAPTCHA Solving API
+
+class CaptchaSolveRequest(BaseModel):
+    captcha_type: str  # recaptcha_v2, recaptcha_v3, hcaptcha, image
+    site_key: Optional[str] = None
+    page_url: Optional[str] = None
+    action: Optional[str] = "verify"  # For reCAPTCHA v3
+    min_score: Optional[float] = 0.7  # For reCAPTCHA v3
+    image_data: Optional[str] = None  # Base64 encoded image for image CAPTCHA
+
+@app.get("/api/captcha/status")
+async def get_captcha_status():
+    """Check CAPTCHA solver configuration and balance"""
+    from tools.captcha_solver import get_captcha_solver
+
+    result = {
+        "services": {}
+    }
+
+    for service in ["2captcha", "anticaptcha"]:
+        solver = get_captcha_solver(service)
+        configured = solver.is_configured()
+        balance = None
+
+        if configured:
+            balance = await solver.get_balance()
+
+        result["services"][service] = {
+            "configured": configured,
+            "balance": balance
+        }
+
+    return JSONResponse(content=result)
+
+@app.post("/api/captcha/solve")
+async def solve_captcha(request: CaptchaSolveRequest):
+    """Solve a CAPTCHA using configured service"""
+    from tools.captcha_solver import get_captcha_solver
+    import base64
+
+    # Try 2captcha first, then anticaptcha
+    solver = get_captcha_solver("2captcha")
+    if not solver.is_configured():
+        solver = get_captcha_solver("anticaptcha")
+
+    if not solver.is_configured():
+        raise HTTPException(
+            status_code=400,
+            detail="No CAPTCHA service configured. Add API key in Settings."
+        )
+
+    try:
+        if request.captcha_type == "recaptcha_v2":
+            if not request.site_key or not request.page_url:
+                raise HTTPException(status_code=400, detail="site_key and page_url required")
+            result = await solver.solve_recaptcha_v2(request.site_key, request.page_url)
+
+        elif request.captcha_type == "recaptcha_v3":
+            if not request.site_key or not request.page_url:
+                raise HTTPException(status_code=400, detail="site_key and page_url required")
+            result = await solver.solve_recaptcha_v3(
+                request.site_key,
+                request.page_url,
+                request.action or "verify",
+                request.min_score or 0.7
+            )
+
+        elif request.captcha_type == "hcaptcha":
+            if not request.site_key or not request.page_url:
+                raise HTTPException(status_code=400, detail="site_key and page_url required")
+            result = await solver.solve_hcaptcha(request.site_key, request.page_url)
+
+        elif request.captcha_type == "image":
+            if not request.image_data:
+                raise HTTPException(status_code=400, detail="image_data required")
+            image_bytes = base64.b64decode(request.image_data)
+            result = await solver.solve_image_captcha(image_bytes)
+
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown captcha_type: {request.captcha_type}")
+
+        return JSONResponse(content={
+            "success": result.success,
+            "solution": result.solution,
+            "captcha_id": result.captcha_id,
+            "solve_time": result.solve_time,
+            "error": result.error
+        })
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"CAPTCHA solving error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/api-keys")

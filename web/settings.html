@@ -770,7 +770,9 @@
                     { id: 'openai', name: 'OpenAI', placeholder: 'sk-...', description: 'GPT-4, GPT-3.5' },
                     { id: 'anthropic', name: 'Anthropic (Claude)', placeholder: 'sk-ant-...', description: 'Claude Sonnet/Opus' },
                     { id: 'google', name: 'Google AI', placeholder: 'AIza...', description: 'Gemini models' },
-                    { id: 'openrouter', name: 'OpenRouter', placeholder: 'sk-or-...', description: 'Multiple models' }
+                    { id: 'openrouter', name: 'OpenRouter', placeholder: 'sk-or-...', description: 'Multiple models' },
+                    { id: '2captcha', name: '2Captcha', placeholder: 'Your 2captcha API key', description: 'CAPTCHA solving service - 2captcha.com', category: 'captcha' },
+                    { id: 'anticaptcha', name: 'Anti-Captcha', placeholder: 'Your anti-captcha API key', description: 'CAPTCHA solving - anti-captcha.com', category: 'captcha' }
                 ];
 
                 container.innerHTML = services.map(service => {
