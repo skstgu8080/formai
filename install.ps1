@@ -152,27 +152,47 @@ function Write-Success {
 }
 
 function Start-FormAINow {
-    $response = Read-Host "  Start FormAI now? [Y/n]"
+    # Find the executable
+    $exePath = Join-Path $INSTALL_DIR "FormAI.exe"
+    if (-not (Test-Path $exePath)) {
+        $exePath = Join-Path $INSTALL_DIR "formai.exe"
+    }
 
-    if ($response -ne "n" -and $response -ne "N") {
-        Write-Host "  Starting FormAI..." -ForegroundColor Green
+    if (-not (Test-Path $exePath)) {
+        Write-Host "  Could not find FormAI executable at: $INSTALL_DIR" -ForegroundColor Red
+        Write-Host "  Contents of install directory:" -ForegroundColor Yellow
+        Get-ChildItem $INSTALL_DIR -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "    $_" }
+        return
+    }
 
-        $exePath = Join-Path $INSTALL_DIR "FormAI.exe"
-        if (-not (Test-Path $exePath)) {
-            $exePath = Join-Path $INSTALL_DIR "formai.exe"
+    # Try to prompt, but auto-start if running non-interactively (piped)
+    $autoStart = $true
+    try {
+        if ([Environment]::UserInteractive -and [Console]::KeyAvailable -ne $null) {
+            $response = Read-Host "  Start FormAI now? [Y/n]"
+            $autoStart = ($response -ne "n" -and $response -ne "N")
         }
+    } catch {
+        # Non-interactive, auto-start
+        $autoStart = $true
+    }
 
-        if (Test-Path $exePath) {
+    if ($autoStart) {
+        Write-Host "  Starting FormAI..." -ForegroundColor Green
+        Write-Host "  Executable: $exePath" -ForegroundColor Gray
+
+        try {
             Start-Process -FilePath $exePath -WorkingDirectory $INSTALL_DIR
 
             # Wait and open browser
-            Start-Sleep -Seconds 3
+            Write-Host "  Waiting for server to start..." -ForegroundColor Gray
+            Start-Sleep -Seconds 5
             Start-Process "http://localhost:5511"
-        } else {
-            Write-Host "  Could not find FormAI executable" -ForegroundColor Yellow
+        } catch {
+            Write-Host "  Failed to start: $_" -ForegroundColor Red
         }
     } else {
-        Write-Host "  Run 'formai' to start FormAI later." -ForegroundColor Yellow
+        Write-Host "  Run 'formai' or double-click the desktop shortcut to start FormAI later." -ForegroundColor Yellow
     }
 }
 
