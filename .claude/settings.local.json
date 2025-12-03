@@ -63,7 +63,9 @@
       "Bash(where:*)",
       "WebFetch(domain:docs.lightningautofill.com)",
       "Bash(cd:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__MCP_DOCKER__list_issues",
+      "mcp__MCP_DOCKER__fetch"
     ],
     "deny": [],
     "ask": []

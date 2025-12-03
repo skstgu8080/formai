@@ -83,14 +83,6 @@ from tools.enhanced_field_mapper import EnhancedFieldMapper
 from tools.chrome_recorder_parser import ChromeRecorderParser
 # AutofillEngine is imported where needed (bulk fill approach)
 
-# Import browser-use automation (optional)
-try:
-    from tools.browser_use_automation import AsyncBrowserUseAutomation
-    BROWSER_USE_ENABLED = True
-except ImportError:
-    BROWSER_USE_ENABLED = False
-    # Silently disable browser-use if not available
-
 # Import callback system (admin server communication)
 from client_callback import ClientCallback
 from dotenv import load_dotenv
@@ -1386,88 +1378,6 @@ async def stop_automation(session_id: str):
     })
 
     return JSONResponse(content={"message": "Automation stopped"})
-
-# Browser-Use AI Automation Endpoints
-
-@app.post("/api/automation/browser-use/start")
-async def start_browser_use_automation(request: dict):
-    """
-    Start AI-powered form filling using browser-use
-
-    Request body:
-    {
-        "profile_id": "profile-123",
-        "url": "https://example.com/form",
-        "headless": false,
-        "max_steps": 50
-    }
-    """
-    if not BROWSER_USE_ENABLED:
-        raise HTTPException(
-            status_code=503,
-            detail="browser-use not installed. Run: pip install browser-use playwright langchain-openai"
-        )
-
-    try:
-        profile_id = request.get("profile_id")
-        url = request.get("url")
-        headless = request.get("headless", False)
-        max_steps = request.get("max_steps", 50)
-
-        if not profile_id or not url:
-            raise HTTPException(status_code=400, detail="profile_id and url are required")
-
-        # Load profile
-        profile_file = Path("profiles") / f"{profile_id}.json"
-        if not profile_file.exists():
-            raise HTTPException(status_code=404, detail=f"Profile {profile_id} not found")
-
-        with open(profile_file, 'r') as f:
-            profile = json.load(f)
-
-        # Initialize browser-use automation
-        automation = AsyncBrowserUseAutomation()
-
-        # Run the automation
-        result = await automation.fill_form(
-            url=url,
-            profile=profile,
-            headless=headless,
-            max_steps=max_steps
-        )
-
-        # Broadcast progress
-        await broadcast_message({
-            "type": "browser_use_completed",
-            "data": result
-        })
-
-        return JSONResponse(content=result)
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/automation/browser-use/test")
-async def test_browser_use():
-    """Test browser-use setup"""
-    if not BROWSER_USE_ENABLED:
-        return JSONResponse(content={
-            "success": False,
-            "message": "browser-use not installed",
-            "instructions": "Run: pip install browser-use playwright langchain-openai"
-        })
-
-    try:
-        automation = AsyncBrowserUseAutomation()
-        result = await automation.test_connection()
-        return JSONResponse(content=result)
-    except Exception as e:
-        return JSONResponse(content={
-            "success": False,
-            "message": f"Test failed: {str(e)}"
-        })
 
 # Background task functions for replay operations
 

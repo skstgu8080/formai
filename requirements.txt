@@ -16,12 +16,12 @@ pillow>=11.2.1  # For screenshot capabilities
 numpy==1.26.4  # For image comparison
 
 # Data Processing
-pydantic>=2.11.5  # Updated for browser-use compatibility
+pydantic>=2.11.5
 python-dotenv==1.0.1
 redis>=5.0.1  # Redis client for job queue
 
 # HTTP Client for API calls
-httpx>=0.28.1  # Updated for browser-use compatibility
+httpx>=0.28.1
 
 # HTML Parsing for HTTP Form Submission
 beautifulsoup4>=4.12.0  # HTML parsing for CSRF detection
@@ -33,8 +33,3 @@ colorama==0.4.6  # For colored console output on Windows
 # Camera & Audio Remote Access (disabled for Docker/headless)
 # opencv-python==4.10.0.84  # For camera access
 # pyaudio==0.2.14  # For microphone access
-
-# AI Browser Automation
-browser-use>=0.9.0  # AI-powered browser automation
-playwright>=1.40.0  # Browser automation framework (required by browser-use)
-langchain-openai>=0.3.0  # LLM integration for browser-use
