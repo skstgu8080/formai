@@ -105,6 +105,23 @@
                 </div>
             </header>
 
+            <!-- Update Banner (hidden by default) -->
+            <div id="update-banner" class="hidden bg-blue-600 text-white px-4 py-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        <span id="update-message">Update available!</span>
+                    </div>
+                    <button onclick="dismissUpdateBanner()" class="text-white hover:text-blue-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             <!-- Page Content -->
             <div class="flex-1 overflow-auto">
                 <div class="p-6">
@@ -347,5 +364,46 @@
     <script src="/static/js/dashboard.js"></script>
     <script src="/static/js/dashboard-enhanced.js"></script>
     <script src="/static/js/system-status.js"></script>
+
+    <!-- Update Check -->
+    <script>
+        async function checkForUpdates() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                if (data.update && (data.update.available || data.update.ready)) {
+                    const banner = document.getElementById('update-banner');
+                    const message = document.getElementById('update-message');
+
+                    if (data.update.ready) {
+                        message.textContent = `Update v${data.update.pending_version || data.update.latest_version} ready - Restart FormAI to apply`;
+                        banner.className = 'bg-green-600 text-white px-4 py-2';
+                    } else {
+                        message.textContent = `Update v${data.update.latest_version} available - Downloading...`;
+                        banner.className = 'bg-blue-600 text-white px-4 py-2';
+                    }
+
+                    // Show banner if not dismissed
+                    if (!sessionStorage.getItem('update-dismissed')) {
+                        banner.classList.remove('hidden');
+                    }
+                }
+            } catch (e) {
+                console.debug('Update check failed:', e);
+            }
+        }
+
+        function dismissUpdateBanner() {
+            document.getElementById('update-banner').classList.add('hidden');
+            sessionStorage.setItem('update-dismissed', 'true');
+        }
+
+        // Check for updates on page load
+        checkForUpdates();
+
+        // Re-check every 5 minutes
+        setInterval(checkForUpdates, 300000);
+    </script>
 </body>
 </html>

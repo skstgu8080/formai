@@ -430,6 +430,17 @@ async def lifespan(app: FastAPI):
     # Start callback system
     admin_callback.start()
 
+    # Check for updates in background
+    async def check_for_updates():
+        """Non-blocking update check"""
+        try:
+            from tools.auto_updater import check_and_download
+            await check_and_download()
+        except Exception as e:
+            logger.debug(f"Update check skipped: {e}")
+
+    asyncio.create_task(check_for_updates())
+
     yield  # Server runs here
 
     # Shutdown (silent)
@@ -444,8 +455,14 @@ async def lifespan(app: FastAPI):
         except:
             pass
 
+# Import version
+try:
+    from version import __version__
+except ImportError:
+    __version__ = "1.0.3"
+
 # FastAPI app with lifespan
-app = FastAPI(title="FormAI", version="2.0.0", lifespan=lifespan)
+app = FastAPI(title="FormAI", version=__version__, lifespan=lifespan)
 
 # CORS middleware
 app.add_middleware(
@@ -1222,14 +1239,29 @@ async def set_model(request: Request):
 
 @app.get("/api/status")
 async def get_status():
-    """Get server status"""
-    return JSONResponse(content={
+    """Get server status including update info"""
+    status = {
         "status": "running",
-        "version": "2.0.0",
+        "version": __version__,
         "profiles_count": len(profiles),
         "active_sessions": len(active_sessions),
         "websocket_connections": len(websocket_connections)
-    })
+    }
+
+    # Add update info if available
+    try:
+        from tools.auto_updater import updater
+        update_status = updater.get_status()
+        status["update"] = {
+            "available": update_status["update_available"],
+            "ready": update_status["update_ready"],
+            "latest_version": update_status["latest_version"],
+            "pending_version": update_status["pending_version"]
+        }
+    except Exception:
+        status["update"] = {"available": False, "ready": False}
+
+    return JSONResponse(content=status)
 
 
 # WebSocket endpoint
