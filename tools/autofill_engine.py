@@ -498,10 +498,13 @@ class AutofillEngine:
                             input_type = elem_info.get('type', 'text')
 
                             if tag == 'SELECT':
-                                # For dropdowns, use select_option_by_text
-                                self.sb.select_option_by_text(selector, value)
-                                filled += 1
-                                logger.info(f"Selected {selector}: {value}")
+                                # For dropdowns, try multiple selection strategies
+                                selected = self._select_dropdown_value(selector, value)
+                                if selected:
+                                    filled += 1
+                                    logger.info(f"Selected {selector}: {value}")
+                                else:
+                                    logger.warning(f"Could not select {value} in {selector}")
                             elif input_type == 'date':
                                 # HTML5 date input - set via JS with YYYY-MM-DD format
                                 formatted = self._format_date_for_input_type(value, 'date')
@@ -612,6 +615,103 @@ class AutofillEngine:
             'dec': 12, 'december': 12
         }
         return months.get(month.lower()[:3], 1)
+
+    def _select_dropdown_value(self, selector: str, value: str) -> bool:
+        """
+        Select a value in a dropdown with smart matching.
+
+        Tries multiple strategies:
+        1. Exact text match
+        2. Case-insensitive text match
+        3. Value attribute match (exact)
+        4. Value attribute match (case-insensitive)
+        5. Partial text match
+        """
+        if not value:
+            return False
+
+        value_lower = value.lower().strip()
+
+        try:
+            # Get all options from the select
+            options = self.sb.execute_script(f"""
+                var sel = document.querySelector('{selector}');
+                if (!sel) return null;
+                return Array.from(sel.options).map(o => ({{
+                    value: o.value,
+                    text: o.text,
+                    index: o.index
+                }}));
+            """)
+
+            if not options:
+                return False
+
+            # Strategy 1: Exact text match
+            for opt in options:
+                if opt['text'] == value:
+                    self.sb.execute_script(f"document.querySelector('{selector}').selectedIndex = {opt['index']}")
+                    self._trigger_change_event(selector)
+                    return True
+
+            # Strategy 2: Case-insensitive text match
+            for opt in options:
+                if opt['text'].lower().strip() == value_lower:
+                    self.sb.execute_script(f"document.querySelector('{selector}').selectedIndex = {opt['index']}")
+                    self._trigger_change_event(selector)
+                    return True
+
+            # Strategy 3: Exact value attribute match
+            for opt in options:
+                if opt['value'] == value:
+                    self.sb.execute_script(f"document.querySelector('{selector}').value = '{opt['value']}'")
+                    self._trigger_change_event(selector)
+                    return True
+
+            # Strategy 4: Case-insensitive value match
+            for opt in options:
+                if opt['value'].lower().strip() == value_lower:
+                    self.sb.execute_script(f"document.querySelector('{selector}').value = '{opt['value']}'")
+                    self._trigger_change_event(selector)
+                    return True
+
+            # Strategy 5: Partial text match (value contains or is contained)
+            for opt in options:
+                opt_text_lower = opt['text'].lower().strip()
+                if value_lower in opt_text_lower or opt_text_lower in value_lower:
+                    self.sb.execute_script(f"document.querySelector('{selector}').selectedIndex = {opt['index']}")
+                    self._trigger_change_event(selector)
+                    return True
+
+            # Strategy 6: Gender-specific mapping
+            gender_map = {
+                'm': 'male', 'f': 'female', 'male': 'male', 'female': 'female',
+                'man': 'male', 'woman': 'female', 'boy': 'male', 'girl': 'female'
+            }
+            mapped_value = gender_map.get(value_lower)
+            if mapped_value:
+                for opt in options:
+                    if mapped_value in opt['text'].lower():
+                        self.sb.execute_script(f"document.querySelector('{selector}').selectedIndex = {opt['index']}")
+                        self._trigger_change_event(selector)
+                        return True
+
+            logger.warning(f"No matching option found for '{value}' in {selector}")
+            return False
+
+        except Exception as e:
+            logger.error(f"Dropdown selection error: {e}")
+            return False
+
+    def _trigger_change_event(self, selector: str):
+        """Trigger change event on element."""
+        self.sb.execute_script(f"""
+            var el = document.querySelector('{selector}');
+            if (el) {{
+                el.dispatchEvent(new Event('input', {{bubbles: true}}));
+                el.dispatchEvent(new Event('change', {{bubbles: true}}));
+            }}
+        """)
 
     async def _check_checkboxes(self, checkboxes: List[str]) -> int:
         """Check all checkboxes using SeleniumBase methods."""
