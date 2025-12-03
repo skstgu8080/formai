@@ -11,6 +11,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, List, Dict, Any, Tuple
 from seleniumbase import SB
 
@@ -308,6 +309,14 @@ class AutofillEngine:
             'date of birth': 'date_of_birth',
             'dob': 'date_of_birth',
             'birthday': 'birthdate',
+
+            # Date components
+            'month': 'birthMonth',
+            'birth month': 'birthMonth',
+            'day': 'birthDay',
+            'birth day': 'birthDay',
+            'year': 'birthYear',
+            'birth year': 'birthYear',
         }
 
         for sel in selectors:
@@ -476,13 +485,36 @@ class AutofillEngine:
                     # Use SeleniumBase's type method which handles UC mode
                     if self.sb.is_element_visible(selector):
                         try:
-                            # Check if it's a select element
-                            tag = self.sb.execute_script(f"return document.querySelector('{selector}')?.tagName")
+                            # Get element tag and input type
+                            elem_info = self.sb.execute_script(f"""
+                                var el = document.querySelector('{selector}');
+                                return el ? {{tag: el.tagName, type: el.type || 'text'}} : null;
+                            """)
+                            if not elem_info:
+                                logger.warning(f"Element not found: {selector}")
+                                continue
+
+                            tag = elem_info.get('tag', '')
+                            input_type = elem_info.get('type', 'text')
+
                             if tag == 'SELECT':
                                 # For dropdowns, use select_option_by_text
                                 self.sb.select_option_by_text(selector, value)
                                 filled += 1
                                 logger.info(f"Selected {selector}: {value}")
+                            elif input_type == 'date':
+                                # HTML5 date input - set via JS with YYYY-MM-DD format
+                                formatted = self._format_date_for_input_type(value, 'date')
+                                self.sb.execute_script(f"""
+                                    var el = document.querySelector('{selector}');
+                                    if (el) {{
+                                        el.value = '{formatted}';
+                                        el.dispatchEvent(new Event('input', {{bubbles: true}}));
+                                        el.dispatchEvent(new Event('change', {{bubbles: true}}));
+                                    }}
+                                """)
+                                filled += 1
+                                logger.info(f"Set date {selector}: {formatted}")
                             else:
                                 # For text inputs, clear and type
                                 self.sb.type(selector, value)
@@ -532,7 +564,54 @@ class AutofillEngine:
                     return ""
             return str(obj) if obj else ""
 
+        # Fallback: construct birthdate from components if requesting date field
+        if key_lower in ['birthdate', 'date_of_birth', 'dob']:
+            constructed = self._construct_date_from_components(flat_profile)
+            if constructed:
+                return constructed
+
         return ""
+
+    def _format_date_for_input_type(self, value: str, input_type: str) -> str:
+        """Format date value for HTML5 date input (YYYY-MM-DD)."""
+        if input_type != 'date':
+            return value
+        # Already in ISO format
+        if re.match(r'^\d{4}-\d{2}-\d{2}$', value):
+            return value
+        # Try to parse common formats and convert
+        for fmt in ['%m/%d/%Y', '%d/%m/%Y', '%Y/%m/%d', '%B %d, %Y', '%b %d, %Y']:
+            try:
+                return datetime.strptime(value, fmt).strftime('%Y-%m-%d')
+            except ValueError:
+                continue
+        return value
+
+    def _construct_date_from_components(self, profile: dict) -> str:
+        """Construct ISO date from birthMonth/birthDay/birthYear."""
+        month = self._get_profile_value(profile, 'birthMonth')
+        day = self._get_profile_value(profile, 'birthDay')
+        year = self._get_profile_value(profile, 'birthYear')
+        if not (month and day and year):
+            return ""
+        try:
+            month_num = int(month) if month.isdigit() else self._month_to_number(month)
+            day_num = int(day) if day.isdigit() else 1
+            return f"{year}-{month_num:02d}-{day_num:02d}"
+        except (ValueError, TypeError):
+            return ""
+
+    def _month_to_number(self, month: str) -> int:
+        """Convert month name to number."""
+        months = {
+            'jan': 1, 'january': 1, 'feb': 2, 'february': 2,
+            'mar': 3, 'march': 3, 'apr': 4, 'april': 4,
+            'may': 5, 'jun': 6, 'june': 6, 'jul': 7, 'july': 7,
+            'aug': 8, 'august': 8, 'sep': 9, 'september': 9,
+            'oct': 10, 'october': 10, 'nov': 11, 'november': 11,
+            'dec': 12, 'december': 12
+        }
+        return months.get(month.lower()[:3], 1)
 
     async def _check_checkboxes(self, checkboxes: List[str]) -> int:
         """Check all checkboxes using SeleniumBase methods."""
