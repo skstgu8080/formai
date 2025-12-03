@@ -235,6 +235,7 @@ class RecordingReplayRequest(BaseModel):
     random_variation: Optional[int] = 500  # Random variation in delay
     auto_close: Optional[bool] = True  # Auto-close browser after replay (default: True)
     close_delay: Optional[int] = 2000  # Delay before closing browser in milliseconds
+    field_delay: Optional[float] = 0.3  # Delay between field fills in seconds (0.1=fast, 0.3=normal, 0.8=slow)
 
 # Utility functions
 def normalize_profile_name(profile: dict) -> str:
@@ -794,8 +795,8 @@ async def replay_recording(recording_id: str, request: RecordingReplayRequest):
                 }
             })
 
-            # Create engine (headless based on request)
-            engine = AutofillEngine(headless=request.headless)
+            # Create engine (headless based on request, field_delay for speed control)
+            engine = AutofillEngine(headless=request.headless, field_delay=request.field_delay)
 
             # Step 2: Execute bulk fill
             await broadcast_message({

@@ -42,8 +42,9 @@ class AutofillEngine:
     6. Click submit
     """
 
-    def __init__(self, headless: bool = True):
+    def __init__(self, headless: bool = True, field_delay: float = 0.3):
         self.headless = headless
+        self.field_delay = field_delay  # Delay between field fills (seconds)
         self.sb = None
         self.driver = None
 
@@ -503,6 +504,7 @@ class AutofillEngine:
                                 if selected:
                                     filled += 1
                                     logger.info(f"Selected {selector}: {value}")
+                                    await asyncio.sleep(self.field_delay)
                                 else:
                                     logger.warning(f"Could not select {value} in {selector}")
                             elif input_type == 'date':
@@ -518,11 +520,13 @@ class AutofillEngine:
                                 """)
                                 filled += 1
                                 logger.info(f"Set date {selector}: {formatted}")
+                                await asyncio.sleep(self.field_delay)
                             else:
                                 # For text inputs, clear and type
                                 self.sb.type(selector, value)
                                 filled += 1
                                 logger.info(f"Filled {selector}")
+                                await asyncio.sleep(self.field_delay)
                         except Exception as type_err:
                             logger.warning(f"Could not fill {selector}: {type_err}")
                     else:
@@ -727,6 +731,7 @@ class AutofillEngine:
                         self.sb.click(selector)
                         checked += 1
                         logger.info(f"Checked checkbox: {selector}")
+                        await asyncio.sleep(self.field_delay)
                     else:
                         logger.debug(f"Checkbox already checked: {selector}")
                         checked += 1
@@ -750,6 +755,7 @@ class AutofillEngine:
                     self.sb.click(selector)
                     selected += 1
                     logger.info(f"Selected radio: {selector}")
+                    await asyncio.sleep(self.field_delay)
                 else:
                     logger.warning(f"Radio not visible: {selector}")
             except Exception as e:
