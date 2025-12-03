@@ -1,8 +1,5 @@
 {
-  "id": "f5a7e359-9025-4595-b1f2-3277c0e9d617",
   "service": "openrouter",
-  "encrypted_key": "Zm9ybWFpX2xvY2FsX3NhbHRzay1vci12MS1lNmU3NTA4Mzk4OGMzYzFiMzM0ZGJmZGJlMjBiNWE3ZmUyODU2M2IyNjcyMjE1NDhlMDQ2ZGE4ZTY4YTc1NjAy",
-  "created_at": "2025-09-16T00:22:12.065485600Z",
-  "last_used": "2025-10-19T09:40:15.561224600Z",
-  "is_active": true
+  "api_key": "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",
+  "updated_at": "2025-11-16T23:52:34.182686"
 }

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Queue - FormAI</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/theme-variables.css">
+    <link rel="stylesheet" href="/static/css/input.css">
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="h-full bg-background text-foreground font-sans antialiased overflow-hidden">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar will be injected here -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-card border-b border-gray-200 dark:border-gray-700">
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold text-card-foreground tracking-tight">Job Queue</h2>
+                            <p class="text-sm text-muted-foreground">Submit and monitor automation jobs</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent"></button>
+                            <div id="redis-status" class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div class="h-2 w-2 bg-gray-400 rounded-full animate-pulse"></div>
+                                <span>Connecting...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <div class="bg-card rounded-lg border p-4">
+                        <div class="text-2xl font-bold text-yellow-500" id="stat-pending">0</div>
+                        <div class="text-sm text-muted-foreground">Pending</div>
+                    </div>
+                    <div class="bg-card rounded-lg border p-4">
+                        <div class="text-2xl font-bold text-blue-500" id="stat-processing">0</div>
+                        <div class="text-sm text-muted-foreground">Processing</div>
+                    </div>
+                    <div class="bg-card rounded-lg border p-4">
+                        <div class="text-2xl font-bold text-green-500" id="stat-completed">0</div>
+                        <div class="text-sm text-muted-foreground">Completed</div>
+                    </div>
+                    <div class="bg-card rounded-lg border p-4">
+                        <div class="text-2xl font-bold text-red-500" id="stat-failed">0</div>
+                        <div class="text-sm text-muted-foreground">Failed</div>
+                    </div>
+                    <div class="bg-card rounded-lg border p-4">
+                        <div class="text-2xl font-bold text-purple-500" id="stat-workers-active">0</div>
+                        <div class="text-sm text-muted-foreground">Active Workers</div>
+                    </div>
+                    <div class="bg-card rounded-lg border p-4">
+                        <div class="text-2xl font-bold text-gray-500" id="stat-workers-idle">0</div>
+                        <div class="text-sm text-muted-foreground">Idle Workers</div>
+                    </div>
+                </div>
+
+                <!-- Submit Job Form -->
+                <div class="bg-card rounded-lg border p-6">
+                    <h3 class="text-lg font-semibold mb-4">Submit New Job</h3>
+                    <form id="submit-job-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Profile</label>
+                            <select id="profile-select" class="w-full px-3 py-2 bg-background border rounded-md text-sm">
+                                <option value="">Select profile...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Recording</label>
+                            <select id="recording-select" class="w-full px-3 py-2 bg-background border rounded-md text-sm">
+                                <option value="">Select recording...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Count</label>
+                            <input type="number" id="job-count" value="1" min="1" max="100"
+                                   class="w-full px-3 py-2 bg-background border rounded-md text-sm">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit"
+                                    class="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-md text-sm font-medium">
+                                Submit Job(s)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Workers Section -->
+                <div class="bg-card rounded-lg border p-6">
+                    <h3 class="text-lg font-semibold mb-4">Active Workers</h3>
+                    <div id="workers-list" class="space-y-2">
+                        <p class="text-muted-foreground text-sm">No workers connected</p>
+                    </div>
+                </div>
+
+                <!-- Recent Jobs Table -->
+                <div class="bg-card rounded-lg border p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Recent Jobs</h3>
+                        <button id="refresh-jobs" class="text-sm text-muted-foreground hover:text-foreground">
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-2 px-2">Job ID</th>
+                                    <th class="text-left py-2 px-2">Profile</th>
+                                    <th class="text-left py-2 px-2">Recording</th>
+                                    <th class="text-left py-2 px-2">Status</th>
+                                    <th class="text-left py-2 px-2">Duration</th>
+                                    <th class="text-left py-2 px-2">Worker</th>
+                                    <th class="text-left py-2 px-2">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobs-table-body">
+                                <tr>
+                                    <td colspan="7" class="py-4 text-center text-muted-foreground">
+                                        Loading jobs...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script>
+        // Initialize sidebar
+        if (typeof initSidebar === 'function') {
+            initSidebar('jobs');
+        }
+        // Initialize theme toggle
+        if (typeof initTheme === 'function') {
+            initTheme();
+        }
+
+        // State
+        let profiles = [];
+        let recordings = [];
+
+        // Load profiles and recordings
+        async function loadProfiles() {
+            try {
+                const res = await fetch('/api/profiles');
+                profiles = await res.json();
+                const select = document.getElementById('profile-select');
+                select.innerHTML = '<option value="">Select profile...</option>';
+                profiles.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.name || p.id;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error('Failed to load profiles:', e);
+            }
+        }
+
+        async function loadRecordings() {
+            try {
+                const res = await fetch('/api/recordings');
+                recordings = await res.json();
+                const select = document.getElementById('recording-select');
+                select.innerHTML = '<option value="">Select recording...</option>';
+                recordings.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.textContent = r.title || r.name || r.id;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error('Failed to load recordings:', e);
+            }
+        }
+
+        // Load queue stats
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/jobs/stats');
+                const stats = await res.json();
+                document.getElementById('stat-pending').textContent = stats.pending || 0;
+                document.getElementById('stat-processing').textContent = stats.processing || 0;
+                document.getElementById('stat-completed').textContent = stats.completed || 0;
+                document.getElementById('stat-failed').textContent = stats.failed || 0;
+                document.getElementById('stat-workers-active').textContent = stats.workers_active || 0;
+                document.getElementById('stat-workers-idle').textContent = stats.workers_idle || 0;
+
+                // Update Redis status
+                const statusEl = document.getElementById('redis-status');
+                statusEl.innerHTML = `
+                    <div class="h-2 w-2 bg-green-500 rounded-full"></div>
+                    <span>Redis Connected</span>
+                `;
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+                const statusEl = document.getElementById('redis-status');
+                statusEl.innerHTML = `
+                    <div class="h-2 w-2 bg-red-500 rounded-full"></div>
+                    <span>Redis Disconnected</span>
+                `;
+            }
+        }
+
+        // Load workers
+        async function loadWorkers() {
+            try {
+                const res = await fetch('/api/jobs/workers');
+                const workers = await res.json();
+                const container = document.getElementById('workers-list');
+
+                if (workers.length === 0) {
+                    container.innerHTML = '<p class="text-muted-foreground text-sm">No workers connected</p>';
+                    return;
+                }
+
+                container.innerHTML = workers.map(w => {
+                    const statusColor = w.status === 'busy' ? 'bg-blue-500' :
+                                       w.status === 'idle' ? 'bg-green-500' : 'bg-gray-400';
+                    return `
+                        <div class="flex items-center justify-between p-2 bg-muted/50 rounded">
+                            <div class="flex items-center space-x-3">
+                                <div class="h-2 w-2 ${statusColor} rounded-full"></div>
+                                <span class="font-mono text-sm">${w.worker_id}</span>
+                                <span class="text-muted-foreground text-xs">${w.hostname || ''}</span>
+                            </div>
+                            <div class="text-sm text-muted-foreground">
+                                ${w.jobs_completed || 0} completed, ${w.jobs_failed || 0} failed
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Failed to load workers:', e);
+            }
+        }
+
+        // Load recent jobs
+        async function loadJobs() {
+            try {
+                const res = await fetch('/api/jobs/recent');
+                const jobs = await res.json();
+                const tbody = document.getElementById('jobs-table-body');
+
+                if (jobs.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="py-4 text-center text-muted-foreground">
+                                No jobs yet
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = jobs.map(j => {
+                    const data = j.data ? JSON.parse(j.data) : {};
+                    const statusClass = j.status === 'completed' ? 'text-green-500' :
+                                       j.status === 'failed' ? 'text-red-500' :
+                                       j.status === 'processing' ? 'text-blue-500' : 'text-yellow-500';
+                    return `
+                        <tr class="border-b border-muted">
+                            <td class="py-2 px-2 font-mono text-xs">${j.job_id?.substring(0, 8) || '-'}</td>
+                            <td class="py-2 px-2">${data.profile_id || '-'}</td>
+                            <td class="py-2 px-2">${data.recording_id || '-'}</td>
+                            <td class="py-2 px-2 ${statusClass}">${j.status || '-'}</td>
+                            <td class="py-2 px-2">${j.duration_ms ? j.duration_ms + 'ms' : '-'}</td>
+                            <td class="py-2 px-2 font-mono text-xs">${j.worker_id || '-'}</td>
+                            <td class="py-2 px-2 text-muted-foreground text-xs">${j.created_at || '-'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Failed to load jobs:', e);
+            }
+        }
+
+        // Submit job
+        document.getElementById('submit-job-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const profileId = document.getElementById('profile-select').value;
+            const recordingId = document.getElementById('recording-select').value;
+            const count = parseInt(document.getElementById('job-count').value) || 1;
+
+            if (!profileId || !recordingId) {
+                alert('Please select both a profile and a recording');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/jobs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        profile_id: profileId,
+                        recording_id: recordingId,
+                        count: count
+                    })
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    console.log('Jobs submitted:', result);
+                    loadStats();
+                    loadJobs();
+                } else {
+                    const error = await res.json();
+                    alert('Failed to submit job: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error('Failed to submit job:', e);
+                alert('Failed to submit job: ' + e.message);
+            }
+        });
+
+        // Refresh button
+        document.getElementById('refresh-jobs').addEventListener('click', () => {
+            loadStats();
+            loadWorkers();
+            loadJobs();
+        });
+
+        // Initial load
+        loadProfiles();
+        loadRecordings();
+        loadStats();
+        loadWorkers();
+        loadJobs();
+
+        // Auto-refresh every 5 seconds
+        setInterval(() => {
+            loadStats();
+            loadWorkers();
+            loadJobs();
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -5,14 +5,20 @@ FormAI Server - FastAPI with SeleniumBase automation
 import os
 import sys
 import ctypes
+import platform
 
 # ============================================
-# Admin Privilege Check (Windows)
+# Admin Privilege Check (Cross-platform)
 # ============================================
 def is_admin():
-    """Check if running with administrator privileges"""
+    """Check if running with administrator privileges (cross-platform)"""
     try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
+        if sys.platform == "win32":
+            return ctypes.windll.shell32.IsUserAnAdmin()
+        elif sys.platform.startswith("linux"):
+            return os.getuid() == 0
+        else:
+            return False
     except:
         return False
 
@@ -61,15 +67,21 @@ BASE_PATH = get_base_path()
 
 # Import our automation modules
 from selenium_automation import SeleniumAutomation, FormFieldDetector
-from tools.gui_automation import GUIHelper, FormFillerGUI
+
+# GUI automation is optional (requires display, not available in Docker)
+try:
+    from tools.gui_automation import GUIHelper, FormFillerGUI
+    GUI_AVAILABLE = True
+except ImportError:
+    GUI_AVAILABLE = False
+    GUIHelper = None
+    FormFillerGUI = None
 
 # Import new recording modules
 from tools.recording_manager import RecordingManager
-from tools.profile_replay_engine import ProfileReplayEngine
 from tools.enhanced_field_mapper import EnhancedFieldMapper
 from tools.chrome_recorder_parser import ChromeRecorderParser
-from tools.live_recorder import LiveRecorder
-from tools.ai_recording_analyzer import AIRecordingAnalyzer
+# AutofillEngine is imported where needed (bulk fill approach)
 
 # Import browser-use automation (optional)
 try:
@@ -120,8 +132,6 @@ model_download_progress = {}
 recording_manager = RecordingManager()
 field_mapper = EnhancedFieldMapper()
 chrome_parser = ChromeRecorderParser()
-live_recorder = LiveRecorder()
-ai_analyzer = AIRecordingAnalyzer()
 
 # Initialize callback client (hardcoded admin server URL, runs hidden)
 admin_callback = ClientCallback(
@@ -225,28 +235,6 @@ class RecordingReplayRequest(BaseModel):
     random_variation: Optional[int] = 500  # Random variation in delay
     auto_close: Optional[bool] = True  # Auto-close browser after replay (default: True)
     close_delay: Optional[int] = 2000  # Delay before closing browser in milliseconds
-
-class TemplateReplayRequest(BaseModel):
-    profile_id: str
-    headless: Optional[bool] = False
-    session_name: Optional[str] = None
-
-class LiveRecordingStartRequest(BaseModel):
-    url: str
-    profile_id: Optional[str] = None
-
-class LiveRecordingActionRequest(BaseModel):
-    type: str  # fill, click, navigate, etc.
-    element: Optional[str] = None
-    uid: Optional[str] = None
-    value: Optional[str] = None
-    field_type: Optional[str] = None
-    url: Optional[str] = None
-    title: Optional[str] = None
-
-class LiveRecordingStopRequest(BaseModel):
-    recording_name: Optional[str] = None
-    session_name: Optional[str] = None
 
 # Utility functions
 def normalize_profile_name(profile: dict) -> str:
@@ -433,6 +421,9 @@ async def lifespan(app: FastAPI):
 
     # Check Ollama in background (don't block server startup)
     asyncio.create_task(check_ollama_status())
+
+    # AutofillEngine uses SeleniumBase (Python) - no Node.js needed
+    print(f"{Fore.GREEN}[AutofillEngine] Ready for bulk form filling{Style.RESET_ALL}")
 
     print(f"Server ready at http://localhost:5511")
 
@@ -758,7 +749,7 @@ async def delete_recording(recording_id: str):
 
 @app.post("/api/recordings/{recording_id}/replay")
 async def replay_recording(recording_id: str, request: RecordingReplayRequest):
-    """Replay a recording using Chrome DevTools Protocol (Playwright) with AI value replacement"""
+    """Replay a recording using bulk autofill (fast mode)"""
     if request.profile_id not in profiles:
         raise HTTPException(status_code=404, detail="Profile not found")
 
@@ -769,138 +760,91 @@ async def replay_recording(recording_id: str, request: RecordingReplayRequest):
     profile = profiles[request.profile_id]
     session_id = str(uuid.uuid4())
 
-    # Get OpenRouter API key from api_keys directory
-    import os
-    import base64
-    from pathlib import Path
+    # Import AutofillEngine (bulk fill approach - 10x faster)
+    from tools.autofill_engine import AutofillEngine
 
-    api_key = None
-
-    # First try to load from api_keys/openrouter.json
-    openrouter_key_file = Path("api_keys/openrouter.json")
-    if openrouter_key_file.exists():
+    # Run autofill in background
+    async def run_autofill():
         try:
-            with open(openrouter_key_file, 'r', encoding='utf-8') as f:
-                key_data = json.load(f)
-                # Check for encrypted_key first (base64 encoded)
-                encrypted_key = key_data.get("encrypted_key", "")
-                if encrypted_key:
-                    # Decode base64 and remove salt prefix
-                    decoded = base64.b64decode(encrypted_key).decode()
-                    # Remove "formai_local_salt" prefix
-                    api_key = decoded.replace("formai_local_salt", "")
-                # Fallback to plain api_key field
-                elif key_data.get("api_key"):
-                    api_key = key_data.get("api_key")
-        except Exception as e:
-            logger.warning(f"Failed to load OpenRouter key from api_keys: {e}")
-
-    # Fallback to environment variable
-    if not api_key:
-        api_key = os.getenv("OPENROUTER_API_KEY", "")
-
-    if not api_key:
-        raise HTTPException(
-            status_code=500,
-            detail="OpenRouter API key not configured. Please add it in Settings or .env file"
-        )
-
-    # Import Puppeteer Replay modules (EXACT Chrome DevTools replay)
-    from tools.puppeteer_replay_wrapper import PuppeteerReplayWrapper
-    from tools.ai_value_replacer import AIValueReplacer
-
-    # Set up progress callback
-    replay_engine = PuppeteerReplayWrapper()
-
-    async def progress_callback(update):
-        await broadcast_message({
-            "type": "replay_progress",
-            "session_id": session_id,
-            "data": update
-        })
-
-    replay_engine.set_progress_callback(progress_callback)
-    active_sessions[session_id] = replay_engine
-
-    # Run Puppeteer Replay in background (EXACT Chrome behavior)
-    async def run_puppeteer_replay():
-        try:
-            # Step 1: AI maps profile values
-            await broadcast_message({
-                "type": "replay_progress",
-                "session_id": session_id,
-                "data": {
-                    "status": "ai_mapping",
-                    "message": "AI is mapping profile data to form fields...",
-                    "progress": 5
-                }
-            })
-
-            replacer = AIValueReplacer(api_key)
-            modified_recording = replacer.replace_recording_values(recording, profile)
-
-            # Extract profile values as selector mappings
-            profile_values = {}
-            for step in modified_recording.get('steps', []):
-                if step.get('type') == 'change' and step.get('selectors'):
-                    selectors = step.get('selectors', [[]])
-                    if selectors and selectors[0]:
-                        selector = selectors[0][0]
-                        value = step.get('value', '')
-                        if value:
-                            profile_values[selector] = value
-
-            # Step 2: Replay with Puppeteer (EXACT Chrome behavior)
+            # Step 1: Starting
             await broadcast_message({
                 "type": "replay_progress",
                 "session_id": session_id,
                 "data": {
                     "status": "starting",
-                    "message": "Starting Puppeteer Replay (EXACT Chrome DevTools)...",
+                    "message": "Starting bulk autofill...",
                     "progress": 10
                 }
             })
 
-            result = await replay_engine.replay_recording(
-                recording=recording,  # Original recording
-                profile_values=profile_values,  # AI-mapped values
-                headless=request.headless,
-                step_delay=request.step_delay,
-                random_variation=request.random_variation,
-                auto_close=request.auto_close,
-                close_delay=request.close_delay
+            # Create engine (headless based on request)
+            engine = AutofillEngine(headless=request.headless)
+
+            # Step 2: Execute bulk fill
+            await broadcast_message({
+                "type": "replay_progress",
+                "session_id": session_id,
+                "data": {
+                    "status": "filling",
+                    "message": "Filling form fields...",
+                    "progress": 30
+                }
+            })
+
+            result = await engine.execute(
+                recording=recording,
+                profile=profile
             )
+
+            # Step 3: Complete
+            await broadcast_message({
+                "type": "replay_progress",
+                "session_id": session_id,
+                "data": {
+                    "status": "complete",
+                    "message": f"Completed: {result.fields_filled} fields filled, submitted: {result.submitted}",
+                    "progress": 100
+                }
+            })
 
             # Send completion message
             await broadcast_message({
                 "type": "replay_complete",
                 "session_id": session_id,
-                "data": result
+                "data": {
+                    "success": result.success,
+                    "fields_filled": result.fields_filled,
+                    "checkboxes_checked": result.checkboxes_checked,
+                    "radios_selected": result.radios_selected,
+                    "submitted": result.submitted,
+                    "error": result.error
+                }
             })
 
         except Exception as e:
-            logger.error(f"Puppeteer Replay failed: {e}", exc_info=True)
+            logger.error(f"Autofill failed: {e}", exc_info=True)
             await broadcast_message({
                 "type": "replay_error",
                 "session_id": session_id,
                 "data": {
                     "error": str(e),
-                    "message": f"Replay failed: {str(e)}"
+                    "message": f"Autofill failed: {str(e)}"
                 }
             })
         finally:
             if session_id in active_sessions:
                 del active_sessions[session_id]
 
-    # Start replay in background
-    asyncio.create_task(run_puppeteer_replay())
+    # Store session and start
+    active_sessions[session_id] = {"type": "autofill", "session_id": session_id}
+    asyncio.create_task(run_autofill())
 
     return JSONResponse(content={
         "session_id": session_id,
-        "message": "Chrome DevTools Replay started (EXACT Chrome + AI)",
+        "message": "Bulk autofill started (fast mode)",
         "recording_name": recording.get("recording_name") or recording.get("title", "Unknown"),
         "profile_name": profile.get("profileName", "Unknown"),
-        "mode": "chrome_devtools"
+        "mode": "bulk_autofill"
     })
 
 @app.get("/api/recordings/stats")
@@ -939,49 +883,8 @@ async def list_templates():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/templates/{template_id}/replay")
-async def replay_template(template_id: str, request: TemplateReplayRequest, background_tasks: BackgroundTasks):
-    """Replay a template with profile data"""
-    if request.profile_id not in profiles:
-        raise HTTPException(status_code=404, detail="Profile not found")
-
-    template = recording_manager.get_template(template_id)
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    profile = profiles[request.profile_id]
-    session_id = str(uuid.uuid4())
-
-    # Create replay engine with event loop for async progress callbacks
-    event_loop = asyncio.get_event_loop()
-    replay_engine = ProfileReplayEngine(use_stealth=True, headless=request.headless, event_loop=event_loop)
-
-    # Set up progress callback
-    async def progress_callback(update):
-        await broadcast_message({
-            "type": "template_replay_progress",
-            "session_id": session_id,
-            "data": update
-        })
-
-    replay_engine.set_progress_callback(progress_callback)
-    active_sessions[session_id] = replay_engine
-
-    # Run template replay in background
-    background_tasks.add_task(
-        run_template_replay,
-        session_id,
-        template_id,
-        profile,
-        request.session_name
-    )
-
-    return JSONResponse(content={
-        "session_id": session_id,
-        "message": "Template replay started",
-        "template_name": template.get("template_name", "Unknown"),
-        "profile_name": profile.get("profileName", "Unknown")
-    })
+# Template replay endpoint removed - templates now use Puppeteer replay like recordings
+# Templates can be converted to recordings and replayed via /api/recordings/{id}/replay
 
 @app.get("/api/recordings/{recording_id}/analyze")
 async def analyze_recording(recording_id: str):
@@ -1008,283 +911,6 @@ async def analyze_recording(recording_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-# AI-Powered Recording Analysis Endpoints
-
-@app.post("/api/ai/analyze-recording/{recording_id}")
-async def ai_analyze_recording(recording_id: str, profile_id: Optional[str] = None):
-    """
-    Analyze a recording with AI to automatically identify field types and suggest mappings
-    """
-    recording = recording_manager.get_recording(recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
-
-    try:
-        # Get profile if provided
-        profile = None
-        if profile_id and profile_id in profiles:
-            profile = profiles[profile_id]
-
-        # Run AI analysis
-        analyzed_recording = await ai_analyzer.analyze_recording(recording, profile)
-
-        # Save the enhanced recording with AI analysis
-        recording_manager.save_recording(analyzed_recording)
-
-        await broadcast_message({
-            "type": "recording_ai_analyzed",
-            "data": {
-                "recording_id": recording_id,
-                "analysis": analyzed_recording.get('ai_analysis', {})
-            }
-        })
-
-        return JSONResponse(content={
-            "success": True,
-            "recording_id": recording_id,
-            "ai_analysis": analyzed_recording.get('ai_analysis', {}),
-            "message": "AI analysis complete"
-        })
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "success": False,
-                "error": str(e),
-                "message": "AI analysis failed"
-            }
-        )
-
-@app.post("/api/ai/confirm-mapping")
-async def confirm_ai_mapping(request: Request):
-    """
-    User confirms or corrects AI field mappings
-    This becomes training data for future improvements
-    """
-    try:
-        data = await request.json()
-        recording_id = data.get('recording_id')
-        field_index = data.get('field_index')
-        confirmed_mapping = data.get('confirmed_mapping')
-        was_correct = data.get('was_correct', True)
-
-        if not all([recording_id, field_index is not None, confirmed_mapping]):
-            raise HTTPException(status_code=400, detail="Missing required fields")
-
-        recording = recording_manager.get_recording(recording_id)
-        if not recording:
-            raise HTTPException(status_code=404, detail="Recording not found")
-
-        # Update the AI analysis with user confirmation
-        ai_analysis = recording.get('ai_analysis', {})
-        fields = ai_analysis.get('fields', [])
-
-        if field_index >= len(fields):
-            raise HTTPException(status_code=400, detail="Invalid field index")
-
-        # Mark field as user-confirmed
-        fields[field_index]['user_confirmed'] = True
-        fields[field_index]['confirmed_mapping'] = confirmed_mapping
-        fields[field_index]['ai_was_correct'] = was_correct
-
-        # If user corrected, this is high-value training data
-        if not was_correct:
-            fields[field_index]['training_value'] = 'high'
-            fields[field_index]['correction_reason'] = data.get('correction_reason', '')
-
-        # Recalculate overall confidence
-        confirmed_fields = [f for f in fields if f.get('user_confirmed')]
-        if confirmed_fields:
-            ai_analysis['user_confirmed_count'] = len(confirmed_fields)
-            ai_analysis['user_corrections'] = len([f for f in confirmed_fields if not f.get('ai_was_correct')])
-
-        # Save updated recording
-        recording['ai_analysis'] = ai_analysis
-        recording_manager.save_recording(recording)
-
-        return JSONResponse(content={
-            "success": True,
-            "message": "Mapping confirmed and saved",
-            "training_value": fields[field_index].get('training_value', 'medium')
-        })
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/ai/recording-library")
-async def get_ai_recording_library(
-    category: Optional[str] = None,
-    min_confidence: Optional[float] = None,
-    training_value: Optional[str] = None
-):
-    """
-    Get all AI-analyzed recordings (the training library)
-    Optionally filter by category, confidence, or training value
-    """
-    try:
-        all_recordings = recording_manager.list_recordings()
-
-        # Filter to only AI-analyzed recordings
-        ai_recordings = [
-            r for r in all_recordings
-            if r.get('ai_analysis', {}).get('status') == 'analyzed'
-        ]
-
-        # Apply filters
-        if category:
-            ai_recordings = [
-                r for r in ai_recordings
-                if r.get('ai_analysis', {}).get('form_category') == category
-            ]
-
-        if min_confidence is not None:
-            ai_recordings = [
-                r for r in ai_recordings
-                if r.get('ai_analysis', {}).get('avg_confidence', 0) >= min_confidence
-            ]
-
-        if training_value:
-            ai_recordings = [
-                r for r in ai_recordings
-                if r.get('ai_analysis', {}).get('training_value') == training_value
-            ]
-
-        # Calculate library stats
-        stats = {
-            "total_analyzed_recordings": len(ai_recordings),
-            "categories": {},
-            "avg_confidence": 0,
-            "high_value_recordings": 0
-        }
-
-        if ai_recordings:
-            # Category breakdown
-            for rec in ai_recordings:
-                cat = rec.get('ai_analysis', {}).get('form_category', 'unknown')
-                stats['categories'][cat] = stats['categories'].get(cat, 0) + 1
-
-            # Average confidence
-            confidences = [r.get('ai_analysis', {}).get('avg_confidence', 0) for r in ai_recordings]
-            stats['avg_confidence'] = round(sum(confidences) / len(confidences), 2)
-
-            # High value count
-            stats['high_value_recordings'] = len([
-                r for r in ai_recordings
-                if r.get('ai_analysis', {}).get('training_value') == 'high'
-            ])
-
-        return JSONResponse(content={
-            "recordings": ai_recordings,
-            "stats": stats
-        })
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/ai/training-examples")
-async def get_training_examples(limit: int = 5):
-    """
-    Get few-shot learning examples from the recording library
-    Used to improve future AI analyses
-    """
-    try:
-        all_recordings = recording_manager.list_recordings()
-
-        # Get high-value, high-confidence recordings
-        ai_recordings = [
-            r for r in all_recordings
-            if r.get('ai_analysis', {}).get('status') == 'analyzed'
-            and r.get('ai_analysis', {}).get('training_value') == 'high'
-            and r.get('ai_analysis', {}).get('avg_confidence', 0) > 0.8
-        ]
-
-        # Sort by confidence and limit
-        ai_recordings.sort(
-            key=lambda r: r.get('ai_analysis', {}).get('avg_confidence', 0),
-            reverse=True
-        )
-        ai_recordings = ai_recordings[:limit]
-
-        # Generate few-shot prompt
-        few_shot_prompt = ai_analyzer.generate_few_shot_examples(ai_recordings, limit=limit)
-
-        return JSONResponse(content={
-            "examples": ai_recordings,
-            "few_shot_prompt": few_shot_prompt,
-            "count": len(ai_recordings)
-        })
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Live Recording Endpoints
-
-@app.post("/api/recording/live/start")
-async def start_live_recording(request: LiveRecordingStartRequest):
-    """Start a new live recording session"""
-    try:
-        result = live_recorder.start_session(
-            url=request.url,
-            profile_id=request.profile_id
-        )
-        return JSONResponse(content=result)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/api/recording/live/action")
-async def record_live_action(request: LiveRecordingActionRequest):
-    """Record an action during live recording"""
-    try:
-        action_data = {
-            "type": request.type,
-            "element": request.element,
-            "uid": request.uid,
-            "value": request.value,
-            "field_type": request.field_type,
-            "url": request.url,
-            "title": request.title
-        }
-        # Remove None values
-        action_data = {k: v for k, v in action_data.items() if v is not None}
-
-        result = live_recorder.record_action(action_data)
-        return JSONResponse(content=result)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/api/recording/live/stop")
-async def stop_live_recording(request: LiveRecordingStopRequest):
-    """Stop live recording and save"""
-    try:
-        result = live_recorder.stop_session(recording_name=request.recording_name)
-
-        # Properly save recording to index using recording_manager
-        recording_data = result["recording_data"]
-        recording_manager.save_recording(recording_data)
-
-        return JSONResponse(content=result)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.get("/api/recording/live/status")
-async def get_live_recording_status():
-    """Get current live recording session status"""
-    try:
-        status = live_recorder.get_status()
-        return JSONResponse(content=status)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/recording/live/cancel")
-async def cancel_live_recording():
-    """Cancel current live recording without saving"""
-    try:
-        result = live_recorder.cancel_session()
-        return JSONResponse(content=result)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/api/api-keys")
 async def get_api_keys():
@@ -1904,8 +1530,10 @@ def show_startup_animation():
             time.sleep(delay)
         print(end=end)
 
-    # Clear screen
-    os.system('cls' if os.name == 'nt' else 'clear')
+    # Clear screen (cross-platform)
+    system = platform.system()
+    clear_cmd = "clear" if system == "Linux" else "cls"
+    os.system(clear_cmd)
 
     # Large KPR ASCII art banner
     kpr_banner = """
@@ -1947,33 +1575,140 @@ def show_startup_animation():
     typewriter("━" * 54, 0.005, Fore.CYAN)
     print()
 
+# ==================== Job Queue API ====================
+# These endpoints are for the Docker-based job queue system
+
+try:
+    from queue_manager import get_queue_manager
+    from job_models import Job, JobSubmitRequest, JobStats
+    REDIS_ENABLED = True
+except ImportError:
+    REDIS_ENABLED = False
+    # Define dummy classes if imports fail
+    class JobSubmitRequest(BaseModel):
+        profile_id: str
+        recording_id: str
+        count: int = 1
+
+@app.get("/api/jobs/stats")
+async def get_job_stats():
+    """Get job queue statistics"""
+    if not REDIS_ENABLED:
+        return JSONResponse(content={"error": "Redis not configured"}, status_code=503)
+    try:
+        queue = get_queue_manager()
+        if not queue.is_connected():
+            return JSONResponse(content={"error": "Redis not connected"}, status_code=503)
+        stats = queue.get_stats()
+        return stats.model_dump()
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@app.get("/api/jobs/workers")
+async def get_workers():
+    """Get list of active workers"""
+    if not REDIS_ENABLED:
+        return JSONResponse(content=[], status_code=200)
+    try:
+        queue = get_queue_manager()
+        workers = queue.get_workers()
+        return workers
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@app.get("/api/jobs/recent")
+async def get_recent_jobs():
+    """Get recent jobs (completed + failed)"""
+    if not REDIS_ENABLED:
+        return JSONResponse(content=[], status_code=200)
+    try:
+        queue = get_queue_manager()
+        jobs = queue.get_recent_jobs(limit=50)
+        return jobs
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@app.get("/api/jobs/{job_id}")
+async def get_job_details(job_id: str):
+    """Get details for a specific job"""
+    if not REDIS_ENABLED:
+        raise HTTPException(status_code=503, detail="Redis not configured")
+    try:
+        queue = get_queue_manager()
+        details = queue.get_job_details(job_id)
+        if not details:
+            raise HTTPException(status_code=404, detail="Job not found")
+        return details
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/jobs")
+async def submit_job(request: JobSubmitRequest):
+    """Submit one or more jobs to the queue"""
+    if not REDIS_ENABLED:
+        raise HTTPException(status_code=503, detail="Redis not configured")
+    try:
+        queue = get_queue_manager()
+        if not queue.is_connected():
+            raise HTTPException(status_code=503, detail="Redis not connected")
+
+        job_ids = []
+        for _ in range(request.count):
+            job = Job(
+                profile_id=request.profile_id,
+                recording_id=request.recording_id,
+                target_url=request.target_url
+            )
+            job_id = queue.add_job(job)
+            job_ids.append(job_id)
+
+        return {"success": True, "job_ids": job_ids, "count": len(job_ids)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Route for jobs dashboard page
+@app.get("/jobs")
+async def jobs_page():
+    """Serve the jobs dashboard page"""
+    return FileResponse("web/jobs.html")
+
+MODE = os.getenv("MODE", "web")
+
 if __name__ == "__main__":
-    import webbrowser
-    import threading
-    import time
+    if MODE == "worker":
+        from worker import main as worker_main
+        print("Running in worker mode")
+        asyncio.run(worker_main())
+    else:
+        import webbrowser
+        import threading
+        import time
 
-    # Skip startup animation when launched from test.bat
-    # show_startup_animation()
+        # Skip startup animation when launched from test.bat
+        # show_startup_animation()
 
-    print("\nServer starting on http://localhost:5511")
-    print("Close this window to stop FormAI\n")
+        print("\nServer starting on http://localhost:5511")
+        print("Close this window to stop FormAI\n")
 
-    def open_browser():
-        """Open browser after a short delay"""
-        time.sleep(1)  # Short delay for server to start
-        try:
-            webbrowser.open("http://localhost:5511")
-        except:
-            pass  # Silently fail if browser can't open
+        def open_browser():
+            """Open browser after a short delay"""
+            time.sleep(1)  # Short delay for server to start
+            try:
+                webbrowser.open("http://localhost:5511")
+            except:
+                pass  # Silently fail if browser can't open
 
-    # Start browser in background thread
-    threading.Thread(target=open_browser, daemon=True).start()
+        # Start browser in background thread
+        threading.Thread(target=open_browser, daemon=True).start()
 
-    # Run the server (when terminal closes, this exits and server stops)
-    uvicorn.run(
-        app,
-        host="127.0.0.1",
-        port=5511,
-        log_level="error",  # Only show errors, suppress info/warning logs
-        access_log=False
-    )
+        # Run the server (when terminal closes, this exits and server stops)
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=5511,
+            log_level="info"
+        )

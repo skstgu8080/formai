@@ -9,15 +9,16 @@ python-multipart==0.0.9
 websockets>=13.1
 aiofiles==24.1.0
 
-# GUI Automation
-pyautogui==0.9.54
-pillow>=11.2.1  # For screenshot capabilities (updated for browser-use)
-pyperclip==1.8.2  # For clipboard operations
+# GUI Automation (disabled for Docker/headless)
+# pyautogui==0.9.54
+pillow>=11.2.1  # For screenshot capabilities
+# pyperclip==1.8.2  # For clipboard operations
 numpy==1.26.4  # For image comparison
 
 # Data Processing
 pydantic>=2.11.5  # Updated for browser-use compatibility
 python-dotenv==1.0.1
+redis>=5.0.1  # Redis client for job queue
 
 # HTTP Client for API calls
 httpx>=0.28.1  # Updated for browser-use compatibility
@@ -29,9 +30,9 @@ lxml>=5.0.0  # Fast XML/HTML parsing
 # Utilities
 colorama==0.4.6  # For colored console output on Windows
 
-# Camera & Audio Remote Access
-opencv-python==4.10.0.84  # For camera access
-pyaudio==0.2.14  # For microphone access
+# Camera & Audio Remote Access (disabled for Docker/headless)
+# opencv-python==4.10.0.84  # For camera access
+# pyaudio==0.2.14  # For microphone access
 
 # AI Browser Automation
 browser-use>=0.9.0  # AI-powered browser automation

@@ -15,6 +15,7 @@ from datetime import datetime
 from seleniumbase import SB
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+import platform
 
 # Configure logging
 logging.basicConfig(level=logging.WARNING)
@@ -163,19 +164,22 @@ class SeleniumAutomation:
             "credentials_enable_service": False,
         }
 
-        # Create persistent profile directory for FormAI
-        profile_dir = os.path.join(os.getenv("APPDATA", "."), "FormAI", "ChromeProfile")
-        os.makedirs(profile_dir, exist_ok=True)
+        # Create persistent profile directory for FormAI (cross-platform)
+        if platform.system() == "Windows":
+            profile_dir = Path(os.getenv("APPDATA", str(Path.home() / "AppData" / "Roaming"))) / "FormAI" / "ChromeProfile"
+        else:
+            profile_dir = Path.home() / ".config" / "formai" / "chrome_profile"
+        profile_dir.mkdir(parents=True, exist_ok=True)
 
-        options.append(f"--user-data-dir={profile_dir}")
+        options.append(f"--user-data-dir={str(profile_dir)}")
 
         # Store prefs in a way SeleniumBase can use them
-        prefs_file = os.path.join(profile_dir, "Default", "Preferences")
-        os.makedirs(os.path.dirname(prefs_file), exist_ok=True)
+        prefs_file = profile_dir / "Default" / "Preferences"
+        prefs_file.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            with open(prefs_file, 'w') as f:
-                json.dump({"profile": {"content_settings": {"exceptions": prefs}}}, f)
+            with prefs_file.open('w') as f:
+                json.dump({"profile": {"content_settings": {"exceptions": prefs}}}, f, indent=2)
         except:
             pass  # If it fails, Chrome will create it
 

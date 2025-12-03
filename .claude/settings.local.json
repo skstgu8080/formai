@@ -57,7 +57,13 @@
       "Bash(git log:*)",
       "Read(//c/tmp/**)",
       "Read(//tmp/awesome-devops-mcp-servers/**)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git clone:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(where:*)",
+      "WebFetch(domain:docs.lightningautofill.com)",
+      "Bash(cd:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []

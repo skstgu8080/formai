@@ -134,6 +134,33 @@ class AIValueReplacer:
         # Fall back to AI for complex mappings
         return self._ai_field_mapping(field_id, sample_value, profile, selectors)
 
+    def _get_profile_value(self, profile: Dict[str, Any], *keys) -> str:
+        """
+        Get a value from profile, checking both flat and nested 'data' structure.
+
+        Args:
+            profile: Profile dictionary
+            *keys: Keys to try in order
+
+        Returns:
+            Value string or empty string if not found
+        """
+        # First check flat structure
+        for key in keys:
+            value = profile.get(key)
+            if value:
+                return str(value)
+
+        # Then check nested 'data' structure
+        data = profile.get('data', {})
+        if isinstance(data, dict):
+            for key in keys:
+                value = data.get(key)
+                if value:
+                    return str(value)
+
+        return ''
+
     def _try_direct_match(
         self,
         field_id: str,
@@ -155,44 +182,51 @@ class AIValueReplacer:
 
         # Name fields
         if 'firstname' in field_lower or 'first-name' in field_lower or 'fname' in field_lower:
-            return profile.get('firstName', profile.get('firstname', ''))
+            return self._get_profile_value(profile, 'firstName', 'firstname', 'first_name')
 
         if 'lastname' in field_lower or 'last-name' in field_lower or 'lname' in field_lower:
-            return profile.get('lastName', profile.get('lastname', ''))
+            return self._get_profile_value(profile, 'lastName', 'lastname', 'last_name')
 
         # Email
         if 'email' in field_lower or 'e-mail' in field_lower:
-            return profile.get('email', '')
+            return self._get_profile_value(profile, 'email')
 
         # Phone
         if 'phone' in field_lower or 'mobile' in field_lower or 'tel' in field_lower:
-            return profile.get('phone', profile.get('mobilePhone', ''))
+            return self._get_profile_value(profile, 'phone', 'mobilePhone', 'cellPhone', 'homePhone')
+
+        # Password
+        if 'password' in field_lower or 'pass' in field_lower:
+            return self._get_profile_value(profile, 'password')
 
         # Address fields
-        if 'address' in field_lower and 'line1' in field_lower:
-            return profile.get('address', profile.get('homeAddress', ''))
+        if 'address' in field_lower:
+            return self._get_profile_value(profile, 'address', 'address1', 'homeAddress')
 
         if 'city' in field_lower:
-            return profile.get('city', profile.get('homeCity', ''))
+            return self._get_profile_value(profile, 'city', 'homeCity')
 
         if 'state' in field_lower or 'province' in field_lower:
-            return profile.get('state', profile.get('homeState', ''))
+            return self._get_profile_value(profile, 'state', 'homeState')
 
         if 'zip' in field_lower or 'postal' in field_lower:
-            return profile.get('zipCode', profile.get('homeZip', ''))
+            return self._get_profile_value(profile, 'zipCode', 'zip', 'homeZip', 'postalCode')
 
         if 'country' in field_lower:
-            return profile.get('country', profile.get('homeCountry', ''))
+            return self._get_profile_value(profile, 'country', 'homeCountry')
 
-        # Gender
+        # Gender - check both flat and nested structure
         if 'gender' in field_lower or 'sex' in field_lower:
-            gender = profile.get('gender', '')
-            # Normalize gender values
-            if gender.lower() in ['m', 'male', 'man']:
-                return 'MALE'
-            elif gender.lower() in ['f', 'female', 'woman']:
-                return 'FEMALE'
-            return gender
+            gender = self._get_profile_value(profile, 'gender', 'sex')
+            if gender:
+                # Normalize gender values
+                gender_lower = gender.lower()
+                if gender_lower in ['m', 'male', 'man']:
+                    return 'MALE'
+                elif gender_lower in ['f', 'female', 'woman']:
+                    return 'FEMALE'
+                return gender
+            return ''
 
         return None
 
@@ -230,34 +264,40 @@ class AIValueReplacer:
         Handles both separate components (birthMonth, birthDay, birthYear)
         and full date fields.
         """
-        # Try to get separate components first
-        month = profile.get('birthMonth', '')
-        day = profile.get('birthDay', '')
-        year = profile.get('birthYear', '')
+        # Try full date field first (more reliable)
+        full_date = self._get_profile_value(profile, 'birthdate', 'date_of_birth', 'dateOfBirth', 'dob')
+        if full_date:
+            return full_date
 
-        if month and day and year:
+        # Try to get separate components with sensible defaults
+        month = self._get_profile_value(profile, 'birthMonth', 'birth_month')
+        day = self._get_profile_value(profile, 'birthDay', 'birth_day')
+        year = self._get_profile_value(profile, 'birthYear', 'birth_year')
+
+        # Use defaults for missing values (allows partial date data)
+        if month or day or year:
             # Convert month name to number if needed
-            month_num = self._convert_month_to_number(month)
+            month_num = self._convert_month_to_number(month) if month else 1
+            day_num = int(day) if day and day.isdigit() else 15
+            year_val = year if year and year.isdigit() else '1990'
+
+            # Ensure day is valid (1-28 to avoid invalid dates)
+            day_num = min(max(day_num, 1), 28)
 
             # Detect format from sample value
             if sample_value:
                 if '-' in sample_value:
-                    # ISO format: YYYY-MM-DD
-                    return f"{year}-{month_num:02d}-{int(day):02d}"
-                elif sample_value.startswith(year):
+                    # ISO format: YYYY-MM-DD (HTML5 date input)
+                    return f"{year_val}-{month_num:02d}-{day_num:02d}"
+                elif sample_value.startswith(str(year_val)):
                     # Year first: YYYY/MM/DD
-                    return f"{year}/{month_num:02d}/{int(day):02d}"
+                    return f"{year_val}/{month_num:02d}/{day_num:02d}"
                 else:
                     # Month first: MM/DD/YYYY
-                    return f"{month_num:02d}/{int(day):02d}/{year}"
+                    return f"{month_num:02d}/{day_num:02d}/{year_val}"
             else:
-                # Default to ISO format
-                return f"{year}-{month_num:02d}-{int(day):02d}"
-
-        # Try full date field
-        full_date = profile.get('birthdate', profile.get('dateOfBirth', ''))
-        if full_date:
-            return full_date
+                # Default to ISO format (required for HTML5 date inputs)
+                return f"{year_val}-{month_num:02d}-{day_num:02d}"
 
         return None
 
