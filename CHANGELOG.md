@@ -19,17 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Password strength checking
   - Required field detection
   - Pre-replay validation with warnings
-- **CAPTCHA Solving Integration** - Support for solving CAPTCHAs automatically
-  - 2Captcha API support
-  - Anti-Captcha API support
-  - reCAPTCHA v2/v3 solving
-  - hCaptcha solving
-  - Image CAPTCHA solving
-  - API key configuration in Settings page
+- **CAPTCHA Solving** - SeleniumBase built-in CAPTCHA solving (no paid APIs required)
+  - Uses `sb.solve_captcha()` as primary method
+  - Cloudflare Turnstile bypass
+  - reCAPTCHA handling via UC Mode
+  - Automatic fallback chain for reliability
 
 ### Changed
 - Added Edit button to recording cards on Recorder page
-- Enhanced Settings page with CAPTCHA service configuration
 
 ---
 

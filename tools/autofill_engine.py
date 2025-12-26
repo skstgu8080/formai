@@ -302,8 +302,8 @@ class AutofillEngine:
             'username': 'username',
             'user': 'username',
 
-            # Personal
-            'gender': 'gender',
+            # Personal - both map to 'sex' since that's the profile field name
+            'gender': 'sex',
             'sex': 'sex',
             'birthdate': 'birthdate',
             'birth date': 'birthdate',
@@ -550,34 +550,59 @@ class AutofillEngine:
         # Flatten profile if it has a 'data' wrapper
         flat_profile = profile.get("data", profile) if isinstance(profile.get("data"), dict) else profile
 
+        value = None
+
         # Direct key lookup
         if key in flat_profile:
-            return str(flat_profile[key])
+            value = str(flat_profile[key])
+        else:
+            # Try case-insensitive
+            key_lower = key.lower()
+            for k, v in flat_profile.items():
+                if k.lower() == key_lower:
+                    value = str(v)
+                    break
 
-        # Try case-insensitive
-        key_lower = key.lower()
-        for k, v in flat_profile.items():
-            if k.lower() == key_lower:
-                return str(v)
-
-        # Try nested lookup (personal.firstName)
-        if "." in key:
-            parts = key.split(".")
-            obj = flat_profile
-            for part in parts:
-                if isinstance(obj, dict) and part in obj:
-                    obj = obj[part]
-                else:
-                    return ""
-            return str(obj) if obj else ""
+            # Try nested lookup (personal.firstName)
+            if value is None and "." in key:
+                parts = key.split(".")
+                obj = flat_profile
+                for part in parts:
+                    if isinstance(obj, dict) and part in obj:
+                        obj = obj[part]
+                    else:
+                        obj = None
+                        break
+                if obj:
+                    value = str(obj)
 
         # Fallback: construct birthdate from components if requesting date field
-        if key_lower in ['birthdate', 'date_of_birth', 'dob']:
-            constructed = self._construct_date_from_components(flat_profile)
-            if constructed:
-                return constructed
+        if value is None:
+            key_lower = key.lower()
+            if key_lower in ['birthdate', 'date_of_birth', 'dob']:
+                constructed = self._construct_date_from_components(flat_profile)
+                if constructed:
+                    value = constructed
 
-        return ""
+        # Fallback: check alternate gender field names
+        if value is None:
+            key_lower = key.lower()
+            if key_lower in ['sex', 'gender']:
+                # Try all common gender field names
+                for alt_key in ['sex', 'gender', 'genderA', 'Gender', 'Sex']:
+                    if alt_key in flat_profile and flat_profile[alt_key]:
+                        value = str(flat_profile[alt_key])
+                        break
+
+        # Normalize gender values for dropdown compatibility
+        if value and key.lower() in ['sex', 'gender']:
+            value_lower = value.lower()
+            if value_lower in ['m', 'male', 'man']:
+                return 'MALE'
+            elif value_lower in ['f', 'female', 'woman']:
+                return 'FEMALE'
+
+        return value if value else ""
 
     def _format_date_for_input_type(self, value: str, input_type: str) -> str:
         """Format date value for HTML5 date input (YYYY-MM-DD)."""

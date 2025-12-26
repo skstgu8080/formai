@@ -112,12 +112,21 @@
                             <h3 class="text-lg font-medium text-card-foreground">Profile Management</h3>
                             <p class="text-sm text-muted-foreground">Create and manage user profiles for form automation</p>
                         </div>
-                        <button id="create-profile-btn" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 inline">
-                                <path d="M5 12h14"/><path d="M12 5v14"/>
-                            </svg>
-                            Create Profile
-                        </button>
+                        <div class="flex space-x-2">
+                            <button id="import-profile-btn" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 inline">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                Import Profile
+                            </button>
+                            <input type="file" id="import-profile-input" accept=".json" class="hidden">
+                            <button id="create-profile-btn" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 inline">
+                                    <path d="M5 12h14"/><path d="M12 5v14"/>
+                                </svg>
+                                Create Profile
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -514,10 +523,58 @@
                 document.getElementById('close-modal').addEventListener('click', () => this.closeModal());
                 document.getElementById('cancel-profile').addEventListener('click', () => this.closeModal());
                 document.getElementById('profile-form').addEventListener('submit', (e) => this.saveProfile(e));
-                
+
                 document.getElementById('profile-modal').addEventListener('click', (e) => {
                     if (e.target.id === 'profile-modal') this.closeModal();
                 });
+
+                // Import profile functionality
+                document.getElementById('import-profile-btn').addEventListener('click', () => {
+                    document.getElementById('import-profile-input').click();
+                });
+
+                document.getElementById('import-profile-input').addEventListener('change', (e) => this.importProfile(e));
+            }
+
+            async importProfile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                try {
+                    const text = await file.text();
+                    const profileData = JSON.parse(text);
+
+                    // Ensure profile has required fields
+                    if (!profileData.name) {
+                        profileData.name = file.name.replace('.json', '');
+                    }
+
+                    // Remove id if present (server will generate new one)
+                    delete profileData.id;
+
+                    // Save the imported profile
+                    const response = await fetch('/api/profiles', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(profileData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert(`✅ Profile imported: ${result.name || profileData.name}`);
+                        await this.loadProfiles();
+                        this.renderProfiles();
+                    } else {
+                        const error = await response.json();
+                        alert(`❌ Import failed: ${error.detail || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert(`❌ Import failed: ${error.message}`);
+                }
+
+                // Reset file input
+                event.target.value = '';
             }
 
             async loadProfiles() {
