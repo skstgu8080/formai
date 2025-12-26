@@ -704,7 +704,7 @@ export const settingsSchema = {
     "gemini",
     "ai"
   ],
-  "author": "KoodosBots",
+  "author": "skstgu8080",
   "license": "Apache-2.0"
 }
 ```

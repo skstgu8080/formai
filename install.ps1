@@ -1,5 +1,5 @@
 # FormAI Installer for Windows (PowerShell)
-# Usage: irm https://raw.githubusercontent.com/KoodosBots/formai/master/install.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/skstgu8080/formai/master/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 

@@ -5,6 +5,31 @@ All notable changes to FormAI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2025-12-26
+
+### Added
+- **Import Profile Button** - Import JSON profile files directly from the Profiles page
+- **Gender Field Fallback** - Autofill engine checks multiple profile field names (sex, gender, genderA)
+- **Gender Value Normalization** - Converts m/male to MALE, f/female to FEMALE for dropdown compatibility
+
+### Changed
+- **CAPTCHA Solving** - Now uses SeleniumBase built-in methods only (no paid APIs)
+  - Primary: `sb.solve_captcha()`
+  - Fallback 1: `uc_gui_handle_captcha()`
+  - Fallback 2: `uc_gui_click_captcha()`
+- **Release Workflow** - Removed retired macOS-13 Intel build, now builds for:
+  - Windows x64
+  - macOS Apple Silicon (ARM64)
+  - Linux x64
+
+### Removed
+- **Paid CAPTCHA APIs** - Removed 2Captcha and Anti-Captcha integration
+  - Deleted `tools/captcha_solver.py` (672 lines)
+  - Removed CAPTCHA API endpoints from server
+  - Removed CAPTCHA service config from Settings page
+
+---
+
 ## [1.0.8] - 2025-12-03
 
 ### Added
@@ -19,11 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Password strength checking
   - Required field detection
   - Pre-replay validation with warnings
-- **CAPTCHA Solving** - SeleniumBase built-in CAPTCHA solving (no paid APIs required)
-  - Uses `sb.solve_captcha()` as primary method
-  - Cloudflare Turnstile bypass
-  - reCAPTCHA handling via UC Mode
-  - Automatic fallback chain for reliability
 
 ### Changed
 - Added Edit button to recording cards on Recorder page
@@ -34,28 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **One-Line Installation** - Install FormAI with a single curl/PowerShell command
-  - `curl -sSL https://raw.githubusercontent.com/KoodosBots/formai/master/install.sh | bash` (macOS/Linux)
-  - `irm https://raw.githubusercontent.com/KoodosBots/formai/master/install.ps1 | iex` (Windows)
-- **Cross-Platform Releases** - Pre-built executables for Windows, macOS (Intel/ARM), Linux
+  - `curl -sSL https://raw.githubusercontent.com/skstgu8080/formai/master/install.sh | bash` (macOS/Linux)
+  - `irm https://raw.githubusercontent.com/skstgu8080/formai/master/install.ps1 | iex` (Windows)
+- **Cross-Platform Releases** - Pre-built executables for Windows, macOS ARM, Linux
 - **GitHub Actions CI/CD** - Automated release builds on version tags
-- **Bulk Autofill Engine** - SeleniumBase-based form filling replaces Puppeteer step-by-step replay
-- Project-kit documentation structure adoption
-- Modular `.claude/` guideline files (security.md, testing.md, api-design.md, database.md, standards.md)
-- Agent templates (code-reviewer, debugger, refactorer)
-- Custom slash commands (review, test, debug)
-- docs/ARCHITECTURE.md for system design
-- Documentation templates for features and bugs
-
-### Changed
-- Dashboard recording replay now uses fast bulk autofill instead of slow step-by-step Puppeteer
-- Restructured CLAUDE.md with project-kit format
-- Updated README.md with accurate Python-based setup instructions
-- Refactored build-formai.bat to use cross-platform Python build script
-
-### Removed
-- Puppeteer-based step-by-step replay (replaced with SeleniumBase AutofillEngine)
-- Outdated Rust/cargo references from README
-- Unrelated Archon project content from CLAUDE.md
 
 ---
 
@@ -106,6 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 1.0.9 | 2025-12-26 | Remove paid CAPTCHA APIs, fix gender field, add profile import |
+| 1.0.8 | 2025-12-03 | Recording Editor, Form Validation |
 | 1.0.0 | 2025-12-01 | Baseline - Python-based FormAI with dual-server architecture |
 
 ---

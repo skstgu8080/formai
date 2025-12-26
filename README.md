@@ -29,7 +29,7 @@ Get FormAI running in under 2 minutes:
 
 ```bash
 # Clone repository
-git clone https://github.com/KoodosBots/formai.git
+git clone https://github.com/skstgu8080/formai.git
 cd formai
 
 # Install Python dependencies

@@ -345,7 +345,7 @@ recordings/
 
 ## Support
 
-- GitHub Issues: https://github.com/KoodosBots/formai/issues
+- GitHub Issues: https://github.com/skstgu8080/formai/issues
 - Documentation: `docs/` folder
 - API Reference: This document
 

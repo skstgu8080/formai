@@ -1,6 +1,6 @@
 #!/bin/bash
 # FormAI Installer for macOS and Linux
-# Usage: curl -sSL https://raw.githubusercontent.com/KoodosBots/formai/master/install.sh | bash
+# Usage: curl -sSL https://raw.githubusercontent.com/skstgu8080/formai/master/install.sh | bash
 
 set -e
 
