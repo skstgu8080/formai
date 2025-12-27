@@ -101,6 +101,56 @@ class OllamaInstaller:
 
         return result
 
+    def install_via_winget(self) -> bool:
+        """
+        Install Ollama using Windows Package Manager (winget).
+        This is truly silent with no GUI popups.
+
+        Returns:
+            True if installation successful
+        """
+        try:
+            # Check if winget is available
+            result = subprocess.run(
+                ["winget", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode != 0:
+                return False
+
+            self._report_progress("installing", 20, "Installing Ollama via Windows Package Manager...")
+
+            # Install Ollama silently via winget
+            result = subprocess.run(
+                ["winget", "install", "--id", "Ollama.Ollama", "-e", "--silent",
+                 "--accept-package-agreements", "--accept-source-agreements"],
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+
+            self._report_progress("installing", 55, "Verifying installation...")
+            time.sleep(3)
+
+            # Verify installation
+            status = self.check_installation()
+            if status["installed"]:
+                self._report_progress("installing", 60, "Ollama installed via winget")
+                return True
+
+            return False
+
+        except FileNotFoundError:
+            # winget not available
+            return False
+        except subprocess.TimeoutExpired:
+            self._report_progress("error", 0, "Winget installation timed out")
+            return False
+        except Exception:
+            return False
+
     def download_installer(self, download_path: Path) -> bool:
         """
         Download Ollama installer
@@ -152,15 +202,24 @@ class OllamaInstaller:
             True if installation successful
         """
         try:
-            self._report_progress("installing", 45, "Running Ollama installer...")
+            self._report_progress("installing", 45, "Running Ollama installer (silent mode)...")
 
-            # Run silent installation
+            # Run silent installation with multiple silent flags for compatibility
+            # Hide the window completely
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+
             result = subprocess.run(
-                [str(installer_path), "/S"],
+                [str(installer_path), "/S", "/VERYSILENT", "/NORESTART", "/SUPPRESSMSGBOXES"],
                 capture_output=True,
                 text=True,
-                timeout=300
+                timeout=300,
+                startupinfo=startupinfo,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
+
+            self._report_progress("installing", 55, "Finalizing installation...")
 
             # Wait for installation to complete
             time.sleep(5)
@@ -200,17 +259,22 @@ class OllamaInstaller:
             if sys.platform == "win32":
                 # On Windows, Ollama typically starts automatically as a service
                 # Just wait and check if it's running
-                for i in range(10):
+                for i in range(5):
                     time.sleep(2)
                     status = self.check_installation()
                     if status["running"]:
                         self._report_progress("starting", 70, "Ollama service is running")
                         return True
 
-                # If not running, try to start manually
+                # If not running, try to start manually with hidden window
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
+
                 subprocess.Popen(
                     [status["executable_path"], "serve"],
-                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+                    startupinfo=startupinfo,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                 )
@@ -251,13 +315,19 @@ class OllamaInstaller:
                 self._report_progress("error", 0, "Ollama not installed")
                 return False
 
-            # Pull model using Ollama CLI
+            # Pull model using Ollama CLI (hidden window)
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+
             process = subprocess.Popen(
                 [status["executable_path"], "pull", model_name],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
-                bufsize=1
+                bufsize=1,
+                startupinfo=startupinfo,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
 
             # Monitor progress
@@ -310,20 +380,27 @@ class OllamaInstaller:
                 self._report_progress("complete", 100, "Ollama ready to use")
                 return result
 
-            # Download installer
-            temp_dir = Path(tempfile.gettempdir())
-            installer_path = temp_dir / "OllamaSetup.exe"
+            # If not installed, try winget first (truly silent, no popups)
+            if not status["installed"]:
+                self._report_progress("installing", 10, "Attempting silent installation via winget...")
+                if self.install_via_winget():
+                    status = self.check_installation()
 
-            if not self.download_installer(installer_path):
-                result["status"] = "download_failed"
-                result["message"] = "Failed to download Ollama installer"
-                return result
+            # Fall back to direct installer download if winget failed
+            if not status["installed"]:
+                temp_dir = Path(tempfile.gettempdir())
+                installer_path = temp_dir / "OllamaSetup.exe"
 
-            # Install Ollama
-            if not self.install_ollama(installer_path):
-                result["status"] = "install_failed"
-                result["message"] = "Failed to install Ollama"
-                return result
+                if not self.download_installer(installer_path):
+                    result["status"] = "download_failed"
+                    result["message"] = "Failed to download Ollama installer"
+                    return result
+
+                # Install Ollama
+                if not self.install_ollama(installer_path):
+                    result["status"] = "install_failed"
+                    result["message"] = "Failed to install Ollama"
+                    return result
 
             # Start service
             if not self.start_service():
