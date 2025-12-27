@@ -5,6 +5,17 @@ All notable changes to FormAI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2025-12-26
+
+### Fixed
+- **CAPTCHA Methods** - Use correct SeleniumBase UC Mode methods
+  - `uc_gui_handle_cf()` for Cloudflare/Turnstile
+  - `uc_gui_handle_rc()` for reCAPTCHA
+  - `uc_gui_handle_captcha()` as generic fallback
+- **Repository URLs** - Updated all docs to use skstgu8080/formai
+
+---
+
 ## [1.0.9] - 2025-12-26
 
 ### Added
@@ -14,9 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **CAPTCHA Solving** - Now uses SeleniumBase built-in methods only (no paid APIs)
-  - Primary: `sb.solve_captcha()`
-  - Fallback 1: `uc_gui_handle_captcha()`
-  - Fallback 2: `uc_gui_click_captcha()`
 - **Release Workflow** - Removed retired macOS-13 Intel build, now builds for:
   - Windows x64
   - macOS Apple Silicon (ARM64)
@@ -108,6 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 1.0.10 | 2025-12-26 | Fix CAPTCHA methods, update repo URLs |
 | 1.0.9 | 2025-12-26 | Remove paid CAPTCHA APIs, fix gender field, add profile import |
 | 1.0.8 | 2025-12-03 | Recording Editor, Form Validation |
 | 1.0.0 | 2025-12-01 | Baseline - Python-based FormAI with dual-server architecture |
