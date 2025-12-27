@@ -611,36 +611,47 @@ class SeleniumAutomation:
                 if indicator in page_source:
                     logger.warning(f"CAPTCHA detected: {indicator}")
 
-                    # Try SeleniumBase's solve_captcha() first (recommended method)
-                    try:
-                        logger.info("Attempting to solve CAPTCHA using sb.solve_captcha()")
-                        self.sb.solve_captcha()
-                        logger.info("CAPTCHA solved successfully")
-                        await asyncio.sleep(2)
-                        return True
-                    except Exception as e:
-                        logger.warning(f"sb.solve_captcha() failed: {e}, trying UC Mode methods")
-
-                        # Fallback 1: UC Mode's built-in CAPTCHA handling
+                    # Try specific handler based on CAPTCHA type
+                    if "cloudflare" in indicator or "turnstile" in indicator:
                         try:
-                            logger.info("Attempting uc_gui_handle_captcha")
-                            self.driver.uc_gui_handle_captcha()
-                            logger.info("CAPTCHA handling completed")
+                            logger.info("Attempting uc_gui_handle_cf for Cloudflare")
+                            self.driver.uc_gui_handle_cf()
+                            logger.info("Cloudflare CAPTCHA handled")
                             await asyncio.sleep(2)
                             return True
-                        except Exception as e2:
-                            logger.warning(f"uc_gui_handle_captcha failed: {e2}")
+                        except Exception as e:
+                            logger.warning(f"uc_gui_handle_cf failed: {e}")
 
-                            # Fallback 2: try uc_gui_click_captcha
-                            try:
-                                logger.info("Trying uc_gui_click_captcha as final fallback")
-                                self.driver.uc_gui_click_captcha()
-                                logger.info("CAPTCHA click completed")
-                                await asyncio.sleep(2)
-                                return True
-                            except Exception as e3:
-                                logger.error(f"All CAPTCHA methods failed: {e3}")
-                                return False
+                    if "recaptcha" in indicator:
+                        try:
+                            logger.info("Attempting uc_gui_handle_rc for reCAPTCHA")
+                            self.driver.uc_gui_handle_rc()
+                            logger.info("reCAPTCHA handled")
+                            await asyncio.sleep(2)
+                            return True
+                        except Exception as e:
+                            logger.warning(f"uc_gui_handle_rc failed: {e}")
+
+                    # Generic CAPTCHA handling fallback
+                    try:
+                        logger.info("Attempting uc_gui_handle_captcha")
+                        self.driver.uc_gui_handle_captcha()
+                        logger.info("CAPTCHA handling completed")
+                        await asyncio.sleep(2)
+                        return True
+                    except Exception as e2:
+                        logger.warning(f"uc_gui_handle_captcha failed: {e2}")
+
+                        # Final fallback: try uc_gui_click_captcha
+                        try:
+                            logger.info("Trying uc_gui_click_captcha as final fallback")
+                            self.driver.uc_gui_click_captcha()
+                            logger.info("CAPTCHA click completed")
+                            await asyncio.sleep(2)
+                            return True
+                        except Exception as e3:
+                            logger.error(f"All CAPTCHA methods failed: {e3}")
+                            return False
 
             return True
         except Exception as e:
