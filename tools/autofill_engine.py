@@ -418,9 +418,24 @@ class AutofillEngine:
 
     def _get_url_from_recording(self, recording: dict) -> Optional[str]:
         """Extract target URL from recording."""
+        # 1. Check for navigate step
         for step in recording.get("steps", []):
             if step.get("type") == "navigate":
-                return step.get("url")
+                url = step.get("url")
+                if url:
+                    return url
+
+        # 2. Check recording's url field
+        url = recording.get("url")
+        if url:
+            return url
+
+        # 3. Check title/recording_name for URL
+        for field in ["title", "recording_name"]:
+            value = recording.get(field, "")
+            if value and value.startswith(("http://", "https://")):
+                return value
+
         return None
 
     async def _wait_for_page_load(self, timeout: int = 10):
