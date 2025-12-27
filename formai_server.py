@@ -552,7 +552,7 @@ async def get_profile(profile_id: str):
 @app.post("/api/profiles")
 async def create_profile(profile: Profile):
     """Create a new profile"""
-    profile_dict = profile.dict()
+    profile_dict = profile.model_dump()
     profile_id = save_profile(profile_dict)
 
     await broadcast_message({
@@ -568,7 +568,7 @@ async def update_profile(profile_id: str, profile: Profile):
     if profile_id not in profiles:
         raise HTTPException(status_code=404, detail="Profile not found")
 
-    profile_dict = profile.dict()
+    profile_dict = profile.model_dump()
     profile_dict['id'] = profile_id
     save_profile(profile_dict)
 
@@ -718,7 +718,7 @@ async def save_field_mapping(mapping: FieldMapping):
     file_path = mappings_dir / f"{safe_filename}.json"
 
     with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(mapping.dict(), f, indent=2)
+        json.dump(mapping.model_dump(), f, indent=2)
 
     return JSONResponse(content={"message": "Mapping saved"})
 

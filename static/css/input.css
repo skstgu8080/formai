@@ -1,4 +1,4 @@
-@import "tailwindcss";
+/* Tailwind loaded via CDN in HTML */
 
 /* Basic dark theme variables */
 :root {
