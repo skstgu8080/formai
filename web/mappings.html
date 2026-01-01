@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Mappings - FormAI</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                        sidebar: {
+                            DEFAULT: "hsl(var(--sidebar-background))",
+                            foreground: "hsl(var(--sidebar-foreground))",
+                            accent: "hsl(var(--sidebar-accent))",
+                            "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+                            border: "hsl(var(--sidebar-border))",
+                            "muted-foreground": "hsl(var(--sidebar-muted-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/theme-variables.css">
+    <link rel="stylesheet" href="/static/css/input.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+</head>
+<body class="h-full bg-background text-foreground font-sans antialiased overflow-hidden">
+    <div class="flex h-screen overflow-hidden">
+        <div id="sidebar-container"></div>
+
+        <main class="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
+            <!-- Header -->
+            <header class="bg-card border-b border-border px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-card-foreground">Field Mappings</h2>
+                        <p class="text-sm text-muted-foreground">Browse and manage learned field mappings</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <input type="text" id="search-input" placeholder="Search domains..."
+                            class="px-3 py-2 bg-background border border-border rounded-md text-sm w-64"
+                            oninput="filterMappings()">
+                        <span id="mapping-count" class="text-sm text-muted-foreground">0 sites</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="flex-1 overflow-auto p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Mappings List -->
+                    <div class="lg:col-span-1 space-y-4">
+                        <div class="bg-card border border-border rounded-lg">
+                            <div class="p-4 border-b border-border">
+                                <h3 class="font-medium text-card-foreground">Trained Sites</h3>
+                            </div>
+                            <div id="mappings-list" class="max-h-[calc(100vh-280px)] overflow-y-auto">
+                                <div class="p-4 text-center text-muted-foreground">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mapping Details -->
+                    <div class="lg:col-span-2">
+                        <div id="mapping-details" class="bg-card border border-border rounded-lg">
+                            <div class="p-8 text-center text-muted-foreground">
+                                <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <p>Select a site to view its field mappings</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+        <div class="bg-card border border-border rounded-lg p-6 max-w-md mx-4">
+            <h3 class="text-lg font-medium text-card-foreground mb-2">Delete Mapping?</h3>
+            <p class="text-muted-foreground mb-4">This will remove all learned field mappings for <span id="delete-domain" class="font-medium text-foreground"></span>. The AI will need to re-learn this site.</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 bg-muted hover:bg-muted/80 text-muted-foreground rounded-md text-sm">Cancel</button>
+                <button onclick="confirmDelete()" class="px-4 py-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-md text-sm">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/system-status.js"></script>
+    <script>
+        let allMappings = [];
+        let selectedDomain = null;
+        let domainToDelete = null;
+
+        // Load mappings on page load
+        document.addEventListener('DOMContentLoaded', loadMappings);
+
+        async function loadMappings() {
+            try {
+                const response = await fetch('/api/field-mappings');
+                const data = await response.json();
+                allMappings = data.mappings || [];
+
+                document.getElementById('mapping-count').textContent = `${allMappings.length} sites`;
+                renderMappingsList(allMappings);
+            } catch (e) {
+                console.error('Failed to load mappings:', e);
+                document.getElementById('mappings-list').innerHTML =
+                    '<div class="p-4 text-center text-red-500">Failed to load mappings</div>';
+            }
+        }
+
+        function filterMappings() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allMappings.filter(m => {
+                const domain = m.domain || '';
+                const url = m.url || '';
+                return domain.toLowerCase().includes(search) || url.toLowerCase().includes(search);
+            });
+            renderMappingsList(filtered);
+        }
+
+        function renderMappingsList(mappings) {
+            const container = document.getElementById('mappings-list');
+
+            // Filter out mappings without domain
+            const validMappings = mappings.filter(m => m.domain);
+
+            if (validMappings.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-muted-foreground">No mappings found</div>';
+                return;
+            }
+
+            container.innerHTML = validMappings.map((m, index) => `
+                <div class="p-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors ${selectedDomain === m.domain ? 'bg-muted' : ''}"
+                     data-domain="${escapeHtml(m.domain)}" data-index="${index}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-card-foreground truncate">${escapeHtml(m.domain)}</div>
+                            <div class="text-xs text-muted-foreground flex items-center space-x-2 mt-1">
+                                <span>${m.fields_count || m.mappings?.length || 0} fields</span>
+                                ${m.is_enhanced ? '<span class="text-green-500">Enhanced</span>' : ''}
+                            </div>
+                        </div>
+                        <button class="delete-btn p-1 text-muted-foreground hover:text-destructive rounded" data-domain="${escapeHtml(m.domain)}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            container.querySelectorAll('[data-domain]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (!e.target.closest('.delete-btn')) {
+                        selectMapping(el.dataset.domain);
+                    }
+                });
+            });
+
+            container.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showDeleteModal(btn.dataset.domain);
+                });
+            });
+        }
+
+        async function selectMapping(domain) {
+            selectedDomain = domain;
+            filterMappings(); // Re-render to show selection
+
+            try {
+                const response = await fetch(`/api/field-mappings/${encodeURIComponent(domain)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                renderMappingDetails(data);
+            } catch (e) {
+                console.error('Failed to load mapping details:', e);
+                document.getElementById('mapping-details').innerHTML =
+                    '<div class="p-8 text-center text-red-500">Failed to load mapping details</div>';
+            }
+        }
+
+        function renderMappingDetails(mapping) {
+            const container = document.getElementById('mapping-details');
+            const mappings = mapping.mappings || [];
+
+            container.innerHTML = `
+                <div class="p-4 border-b border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-medium text-card-foreground">${mapping.domain}</h3>
+                            <a href="${mapping.url}" target="_blank" class="text-sm text-blue-500 hover:underline truncate block max-w-lg">${mapping.url || 'No URL'}</a>
+                        </div>
+                        <div class="text-right text-sm text-muted-foreground">
+                            ${mapping.is_enhanced ? '<span class="text-green-500 font-medium">Enhanced</span>' : 'Basic'}
+                            <div class="text-xs">${mapping.created_at ? new Date(mapping.created_at).toLocaleDateString() : ''}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <h4 class="font-medium text-card-foreground mb-3">Field Mappings (${mappings.length})</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-border">
+                                    <th class="text-left py-2 px-3 text-muted-foreground font-medium">Selector</th>
+                                    <th class="text-left py-2 px-3 text-muted-foreground font-medium">Profile Field</th>
+                                    <th class="text-left py-2 px-3 text-muted-foreground font-medium">Strategy</th>
+                                    <th class="text-left py-2 px-3 text-muted-foreground font-medium">Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${mappings.map(m => `
+                                    <tr class="border-b border-border/50 hover:bg-muted/30">
+                                        <td class="py-2 px-3 font-mono text-xs text-blue-500">${escapeHtml(m.selector)}</td>
+                                        <td class="py-2 px-3 text-green-500">${m.profile_field}</td>
+                                        <td class="py-2 px-3">
+                                            <span class="px-2 py-0.5 rounded text-xs ${getStrategyClass(m.fill_strategy)}">
+                                                ${m.fill_strategy || 'direct_type'}
+                                            </span>
+                                        </td>
+                                        <td class="py-2 px-3 text-muted-foreground">${m.input_type || 'text'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                ${mapping.fill_config ? `
+                    <div class="p-4 border-t border-border">
+                        <h4 class="font-medium text-card-foreground mb-2">Configuration</h4>
+                        <pre class="bg-muted p-3 rounded text-xs overflow-x-auto">${JSON.stringify(mapping.fill_config, null, 2)}</pre>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function getStrategyClass(strategy) {
+            const classes = {
+                'direct_type': 'bg-gray-500/20 text-gray-400',
+                'password_type': 'bg-purple-500/20 text-purple-400',
+                'dropdown_select': 'bg-blue-500/20 text-blue-400',
+                'js_date_input': 'bg-orange-500/20 text-orange-400',
+                'char_by_char': 'bg-yellow-500/20 text-yellow-400',
+                'checkbox_click': 'bg-green-500/20 text-green-400',
+            };
+            return classes[strategy] || 'bg-gray-500/20 text-gray-400';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showDeleteModal(domain) {
+            domainToDelete = domain;
+            document.getElementById('delete-domain').textContent = domain;
+            document.getElementById('delete-modal').classList.remove('hidden');
+            document.getElementById('delete-modal').classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            document.getElementById('delete-modal').classList.remove('flex');
+            domainToDelete = null;
+        }
+
+        async function confirmDelete() {
+            if (!domainToDelete) return;
+
+            try {
+                const response = await fetch(`/api/field-mappings/${encodeURIComponent(domainToDelete)}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    closeDeleteModal();
+                    if (selectedDomain === domainToDelete) {
+                        selectedDomain = null;
+                        document.getElementById('mapping-details').innerHTML = `
+                            <div class="p-8 text-center text-muted-foreground">
+                                <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <p>Select a site to view its field mappings</p>
+                            </div>
+                        `;
+                    }
+                    loadMappings();
+                } else {
+                    alert('Failed to delete mapping');
+                }
+            } catch (e) {
+                console.error('Delete failed:', e);
+                alert('Failed to delete mapping');
+            }
+        }
+    </script>
+</body>
+</html>

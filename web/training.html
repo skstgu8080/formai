@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training - FormAI</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                        sidebar: {
+                            DEFAULT: "hsl(var(--sidebar-background))",
+                            foreground: "hsl(var(--sidebar-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/theme-variables.css">
+    <link rel="stylesheet" href="/static/css/input.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <script src="/static/js/theme.js"></script>
+</head>
+<body class="h-full bg-background text-foreground font-sans antialiased">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Dynamic Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-background pt-14 lg:pt-0" id="main-content">
+            <!-- Header -->
+            <header class="bg-card/50 border-b border-gray-200 backdrop-blur-sm sticky top-0 z-10 hidden lg:block">
+                <div class="px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold text-card-foreground tracking-tight">Training</h2>
+                            <p class="text-sm text-muted-foreground">Import Chrome recordings to learn field mappings</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button id="theme-toggle" class="p-2 rounded-md text-muted-foreground hover:text-card-foreground hover:bg-accent"></button>
+                            <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div class="h-2 w-2 bg-green-500 rounded-full" id="status-dot"></div>
+                                <span id="status-text">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Import Recording -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-card-foreground mb-4">Import Chrome Recording</h3>
+                            <p class="text-sm text-muted-foreground mb-4">
+                                Paste a Chrome DevTools recording JSON or upload a file. The system will extract field mappings
+                                and learn how to fill this form automatically.
+                            </p>
+
+                            <!-- File Upload -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-card-foreground mb-2">Upload Recording File</label>
+                                <input type="file" id="file-input" accept=".json"
+                                    class="block w-full text-sm text-muted-foreground
+                                    file:mr-4 file:py-2 file:px-4
+                                    file:rounded-md file:border-0
+                                    file:text-sm file:font-semibold
+                                    file:bg-secondary file:text-secondary-foreground
+                                    hover:file:bg-secondary/80
+                                    cursor-pointer">
+                            </div>
+
+                            <!-- Or separator -->
+                            <div class="relative my-6">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-card text-muted-foreground">or paste JSON</span>
+                                </div>
+                            </div>
+
+                            <!-- JSON Input -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-card-foreground mb-2">Recording JSON</label>
+                                <textarea id="json-input" rows="12"
+                                    class="w-full px-3 py-2 bg-background border border-input text-foreground rounded-md
+                                    focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent
+                                    font-mono text-sm"
+                                    placeholder='{"title": "My Recording", "steps": [...]}'>
+                                </textarea>
+                            </div>
+
+                            <!-- Options -->
+                            <div class="mb-6 space-y-3">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="analyze-live" checked
+                                        class="w-4 h-4 text-blue-600 bg-background border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="analyze-live" class="ml-2 text-sm text-card-foreground">
+                                        <span class="font-medium">Live Analysis</span>
+                                        <span class="text-muted-foreground"> - Visit page to detect optimal fill strategies (recommended)</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="text" id="domain-override"
+                                        class="w-48 px-3 py-1.5 bg-background border border-input text-foreground rounded-md text-sm
+                                        focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                                        placeholder="Override domain (optional)">
+                                    <span class="ml-2 text-sm text-muted-foreground">Leave empty to auto-detect</span>
+                                </div>
+                            </div>
+
+                            <!-- Train Button -->
+                            <div class="flex items-center space-x-4">
+                                <button id="train-btn" onclick="trainRecording()"
+                                    class="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-md font-medium
+                                    transition-colors duration-200 flex items-center space-x-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                    </svg>
+                                    <span>Train from Recording</span>
+                                </button>
+                                <button id="batch-btn" onclick="batchTrain()"
+                                    class="px-4 py-2 bg-accent hover:bg-accent/80 text-accent-foreground rounded-md text-sm
+                                    transition-colors duration-200">
+                                    Batch Train All Recordings
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Results -->
+                        <div id="results-container" class="bg-card border border-gray-200 rounded-lg p-6 hidden">
+                            <h3 class="text-lg font-medium text-card-foreground mb-4">Training Results</h3>
+                            <div id="results-content"></div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar: Trained Sites -->
+                    <div class="space-y-6">
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-medium text-card-foreground">Trained Sites</h3>
+                                <button onclick="loadTrainedSites()" class="text-sm text-blue-600 hover:text-blue-800">Refresh</button>
+                            </div>
+                            <div id="trained-sites-list" class="space-y-2 max-h-96 overflow-y-auto">
+                                <p class="text-sm text-muted-foreground">Loading...</p>
+                            </div>
+                        </div>
+
+                        <!-- How It Works -->
+                        <div class="bg-card border border-gray-200 rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-card-foreground mb-4">How It Works</h3>
+                            <div class="space-y-3 text-sm text-muted-foreground">
+                                <div class="flex items-start space-x-2">
+                                    <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded text-xs font-medium">1</span>
+                                    <span>Record a form fill in Chrome DevTools</span>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded text-xs font-medium">2</span>
+                                    <span>Export the recording as JSON</span>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded text-xs font-medium">3</span>
+                                    <span>Paste or upload the JSON here</span>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded text-xs font-medium">4</span>
+                                    <span>System learns field mappings + fill strategies</span>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 rounded text-xs font-medium">✓</span>
+                                    <span>Future fills use exact learned mappings!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/system-status.js"></script>
+    <script>
+        // Load trained sites on page load
+        document.addEventListener('DOMContentLoaded', loadTrainedSites);
+
+        // Handle file upload
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const text = await file.text();
+                document.getElementById('json-input').value = text;
+            }
+        });
+
+        async function trainRecording() {
+            const jsonInput = document.getElementById('json-input').value.trim();
+            const analyzeLive = document.getElementById('analyze-live').checked;
+            const domainOverride = document.getElementById('domain-override').value.trim();
+
+            if (!jsonInput) {
+                showResult('error', 'Please paste a recording JSON or upload a file');
+                return;
+            }
+
+            let recording;
+            try {
+                recording = JSON.parse(jsonInput);
+            } catch (e) {
+                showResult('error', 'Invalid JSON: ' + e.message);
+                return;
+            }
+
+            // Update UI
+            const btn = document.getElementById('train-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-pulse">Training...</span>';
+            setStatus('training', 'Training...');
+
+            try {
+                const response = await fetch('/api/train-from-recording', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recording: recording,
+                        domain: domainOverride || null,
+                        analyze_live: analyzeLive
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult('success', `
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-green-500">✓</span>
+                                <span class="font-medium">Successfully trained ${result.domain}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-muted-foreground">URL:</span>
+                                    <span class="ml-2">${result.url}</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted-foreground">Fields learned:</span>
+                                    <span class="ml-2 font-medium">${result.fields_learned}</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted-foreground">Enhanced:</span>
+                                    <span class="ml-2">${result.is_enhanced ? '✓ With fill strategies' : 'Basic mappings'}</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h4 class="font-medium mb-2">Mappings:</h4>
+                                <div class="bg-muted rounded-md p-3 text-xs font-mono max-h-48 overflow-y-auto">
+                                    ${result.mappings.map(m => `
+                                        <div class="mb-1">
+                                            <span class="text-blue-600">${m.selector}</span> →
+                                            <span class="text-green-600">${m.profile_field}</span>
+                                            ${m.fill_strategy ? `<span class="text-muted-foreground"> (${m.fill_strategy})</span>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    setStatus('ready', 'Ready');
+                    loadTrainedSites();
+                } else {
+                    showResult('error', result.error || 'Training failed');
+                    setStatus('error', 'Error');
+                }
+            } catch (e) {
+                showResult('error', 'Request failed: ' + e.message);
+                setStatus('error', 'Error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                    <span>Train from Recording</span>
+                `;
+            }
+        }
+
+        async function batchTrain() {
+            const btn = document.getElementById('batch-btn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            setStatus('training', 'Batch training...');
+
+            try {
+                const response = await fetch('/api/train-batch', { method: 'POST' });
+                const result = await response.json();
+
+                showResult('success', `
+                    <div class="space-y-2">
+                        <div class="font-medium">Batch Training Complete</div>
+                        <div class="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <span class="text-muted-foreground">Total:</span>
+                                <span class="ml-2 font-medium">${result.total_recordings}</span>
+                            </div>
+                            <div>
+                                <span class="text-green-600">Successful:</span>
+                                <span class="ml-2 font-medium">${result.successful}</span>
+                            </div>
+                            <div>
+                                <span class="text-red-600">Failed:</span>
+                                <span class="ml-2 font-medium">${result.failed}</span>
+                            </div>
+                        </div>
+                        ${result.domains_trained && result.domains_trained.length > 0 ? `
+                            <div class="mt-3">
+                                <div class="text-sm font-medium mb-1">Domains trained:</div>
+                                <div class="text-xs text-muted-foreground max-h-32 overflow-y-auto">
+                                    ${result.domains_trained.slice(0, 20).map(d => `${d.domain} (${d.fields} fields)`).join(', ')}
+                                    ${result.domains_trained.length > 20 ? `... and ${result.domains_trained.length - 20} more` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `);
+                setStatus('ready', 'Ready');
+                loadTrainedSites();
+            } catch (e) {
+                showResult('error', 'Batch training failed: ' + e.message);
+                setStatus('error', 'Error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Batch Train All Recordings';
+            }
+        }
+
+        async function loadTrainedSites() {
+            const container = document.getElementById('trained-sites-list');
+            try {
+                const response = await fetch('/api/trained-sites');
+                const result = await response.json();
+
+                if (result.domains && result.domains.length > 0) {
+                    container.innerHTML = result.domains.map(d => `
+                        <div class="flex justify-between items-center py-2 px-3 bg-muted/50 rounded-md text-sm">
+                            <span class="truncate" title="${d.domain}">${d.domain}</span>
+                            <span class="text-muted-foreground">${d.fields} fields</span>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-sm text-muted-foreground">No trained sites yet</p>';
+                }
+            } catch (e) {
+                container.innerHTML = '<p class="text-sm text-red-500">Failed to load</p>';
+            }
+        }
+
+        function showResult(type, content) {
+            const container = document.getElementById('results-container');
+            const resultsContent = document.getElementById('results-content');
+            container.classList.remove('hidden');
+
+            if (type === 'error') {
+                resultsContent.innerHTML = `
+                    <div class="flex items-center space-x-2 text-red-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        <span>${content}</span>
+                    </div>
+                `;
+            } else {
+                resultsContent.innerHTML = content;
+            }
+        }
+
+        function setStatus(status, text) {
+            const dot = document.getElementById('status-dot');
+            const textEl = document.getElementById('status-text');
+
+            dot.className = 'h-2 w-2 rounded-full';
+            if (status === 'ready') {
+                dot.classList.add('bg-green-500');
+            } else if (status === 'training') {
+                dot.classList.add('bg-yellow-500', 'animate-pulse');
+            } else {
+                dot.classList.add('bg-red-500');
+            }
+            textEl.textContent = text;
+        }
+    </script>
+</body>
+</html>

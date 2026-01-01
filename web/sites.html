@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sites - FormAI</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                        sidebar: {
+                            DEFAULT: "hsl(var(--sidebar-background))",
+                            foreground: "hsl(var(--sidebar-foreground))",
+                            primary: "hsl(var(--sidebar-primary))",
+                            "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+                            accent: "hsl(var(--sidebar-accent))",
+                            "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+                            border: "hsl(var(--sidebar-border))",
+                            ring: "hsl(var(--sidebar-ring))",
+                            "muted-foreground": "hsl(var(--sidebar-muted-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/theme-variables.css">
+    <link rel="stylesheet" href="/static/css/input.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        .status-success { color: #22c55e; }
+        .status-failed { color: #ef4444; }
+        .status-pending { color: #6b7280; }
+    </style>
+</head>
+<body class="h-full bg-background text-foreground font-sans antialiased overflow-hidden">
+    <div class="flex h-screen overflow-hidden">
+        <div id="sidebar-container"></div>
+
+        <main class="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
+            <!-- Header -->
+            <header class="bg-card border-b border-border px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-card-foreground">Sites</h2>
+                        <p class="text-sm text-muted-foreground">Add URLs and auto-fill all at once</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <select id="profile-select" class="px-3 py-2 bg-background border border-border rounded-md text-sm">
+                            <option value="">Select Profile</option>
+                        </select>
+                        <button onclick="window.location.href='/'" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm font-medium">
+                            Go to Automation
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Bar -->
+            <div class="bg-card border-b border-border px-6 py-3">
+                <div class="flex items-center space-x-6 text-sm">
+                    <span>Total: <strong id="stat-total">0</strong></span>
+                    <span>Enabled: <strong id="stat-enabled">0</strong></span>
+                    <span class="status-success">Success: <strong id="stat-success">0</strong></span>
+                    <span class="status-failed">Failed: <strong id="stat-failed">0</strong></span>
+                    <span class="status-pending">Pending: <strong id="stat-pending">0</strong></span>
+                </div>
+            </div>
+
+            <!-- Progress Bar (hidden by default) -->
+            <div id="progress-container" class="hidden bg-card border-b border-border px-6 py-3">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1 bg-muted rounded-full h-2">
+                        <div id="progress-bar" class="bg-green-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                    <span id="progress-text" class="text-sm text-muted-foreground">0 / 0</span>
+                    <button onclick="stopBatch()" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm">Stop</button>
+                </div>
+                <p id="progress-site" class="text-sm text-muted-foreground mt-1"></p>
+            </div>
+
+            <!-- Add Site Form -->
+            <div class="bg-card border-b border-border px-6 py-4">
+                <div class="flex space-x-3">
+                    <input type="text" id="new-url" placeholder="Enter URL (https://example.com/signup)"
+                           class="flex-1 px-3 py-2 bg-background border border-border rounded-md text-sm">
+                    <button onclick="addSite()" class="px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-md text-sm">
+                        Add Site
+                    </button>
+                    <button onclick="showBulkAdd()" class="px-4 py-2 bg-muted hover:bg-muted/80 text-muted-foreground rounded-md text-sm">
+                        Bulk Add
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bulk Add Modal -->
+            <div id="bulk-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div class="bg-card rounded-lg p-6 w-full max-w-lg">
+                    <h3 class="text-lg font-semibold mb-4">Bulk Add Sites</h3>
+                    <textarea id="bulk-urls" rows="10" placeholder="Paste URLs (one per line)"
+                              class="w-full px-3 py-2 bg-background border border-border rounded-md text-sm"></textarea>
+                    <div class="flex justify-end space-x-3 mt-4">
+                        <button onclick="hideBulkAdd()" class="px-4 py-2 bg-muted text-muted-foreground rounded-md">Cancel</button>
+                        <button onclick="addBulkSites()" class="px-4 py-2 bg-green-600 text-white rounded-md">Add All</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sites Table -->
+            <div class="flex-1 overflow-auto p-6">
+                <table class="w-full">
+                    <thead class="bg-muted/50 sticky top-0">
+                        <tr>
+                            <th class="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Enabled</th>
+                            <th class="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Name</th>
+                            <th class="text-left px-4 py-3 text-sm font-medium text-muted-foreground">URL</th>
+                            <th class="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Status</th>
+                            <th class="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Fields</th>
+                            <th class="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Last Run</th>
+                            <th class="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sites-table" class="divide-y divide-border">
+                        <!-- Sites will be loaded here -->
+                    </tbody>
+                </table>
+                <div id="no-sites" class="hidden text-center py-12 text-muted-foreground">
+                    <p class="text-lg">No sites added yet</p>
+                    <p class="text-sm mt-2">Add a URL above to get started</p>
+                </div>
+            </div>
+
+            <!-- Fields Modal -->
+            <div id="fields-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div class="bg-card rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Site Fields</h3>
+                        <button onclick="hideFieldsModal()" class="text-muted-foreground hover:text-foreground">&times;</button>
+                    </div>
+                    <p id="fields-site-name" class="text-sm text-muted-foreground mb-4"></p>
+                    <div id="fields-list" class="space-y-3">
+                        <!-- Fields will be loaded here -->
+                    </div>
+                    <div class="flex justify-end mt-4">
+                        <button onclick="hideFieldsModal()" class="px-4 py-2 bg-muted text-muted-foreground rounded-md">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert -->
+            <div id="alert" class="hidden fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg max-w-md"></div>
+        </main>
+    </div>
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/sidebar.js?v=2"></script>
+    <script src="/static/js/system-status.js"></script>
+    <script>
+        let sites = [];
+        let profiles = [];
+        let batchRunning = false;
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfiles();
+            loadSites();
+            connectWebSocket();
+        });
+
+        async function loadProfiles() {
+            try {
+                const res = await fetch('/api/profiles');
+                profiles = await res.json();
+                const select = document.getElementById('profile-select');
+                select.innerHTML = '<option value="">Select Profile</option>';
+                profiles.forEach(p => {
+                    select.innerHTML += `<option value="${p.id}">${p.name || p.firstName || p.id}</option>`;
+                });
+                if (profiles.length > 0) {
+                    select.value = profiles[0].id;
+                }
+            } catch (e) {
+                console.error('Failed to load profiles:', e);
+            }
+        }
+
+        async function loadSites() {
+            try {
+                const res = await fetch('/api/sites');
+                const data = await res.json();
+                sites = data.sites || [];
+                updateStats(data.stats);
+                renderSites();
+            } catch (e) {
+                console.error('Failed to load sites:', e);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('stat-total').textContent = stats.total || 0;
+            document.getElementById('stat-enabled').textContent = stats.enabled || 0;
+            document.getElementById('stat-success').textContent = stats.success || 0;
+            document.getElementById('stat-failed').textContent = stats.failed || 0;
+            document.getElementById('stat-pending').textContent = stats.pending || 0;
+        }
+
+        function renderSites() {
+            const tbody = document.getElementById('sites-table');
+            const noSites = document.getElementById('no-sites');
+
+            if (sites.length === 0) {
+                tbody.innerHTML = '';
+                noSites.classList.remove('hidden');
+                return;
+            }
+
+            noSites.classList.add('hidden');
+            tbody.innerHTML = sites.map(site => {
+                const fieldsCount = (site.fields && site.fields.length) || 0;
+                const hasFields = fieldsCount > 0;
+                return `
+                <tr class="hover:bg-muted/30">
+                    <td class="px-4 py-3">
+                        <input type="checkbox" ${site.enabled ? 'checked' : ''}
+                               onchange="toggleSite('${site.id}')" class="rounded">
+                    </td>
+                    <td class="px-4 py-3 text-sm font-medium">${site.name || '-'}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <a href="${site.url}" target="_blank" class="text-blue-500 hover:underline truncate block max-w-xs">
+                            ${site.url}
+                        </a>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="status-${site.last_status || 'pending'}">
+                            ${site.last_status ? (site.last_status === 'success' ? '✓' : '✗') : '-'}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        ${hasFields ? `<button onclick="showFields('${site.id}')" class="text-blue-500 hover:underline">${fieldsCount} fields</button>` :
+                            `<button onclick="analyzeSite('${site.id}')" class="text-yellow-500 hover:text-yellow-600">Analyze</button>`}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-muted-foreground">
+                        ${site.last_run ? new Date(site.last_run).toLocaleString() : '-'}
+                    </td>
+                    <td class="px-4 py-3 text-sm space-x-2">
+                        <button onclick="fillSite('${site.id}')" class="text-green-500 hover:text-green-600">Run</button>
+                        <button onclick="analyzeSite('${site.id}')" class="text-yellow-500 hover:text-yellow-600" title="Analyze fields">🔍</button>
+                        <button onclick="deleteSite('${site.id}')" class="text-red-500 hover:text-red-600">Delete</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        async function addSite() {
+            const url = document.getElementById('new-url').value.trim();
+            if (!url) return showAlert('Please enter a URL', 'error');
+            if (!url.startsWith('http')) return showAlert('URL must start with http:// or https://', 'error');
+
+            try {
+                await fetch('/api/sites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                document.getElementById('new-url').value = '';
+                loadSites();
+                showAlert('Site added', 'success');
+            } catch (e) {
+                showAlert('Failed to add site', 'error');
+            }
+        }
+
+        function showBulkAdd() {
+            document.getElementById('bulk-modal').classList.remove('hidden');
+        }
+
+        function hideBulkAdd() {
+            document.getElementById('bulk-modal').classList.add('hidden');
+        }
+
+        async function addBulkSites() {
+            const urls = document.getElementById('bulk-urls').value;
+            if (!urls.trim()) return;
+
+            try {
+                const res = await fetch('/api/sites/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ urls })
+                });
+                const data = await res.json();
+                hideBulkAdd();
+                document.getElementById('bulk-urls').value = '';
+                loadSites();
+                showAlert(`Added ${data.added} sites`, 'success');
+            } catch (e) {
+                showAlert('Failed to add sites', 'error');
+            }
+        }
+
+        async function analyzeSite(siteId) {
+            showAlert('Analyzing site fields...', 'info');
+            try {
+                const res = await fetch(`/api/sites/${siteId}/analyze`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert(`Found ${data.fields_count} fields`, 'success');
+                    loadSites();
+                } else {
+                    showAlert(`Analysis failed: ${data.error}`, 'error');
+                }
+            } catch (e) {
+                showAlert('Failed to analyze site', 'error');
+            }
+        }
+
+        let currentSiteId = null;
+
+        function showFields(siteId) {
+            currentSiteId = siteId;
+            const site = sites.find(s => s.id === siteId);
+            if (!site || !site.fields) return;
+
+            document.getElementById('fields-site-name').textContent = site.name || site.url;
+            const fieldsList = document.getElementById('fields-list');
+
+            fieldsList.innerHTML = site.fields.map((field, i) => `
+                <div class="p-3 bg-muted/30 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="font-medium">${field.label || field.name || field.selector}</p>
+                            <p class="text-xs text-muted-foreground">Type: ${field.field_type} | Selector: ${field.selector}</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded ${field.profile_key ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}">
+                            ${field.profile_key || 'Not mapped'}
+                        </span>
+                    </div>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <input type="text" value="${field.profile_key || ''}"
+                               placeholder="Profile key (e.g., email, firstName)"
+                               class="flex-1 px-2 py-1 text-sm bg-background border border-border rounded"
+                               onchange="updateFieldMapping('${siteId}', ${i}, this.value)">
+                        <input type="text" value="${field.transform || ''}"
+                               placeholder="Transform (e.g., date:MM/DD/YYYY)"
+                               class="w-48 px-2 py-1 text-sm bg-background border border-border rounded"
+                               onchange="updateFieldTransform('${siteId}', ${i}, this.value)">
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('fields-modal').classList.remove('hidden');
+        }
+
+        function hideFieldsModal() {
+            document.getElementById('fields-modal').classList.add('hidden');
+            currentSiteId = null;
+        }
+
+        async function updateFieldMapping(siteId, fieldIndex, profileKey) {
+            try {
+                const site = sites.find(s => s.id === siteId);
+                const transform = site.fields[fieldIndex].transform || '';
+                await fetch(`/api/sites/${siteId}/fields/${fieldIndex}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile_key: profileKey, transform })
+                });
+                loadSites();
+            } catch (e) {
+                showAlert('Failed to update mapping', 'error');
+            }
+        }
+
+        async function updateFieldTransform(siteId, fieldIndex, transform) {
+            try {
+                const site = sites.find(s => s.id === siteId);
+                const profileKey = site.fields[fieldIndex].profile_key || '';
+                await fetch(`/api/sites/${siteId}/fields/${fieldIndex}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile_key: profileKey, transform })
+                });
+                loadSites();
+            } catch (e) {
+                showAlert('Failed to update transform', 'error');
+            }
+        }
+
+        async function toggleSite(siteId) {
+            try {
+                await fetch(`/api/sites/${siteId}/toggle`, { method: 'POST' });
+                loadSites();
+            } catch (e) {
+                showAlert('Failed to toggle site', 'error');
+            }
+        }
+
+        async function deleteSite(siteId) {
+            if (!confirm('Delete this site?')) return;
+            try {
+                await fetch(`/api/sites/${siteId}`, { method: 'DELETE' });
+                loadSites();
+                showAlert('Site deleted', 'success');
+            } catch (e) {
+                showAlert('Failed to delete site', 'error');
+            }
+        }
+
+        async function fillSite(siteId) {
+            const profileId = document.getElementById('profile-select').value;
+            if (!profileId) return showAlert('Please select a profile', 'error');
+
+            showAlert('Running...', 'info');
+            try {
+                const res = await fetch(`/api/sites/${siteId}/fill`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile_id: profileId, headless: false })
+                });
+                const data = await res.json();
+                loadSites();
+                if (data.success) {
+                    showAlert(`Filled ${data.fields_filled} fields`, 'success');
+                } else {
+                    showAlert(`Failed: ${data.error}`, 'error');
+                }
+            } catch (e) {
+                showAlert('Failed to run site', 'error');
+            }
+        }
+
+        async function fillAllSites() {
+            const profileId = document.getElementById('profile-select').value;
+            if (!profileId) return showAlert('Please select a profile', 'error');
+
+            batchRunning = true;
+            document.getElementById('progress-container').classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/sites/fill-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile_id: profileId, headless: true })
+                });
+                const data = await res.json();
+                showAlert(`Started batch run for ${data.total_sites} sites`, 'info');
+            } catch (e) {
+                showAlert('Failed to start batch', 'error');
+                batchRunning = false;
+                document.getElementById('progress-container').classList.add('hidden');
+            }
+        }
+
+        function stopBatch() {
+            batchRunning = false;
+            document.getElementById('progress-container').classList.add('hidden');
+            showAlert('Batch stopped', 'info');
+        }
+
+        function connectWebSocket() {
+            const ws = new WebSocket(`ws://${window.location.host}/ws`);
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'batch_progress') {
+                    const { current, total, site, url } = msg.data;
+                    const pct = (current / total) * 100;
+                    document.getElementById('progress-bar').style.width = pct + '%';
+                    document.getElementById('progress-text').textContent = `${current} / ${total}`;
+                    document.getElementById('progress-site').textContent = `Filling: ${site}`;
+                } else if (msg.type === 'batch_complete') {
+                    batchRunning = false;
+                    document.getElementById('progress-container').classList.add('hidden');
+                    const { total, success, failed } = msg.data;
+                    showAlert(`Completed: ${success} success, ${failed} failed`, success > 0 ? 'success' : 'error');
+                    loadSites();
+                }
+            };
+            ws.onclose = () => setTimeout(connectWebSocket, 3000);
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg max-w-md ${
+                type === 'success' ? 'bg-green-600 text-white' :
+                type === 'error' ? 'bg-red-600 text-white' :
+                'bg-blue-600 text-white'
+            }`;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 3000);
+        }
+
+        // Enter key to add site
+        document.getElementById('new-url').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addSite();
+        });
+
+        // ============================================
+        // AI AGENT FUNCTIONS
+        // ============================================
+
+        let aiAgentRunning = false;
+
+        async function checkAIAgentStatus() {
+            try {
+                const res = await fetch('/api/ai-agent/status');
+                const data = await res.json();
+                return data;
+            } catch (e) {
+                return { ollama_available: false, error: e.message };
+            }
+        }
+
+        async function startAIAgent() {
+            const profileId = document.getElementById('profile-select').value;
+            if (!profileId) return showAlert('Please select a profile', 'error');
+
+            // Check Ollama status first
+            const status = await checkAIAgentStatus();
+            if (!status.ollama_available) {
+                showAlert('Ollama is not running. Start Ollama first.', 'error');
+                return;
+            }
+
+            // Get site limit
+            const limit = parseInt(document.getElementById('site-count').value) || 0;
+
+            // Get enabled site URLs
+            const enabledSites = sites.filter(s => s.enabled);
+            if (enabledSites.length === 0) {
+                showAlert('No enabled sites. Enable some sites first.', 'error');
+                return;
+            }
+
+            const urls = enabledSites.map(s => s.url);
+
+            // Show progress
+            aiAgentRunning = true;
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-text').textContent = '0 / ' + (limit || urls.length);
+            document.getElementById('progress-site').textContent = 'Starting AI Agent...';
+
+            showAlert(`AI Agent starting for ${limit || urls.length} sites...`, 'info');
+
+            try {
+                const res = await fetch('/api/ai-agent/fill-batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        urls: urls,
+                        profile_id: profileId,
+                        headless: false,
+                        limit: limit
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    showAlert(data.error || 'Failed to start AI Agent', 'error');
+                    aiAgentRunning = false;
+                    document.getElementById('progress-container').classList.add('hidden');
+                }
+            } catch (e) {
+                showAlert('Failed to start AI Agent: ' + e.message, 'error');
+                aiAgentRunning = false;
+                document.getElementById('progress-container').classList.add('hidden');
+            }
+        }
+
+        async function stopAIAgent() {
+            try {
+                await fetch('/api/ai-agent/stop', { method: 'POST' });
+                aiAgentRunning = false;
+                document.getElementById('progress-container').classList.add('hidden');
+                showAlert('AI Agent stopped', 'info');
+            } catch (e) {
+                showAlert('Failed to stop agent', 'error');
+            }
+        }
+
+        // Update WebSocket handler to include AI agent messages
+        function connectWebSocket() {
+            const ws = new WebSocket(`ws://${window.location.host}/ws`);
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+
+                // Existing batch progress
+                if (msg.type === 'batch_progress') {
+                    const { current, total, site, url } = msg.data;
+                    const pct = (current / total) * 100;
+                    document.getElementById('progress-bar').style.width = pct + '%';
+                    document.getElementById('progress-text').textContent = `${current} / ${total}`;
+                    document.getElementById('progress-site').textContent = `Filling: ${site}`;
+                } else if (msg.type === 'batch_complete') {
+                    batchRunning = false;
+                    document.getElementById('progress-container').classList.add('hidden');
+                    const { total, success, failed } = msg.data;
+                    showAlert(`Completed: ${success} success, ${failed} failed`, success > 0 ? 'success' : 'error');
+                    loadSites();
+                }
+
+                // AI Agent progress
+                else if (msg.type === 'ai_agent_progress') {
+                    const data = msg.data;
+                    if (data.progress) {
+                        const { completed, total, successful, failed } = data.progress;
+                        const pct = (completed / total) * 100;
+                        document.getElementById('progress-bar').style.width = pct + '%';
+                        document.getElementById('progress-text').textContent = `${completed} / ${total} (${successful}✓ ${failed}✗)`;
+                    }
+                    if (data.site) {
+                        document.getElementById('progress-site').textContent = `AI Agent: ${data.site}`;
+                    }
+                    if (data.type === 'action' && data.action) {
+                        // Show current action
+                        const action = data.action;
+                        document.getElementById('progress-site').textContent = `AI: ${action.tool}(${action.selector || ''})`;
+                    }
+                }
+                else if (msg.type === 'ai_agent_action') {
+                    const { action } = msg.data;
+                    document.getElementById('progress-site').textContent = `AI Action: ${action.tool}`;
+                }
+                else if (msg.type === 'ai_agent_complete' || msg.type === 'ai_agent_batch_complete') {
+                    aiAgentRunning = false;
+                    document.getElementById('progress-container').classList.add('hidden');
+                    const data = msg.data;
+                    const success = data.successful || (data.success ? 1 : 0);
+                    const failed = data.failed || (data.success ? 0 : 1);
+                    const total = data.total_sites || 1;
+                    showAlert(`AI Agent done: ${success}/${total} successful`, success > 0 ? 'success' : 'error');
+                    loadSites();
+                }
+                else if (msg.type === 'ai_agent_error') {
+                    aiAgentRunning = false;
+                    document.getElementById('progress-container').classList.add('hidden');
+                    showAlert('AI Agent error: ' + msg.data.error, 'error');
+                }
+            };
+            ws.onclose = () => setTimeout(connectWebSocket, 3000);
+        }
+
+        // Override stop button to handle AI agent too
+        function stopBatch() {
+            if (aiAgentRunning) {
+                stopAIAgent();
+            } else {
+                batchRunning = false;
+                document.getElementById('progress-container').classList.add('hidden');
+                showAlert('Batch stopped', 'info');
+            }
+        }
+    </script>
+</body>
+</html>
