@@ -12,27 +12,29 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #fafafa;
             padding: 20px;
         }
 
         .header {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            background: #171717;
             padding: 30px;
             border-radius: 10px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 1px solid #262626;
         }
 
         .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .header p {
-            opacity: 0.9;
+            color: #a3a3a3;
+            font-size: 14px;
         }
 
         .stats {
@@ -43,115 +45,124 @@
         }
 
         .stat-card {
-            background: #161b22;
+            background: #171717;
             padding: 20px;
             border-radius: 10px;
-            border-left: 4px solid #dc2626;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 1px solid #262626;
+            text-align: center;
         }
 
         .stat-card h3 {
-            font-size: 14px;
-            color: #aaa;
+            font-size: 12px;
+            color: #a3a3a3;
             margin-bottom: 10px;
             text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
         .stat-card .value {
             font-size: 32px;
-            font-weight: bold;
-            color: #ef4444;
+            font-weight: 600;
+            color: #3b82f6;
         }
 
         .clients-section {
-            background: #161b22;
-            padding: 30px;
+            background: #171717;
+            padding: 24px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 1px solid #262626;
         }
 
         .clients-section h2 {
             margin-bottom: 20px;
-            font-size: 24px;
+            font-size: 20px;
+            font-weight: 600;
         }
 
         .client-card {
-            background: #0d1117;
+            background: #0a0a0a;
             padding: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border-radius: 8px;
-            border-left: 4px solid #21262d;
+            border: 1px solid #262626;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
         .client-card:hover {
-            transform: translateX(5px);
-            border-left-color: #dc2626;
+            border-color: #3b82f6;
+            background: #0f0f0f;
         }
 
         .client-card.online {
-            border-left-color: #ef4444;
+            border-left: 3px solid #22c55e;
+        }
+
+        .client-card.offline {
+            border-left: 3px solid #ef4444;
         }
 
         .client-info h3 {
-            font-size: 18px;
+            font-size: 16px;
             margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .client-info p {
-            color: #aaa;
-            font-size: 14px;
+            color: #a3a3a3;
+            font-size: 13px;
             margin-bottom: 4px;
         }
 
         .status-badge {
-            padding: 6px 15px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
+            font-weight: 500;
         }
 
         .status-badge.online {
-            background: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
         }
 
         .status-badge.offline {
-            background: rgba(255, 59, 59, 0.2);
-            color: #ff3b3b;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
         }
 
         .command-controls {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
         }
 
         button {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
+            background: #262626;
+            color: #fafafa;
+            border: 1px solid #404040;
+            padding: 8px 14px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
         button:hover {
-            background: #991b1b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+            background: #3b82f6;
+            border-color: #3b82f6;
         }
 
         button:disabled {
-            background: #555;
+            background: #1a1a1a;
+            color: #525252;
+            border-color: #262626;
             cursor: not-allowed;
-            transform: none;
         }
 
         .modal {
@@ -172,16 +183,17 @@
         }
 
         .modal-content {
-            background: #161b22;
-            padding: 30px;
+            background: #171717;
+            padding: 24px;
             border-radius: 10px;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border: 1px solid #262626;
         }
 
         .modal-content h2 {
             margin-bottom: 20px;
+            font-weight: 600;
         }
 
         .form-group {
@@ -191,20 +203,29 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #aaa;
-            font-size: 14px;
+            color: #a3a3a3;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .form-group select,
         .form-group textarea,
         .form-group input {
             width: 100%;
-            padding: 10px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 5px;
-            color: #c9d1d9;
+            padding: 10px 12px;
+            background: #0a0a0a;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            color: #fafafa;
             font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group select:focus,
+        .form-group textarea:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
         }
 
         .form-group textarea {
@@ -220,17 +241,38 @@
         }
 
         .button-secondary {
-            background: #555;
+            background: #262626;
         }
 
         .button-secondary:hover {
-            background: #666;
+            background: #404040;
+            border-color: #525252;
+        }
+
+        .button-primary {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .button-primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .button-danger {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .button-danger:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
         }
 
         .no-clients {
             text-align: center;
             padding: 40px;
-            color: #aaa;
+            color: #a3a3a3;
         }
 
         @keyframes pulse {
@@ -240,6 +282,222 @@
 
         .loading {
             animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #171717;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #525252;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+
+            .stat-card {
+                padding: 10px;
+            }
+
+            .stat-card .value {
+                font-size: 18px;
+            }
+
+            .stat-card h3 {
+                font-size: 9px;
+                margin-bottom: 5px;
+            }
+
+            .clients-section {
+                padding: 15px;
+            }
+
+            .clients-section h2 {
+                font-size: 18px;
+            }
+
+            .client-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .client-info h3 {
+                font-size: 14px;
+            }
+
+            .client-info p {
+                font-size: 12px;
+            }
+
+            .command-controls {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .command-controls button {
+                flex: 1;
+                min-width: 45%;
+                font-size: 11px;
+                padding: 10px 8px;
+            }
+
+            /* Modal styles for mobile */
+            .modal-content {
+                width: 95% !important;
+                max-width: 95% !important;
+                max-height: 85vh !important;
+                padding: 15px;
+                margin: 10px;
+                overflow-y: auto;
+            }
+
+            /* Python Templates modal fix */
+            #pythonTemplatesModal .modal-content {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #pythonTemplatesModal textarea {
+                min-height: 100px !important;
+                max-height: 150px;
+            }
+
+            #pythonTemplatesModal .button-group {
+                position: sticky;
+                bottom: 0;
+                background: #171717;
+                padding-top: 10px;
+                margin-top: auto;
+            }
+
+            .modal-content h2 {
+                font-size: 18px;
+            }
+
+            .form-group label {
+                font-size: 12px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 12px;
+            }
+
+            .button-group {
+                flex-wrap: wrap;
+            }
+
+            .button-group button {
+                flex: 1;
+                min-width: 45%;
+            }
+
+            /* Python templates grid */
+            .form-group > div[style*="grid-template-columns: repeat(4"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* File browser */
+            #fileList {
+                max-height: 300px !important;
+            }
+
+            /* Navigation buttons */
+            #fileBrowserModal .modal-content > div:first-of-type > div:first-child {
+                flex-wrap: wrap;
+            }
+
+            #fileBrowserModal button[style*="min-width: 40px"] {
+                min-width: 35px !important;
+                padding: 6px 8px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+
+            .stat-card {
+                padding: 8px;
+            }
+
+            .stat-card .value {
+                font-size: 16px;
+            }
+
+            .stat-card h3 {
+                font-size: 8px;
+            }
+
+            .command-controls button {
+                min-width: 48%;
+                font-size: 10px;
+                padding: 8px 4px;
+            }
+
+            .form-group > div[style*="grid-template-columns"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* Full width buttons on very small screens */
+            .button-group button {
+                min-width: 48%;
+                font-size: 12px;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            button {
+                min-height: 44px;
+            }
+
+            .client-card {
+                padding: 18px;
+            }
+
+            input, select, textarea {
+                min-height: 44px;
+            }
         }
     </style>
 </head>
@@ -266,6 +524,10 @@
             <h3>Total Heartbeats</h3>
             <div class="value">-</div>
         </div>
+        <div class="stat-card">
+            <h3>Active Licenses</h3>
+            <div class="value" id="activeLicensesCount">-</div>
+        </div>
     </div>
 
     <div class="clients-section">
@@ -276,17 +538,10 @@
     </div>
 
     <div class="clients-section" style="margin-top: 30px;">
-        <h2>📸 Recent Screenshots</h2>
-        <div id="screenshots-list">
-            <div class="no-clients loading">Loading screenshots...</div>
-        </div>
-    </div>
-
-    <div class="clients-section" style="margin-top: 30px;">
         <h2>🚀 FormAI Updates</h2>
 
-        <div style="background: #0d1117; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="margin-bottom: 15px; font-size: 18px;">Upload New Update</h3>
+        <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #262626;">
+            <h3 style="margin-bottom: 15px; font-size: 16px; font-weight: 600;">Upload New Update</h3>
             <form id="uploadForm" style="display: flex; gap: 15px; align-items: end;">
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
                     <label>FormAI.exe File</label>
@@ -307,23 +562,121 @@
         </div>
     </div>
 
+    <div class="clients-section" style="margin-top: 30px;">
+        <h2>🔑 License Management</h2>
+
+        <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #262626;">
+            <h3 style="margin-bottom: 15px; font-size: 16px; font-weight: 600;">Create New License</h3>
+            <form id="createLicenseForm" style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                    <label>Customer Name</label>
+                    <input type="text" id="licenseCustomer" placeholder="Customer name" required style="padding: 8px;">
+                </div>
+                <div class="form-group" style="width: 150px; margin-bottom: 0;">
+                    <label>Tier</label>
+                    <select id="licenseTier" style="padding: 8px;">
+                        <option value="basic">Basic</option>
+                        <option value="standard" selected>Standard</option>
+                        <option value="pro">Pro</option>
+                        <option value="enterprise">Enterprise</option>
+                    </select>
+                </div>
+                <div class="form-group" style="width: 150px; margin-bottom: 0;">
+                    <label>Max Machines</label>
+                    <input type="number" id="licenseMaxMachines" value="1" min="1" max="100" style="padding: 8px;">
+                </div>
+                <div class="form-group" style="width: 150px; margin-bottom: 0;">
+                    <label>Expires In (days)</label>
+                    <input type="number" id="licenseExpiryDays" value="365" min="1" style="padding: 8px;">
+                </div>
+                <button type="submit" style="height: 42px; padding: 0 20px;">
+                    🔑 Generate
+                </button>
+            </form>
+        </div>
+
+        <div id="licenses-list">
+            <div class="no-clients loading">Loading licenses...</div>
+        </div>
+    </div>
+
+    <!-- License Details Modal -->
+    <div class="modal" id="licenseModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2>🔑 License Details</h2>
+            <div id="licenseDetails" style="margin-bottom: 20px;">
+                <div style="background: #0a0a0a; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #262626;">
+                    <p style="margin-bottom: 10px;"><strong>License Key:</strong></p>
+                    <code id="licenseKeyDisplay" style="font-size: 16px; color: #22c55e; background: #171717; padding: 12px; display: block; border-radius: 6px; word-break: break-all; font-family: 'Courier New', monospace;"></code>
+                    <button onclick="copyLicenseKey()" style="margin-top: 10px; font-size: 12px;">📋 Copy Key</button>
+                </div>
+                <p><strong>Customer:</strong> <span id="licenseCustomerDisplay"></span></p>
+                <p><strong>Tier:</strong> <span id="licenseTierDisplay"></span></p>
+                <p><strong>Status:</strong> <span id="licenseStatusDisplay"></span></p>
+                <p><strong>Max Machines:</strong> <span id="licenseMaxMachinesDisplay"></span></p>
+                <p><strong>Bound Machines:</strong> <span id="licenseBoundMachinesDisplay"></span></p>
+                <p><strong>Created:</strong> <span id="licenseCreatedDisplay"></span></p>
+                <p><strong>Expires:</strong> <span id="licenseExpiresDisplay"></span></p>
+                <p><strong>Last Used:</strong> <span id="licenseLastUsedDisplay"></span></p>
+            </div>
+            <div class="button-group">
+                <button type="button" onclick="revokeLicense()" class="button-danger">Revoke</button>
+                <button type="button" onclick="unbindLicense()" class="button-secondary">Unbind Machines</button>
+                <button type="button" class="button-secondary" onclick="closeLicenseModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Python Templates Modal -->
     <div class="modal" id="pythonTemplatesModal">
         <div class="modal-content" style="max-width: 800px;">
             <h2>🐍 Python Command Templates</h2>
 
             <div class="form-group">
-                <label>Quick Actions</label>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
-                    <button onclick="insertPythonTemplate('wallpaper_color')" style="font-size: 12px;">🎨 Wallpaper Color</button>
-                    <button onclick="insertPythonTemplate('system_info')" style="font-size: 12px;">💻 System Info</button>
-                    <button onclick="insertPythonTemplate('processes')" style="font-size: 12px;">📊 Processes</button>
-                    <button onclick="insertPythonTemplate('network_info')" style="font-size: 12px;">🌐 Network Info</button>
-                    <button onclick="insertPythonTemplate('disk_usage')" style="font-size: 12px;">💾 Disk Usage</button>
-                    <button onclick="insertPythonTemplate('messagebox')" style="font-size: 12px;">💬 Message Box</button>
-                    <button onclick="insertPythonTemplate('env_vars')" style="font-size: 12px;">🔧 Env Variables</button>
-                    <button onclick="insertPythonTemplate('user_info')" style="font-size: 12px;">👤 User Info</button>
-                    <button onclick="insertPythonTemplate('file_list')" style="font-size: 12px;">📁 List Files</button>
+                <label>🎨 Desktop & Display</label>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px;">
+                    <button onclick="insertPythonTemplate('wallpaper_blue')" style="font-size: 11px;">🔵 Blue</button>
+                    <button onclick="insertPythonTemplate('wallpaper_red')" style="font-size: 11px;">🔴 Red</button>
+                    <button onclick="insertPythonTemplate('wallpaper_green')" style="font-size: 11px;">🟢 Green</button>
+                    <button onclick="insertPythonTemplate('wallpaper_black')" style="font-size: 11px;">⚫ Black</button>
+                    <button onclick="insertPythonTemplate('wallpaper_white')" style="font-size: 11px;">⚪ White</button>
+                    <button onclick="insertPythonTemplate('wallpaper_gray')" style="font-size: 11px;">🔘 Gray</button>
+                    <button onclick="insertPythonTemplate('wallpaper_purple')" style="font-size: 11px;">🟣 Purple</button>
+                    <button onclick="insertPythonTemplate('wallpaper_orange')" style="font-size: 11px;">🟠 Orange</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>💬 User Interaction</label>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px;">
+                    <button onclick="insertPythonTemplate('messagebox')" style="font-size: 11px;">💬 Message Box</button>
+                    <button onclick="insertPythonTemplate('input_box')" style="font-size: 11px;">📝 Input Box</button>
+                    <button onclick="insertPythonTemplate('play_sound')" style="font-size: 11px;">🔊 Play Sound</button>
+                    <button onclick="insertPythonTemplate('speak_text')" style="font-size: 11px;">🗣️ Speak Text</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>🔒 System Control</label>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px;">
+                    <button onclick="insertPythonTemplate('lock_screen')" style="font-size: 11px;">🔒 Lock Screen</button>
+                    <button onclick="insertPythonTemplate('open_url')" style="font-size: 11px;">🌐 Open URL</button>
+                    <button onclick="insertPythonTemplate('open_notepad')" style="font-size: 11px;">📝 Open Notepad</button>
+                    <button onclick="insertPythonTemplate('open_calc')" style="font-size: 11px;">🔢 Open Calculator</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>📊 System Info</label>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px;">
+                    <button onclick="insertPythonTemplate('system_info')" style="font-size: 11px;">💻 System Info</button>
+                    <button onclick="insertPythonTemplate('processes')" style="font-size: 11px;">📊 Processes</button>
+                    <button onclick="insertPythonTemplate('network_info')" style="font-size: 11px;">🌐 Network Info</button>
+                    <button onclick="insertPythonTemplate('disk_usage')" style="font-size: 11px;">💾 Disk Usage</button>
+                    <button onclick="insertPythonTemplate('env_vars')" style="font-size: 11px;">🔧 Env Variables</button>
+                    <button onclick="insertPythonTemplate('user_info')" style="font-size: 11px;">👤 User Info</button>
+                    <button onclick="insertPythonTemplate('file_list')" style="font-size: 11px;">📁 List Files</button>
+                    <button onclick="insertPythonTemplate('clipboard')" style="font-size: 11px;">📋 Clipboard</button>
                 </div>
             </div>
 
@@ -359,14 +712,40 @@
             <h2>📁 File Browser</h2>
 
             <div style="margin-bottom: 20px;">
-                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-                    <button onclick="navigateToParent()" id="parentBtn" style="padding: 8px 12px;">⬆️ Parent</button>
-                    <input type="text" id="currentPath" readonly style="flex: 1; padding: 8px; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; color: #c9d1d9;" />
-                    <button onclick="refreshFileList()" style="padding: 8px 12px;">🔄 Refresh</button>
+                <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 10px;">
+                    <button onclick="goBack()" id="backBtn" disabled style="padding: 8px 12px; min-width: 40px;" title="Back">←</button>
+                    <button onclick="goForward()" id="forwardBtn" disabled style="padding: 8px 12px; min-width: 40px;" title="Forward">→</button>
+                    <button onclick="navigateToParent()" id="parentBtn" style="padding: 8px 12px; min-width: 40px;" title="Up">↑</button>
+                    <button onclick="refreshFileList()" style="padding: 8px 12px; min-width: 40px;" title="Refresh">↻</button>
+                    <div style="flex: 1; display: flex; align-items: center; background: #0a0a0a; border: 1px solid #262626; border-radius: 6px; padding: 6px 10px; margin-left: 10px;">
+                        <span style="margin-right: 8px;">📁</span>
+                        <span id="breadcrumbPath" style="color: #fafafa; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="position: relative; display: inline-block;">
+                        <button onclick="toggleNewMenu()" style="padding: 6px 12px; font-size: 13px;">+ New ▾</button>
+                        <div id="newMenu" style="display: none; position: absolute; top: 100%; left: 0; background: #171717; border: 1px solid #262626; border-radius: 6px; min-width: 180px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                            <div onclick="createNewFolder()" style="padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #262626; color: #fafafa;" onmouseover="this.style.background='#262626'" onmouseout="this.style.background='transparent'">
+                                <span>📁</span> Folder
+                            </div>
+                            <div onclick="createNewFile('txt')" style="padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #262626; color: #fafafa;" onmouseover="this.style.background='#262626'" onmouseout="this.style.background='transparent'">
+                                <span>📄</span> Text Document
+                            </div>
+                            <div onclick="createNewFile('py')" style="padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #262626; color: #fafafa;" onmouseover="this.style.background='#262626'" onmouseout="this.style.background='transparent'">
+                                <span>🐍</span> Python Script
+                            </div>
+                            <div onclick="createNewFile('json')" style="padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #fafafa;" onmouseover="this.style.background='#262626'" onmouseout="this.style.background='transparent'">
+                                <span>{ }</span> JSON File
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="deleteSelectedFile()" id="deleteBtn" disabled style="padding: 6px 12px; font-size: 13px;" class="button-danger">🗑 Delete</button>
+                    <button onclick="downloadSelectedFile()" id="downloadBtn" disabled style="padding: 6px 12px; font-size: 13px;">💾 Download</button>
                 </div>
             </div>
 
-            <div id="fileList" style="max-height: 400px; overflow-y: auto; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; padding: 10px;">
+            <div id="fileList" style="max-height: 400px; overflow-y: auto; background: #0a0a0a; border: 1px solid #262626; border-radius: 6px; padding: 10px;">
                 <div class="no-clients loading">Loading files...</div>
             </div>
 
@@ -381,13 +760,113 @@
         <div class="modal-content" style="max-width: 900px; max-height: 90vh;">
             <h2 id="fileViewerTitle">File Viewer</h2>
 
-            <div style="overflow: auto; max-height: calc(90vh - 150px); background: #0d1117; border: 1px solid #30363d; border-radius: 5px; padding: 15px;">
-                <pre id="fileContent" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', monospace; color: #c9d1d9;"></pre>
+            <div style="overflow: auto; max-height: calc(90vh - 150px); background: #0a0a0a; border: 1px solid #262626; border-radius: 6px; padding: 15px;">
+                <pre id="fileContent" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', monospace; color: #fafafa;"></pre>
             </div>
 
             <div class="button-group">
                 <button type="button" class="button-secondary" onclick="closeFileViewer()">Close</button>
+                <button type="button" onclick="editCurrentFile()">✏️ Edit</button>
                 <button type="button" onclick="downloadCurrentFile()">💾 Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Editor Modal -->
+    <div class="modal" id="fileEditorModal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh;">
+            <h2 id="fileEditorTitle">Edit File</h2>
+
+            <div class="form-group">
+                <label id="fileEditorPathLabel" style="font-family: 'Courier New', monospace;"></label>
+                <textarea id="fileEditorContent" style="min-height: 400px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; resize: vertical;"></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="button-secondary" onclick="closeFileEditor()">Cancel</button>
+                <button type="button" class="button-primary" onclick="saveFileContent()">💾 Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Detail Modal -->
+    <div class="modal" id="clientDetailModal">
+        <div class="modal-content" style="max-width: 900px; max-height: 95vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="clientDetailTitle">📱 Client Details</h2>
+                <span id="clientDetailStatus" class="status-badge">-</span>
+            </div>
+
+            <!-- Client Stats -->
+            <div class="stats" style="margin-bottom: 20px;" id="clientStats">
+                <div class="stat-card">
+                    <h3>Hostname</h3>
+                    <div class="value" id="cdHostname" style="font-size: 16px;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>IP Address</h3>
+                    <div class="value" id="cdIP" style="font-size: 16px;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Platform</h3>
+                    <div class="value" id="cdPlatform" style="font-size: 16px;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Heartbeats</h3>
+                    <div class="value" id="cdHeartbeats">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Last Seen</h3>
+                    <div class="value" id="cdLastSeen" style="font-size: 14px;">-</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div style="background: #0a0a0a; border: 1px solid #262626; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 14px; color: #a3a3a3;">⚡ Quick Actions</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                    <button onclick="takeScreenshotFromDetail()" style="font-size: 12px;">📸 Screenshot</button>
+                    <button onclick="openFileBrowserFromDetail()" style="font-size: 12px;">📁 Files</button>
+                    <button onclick="openPythonFromDetail()" style="font-size: 12px;">🐍 Python</button>
+                    <button onclick="openCommandFromDetail()" style="font-size: 12px;">⚡ Command</button>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div style="background: #0a0a0a; border: 1px solid #262626; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 14px; color: #a3a3a3;">💻 System Info</h3>
+                <div id="clientSystemInfo" style="font-family: monospace; font-size: 12px; color: #a3a3a3;">
+                    <p><strong>OS:</strong> <span id="cdOS">-</span></p>
+                    <p><strong>Machine:</strong> <span id="cdMachine">-</span></p>
+                    <p><strong>Processor:</strong> <span id="cdProcessor">-</span></p>
+                    <p><strong>Python:</strong> <span id="cdPython">-</span></p>
+                    <p><strong>Version:</strong> <span id="cdVersion">-</span></p>
+                    <p><strong>License:</strong> <span id="cdLicense">-</span></p>
+                    <p><strong>Machine ID:</strong> <span id="cdMachineId" style="font-size: 10px;">-</span></p>
+                </div>
+            </div>
+
+            <!-- Connection Info -->
+            <div style="background: #0a0a0a; border: 1px solid #262626; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 14px; color: #a3a3a3;">📊 Connection Info</h3>
+                <div id="clientConnectionInfo" style="font-family: monospace; font-size: 12px; color: #a3a3a3;">
+                    <p><strong>Client ID:</strong> <span id="cdClientId" style="font-size: 10px;">-</span></p>
+                    <p><strong>First Seen:</strong> <span id="cdFirstSeen">-</span></p>
+                    <p><strong>Last Heartbeat:</strong> <span id="cdLastHeartbeat">-</span></p>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div style="background: #0a0a0a; border: 1px solid #262626; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 14px; color: #a3a3a3;">📸 Screenshots</h3>
+                <div id="clientScreenshots" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                    <div style="color: #525252; text-align: center; padding: 20px;">No screenshots yet</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="button-secondary" onclick="closeClientDetail()">Close</button>
+                <button type="button" class="button-danger" onclick="restartClientFromDetail()">🔄 Restart Client</button>
             </div>
         </div>
     </div>
@@ -434,7 +913,7 @@
 
                 <div class="form-group">
                     <label>Select Clients</label>
-                    <div id="clientCheckboxes" style="max-height: 300px; overflow-y: auto; background: #0d1117; border: 1px solid #30363d; border-radius: 5px; padding: 10px;">
+                    <div id="clientCheckboxes" style="max-height: 300px; overflow-y: auto; background: #0a0a0a; border: 1px solid #262626; border-radius: 6px; padding: 10px;">
                         <div class="no-clients">Loading clients...</div>
                     </div>
                 </div>
@@ -442,6 +921,34 @@
                 <div class="button-group">
                     <button type="button" class="button-secondary" onclick="closeDeployModal()">Cancel</button>
                     <button type="button" onclick="deployToSelected()">Deploy to Selected</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Run Program Modal -->
+    <div class="modal" id="runModal">
+        <div class="modal-content">
+            <h2>▶️ Run Program</h2>
+            <form id="runForm">
+                <div class="form-group">
+                    <label>Program Version: <strong id="runVersion"></strong></label>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Clients</label>
+                    <div style="margin-bottom: 10px;">
+                        <button type="button" onclick="selectAllRunClients()" style="font-size: 12px; padding: 5px 10px;">Select All</button>
+                        <button type="button" onclick="deselectAllRunClients()" style="font-size: 12px; padding: 5px 10px;">Deselect All</button>
+                    </div>
+                    <div id="runClientCheckboxes" style="max-height: 300px; overflow-y: auto; background: #0a0a0a; border: 1px solid #262626; border-radius: 6px; padding: 10px;">
+                        <div class="no-clients">Loading clients...</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="button-secondary" onclick="closeRunModal()">Cancel</button>
+                    <button type="button" onclick="runOnSelected()" style="background: #22c55e;">▶️ Run on Selected</button>
                 </div>
             </form>
         </div>
@@ -479,34 +986,18 @@
                     return;
                 }
 
+                // Store clients for detail view
+                window.clientsData = {};
+                data.clients.forEach(c => window.clientsData[c.client_id] = c);
+
                 clientsList.innerHTML = data.clients.map(client => `
-                    <div class="client-card ${client.is_online ? 'online' : 'offline'}">
+                    <div class="client-card ${client.is_online ? 'online' : 'offline'}"
+                         onclick="openClientDetail(window.clientsData['${client.client_id}'])"
+                         style="cursor: pointer;">
                         <div class="client-info">
                             <h3>${client.hostname}</h3>
-                            <p><strong>IP:</strong> ${client.local_ip}</p>
-                            <p><strong>Platform:</strong> ${client.platform} ${client.platform_release}</p>
-                            <p><strong>Version:</strong> ${client.version} | <strong>Python:</strong> ${client.python_version}</p>
+                            <p><strong>IP:</strong> ${client.local_ip} | <strong>Platform:</strong> ${client.platform}</p>
                             <p><strong>Last Seen:</strong> ${client.minutes_since_seen} minutes ago</p>
-                            <div class="command-controls">
-                                <button onclick="sendCommand('${client.client_id}', 'ping')" ${!client.is_online ? 'disabled' : ''}>
-                                    🏓 Ping
-                                </button>
-                                <button onclick="sendCommand('${client.client_id}', 'screenshot')" ${!client.is_online ? 'disabled' : ''}>
-                                    📸 Screenshot
-                                </button>
-                                <button onclick="sendCommand('${client.client_id}', 'get_status')" ${!client.is_online ? 'disabled' : ''}>
-                                    📊 Status
-                                </button>
-                                <button onclick="openPythonTemplatesModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
-                                    🐍 Python
-                                </button>
-                                <button onclick="openFileBrowser('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
-                                    📁 Files
-                                </button>
-                                <button onclick="openCommandModal('${client.client_id}')" ${!client.is_online ? 'disabled' : ''}>
-                                    💻 Custom
-                                </button>
-                            </div>
                         </div>
                         <div>
                             <span class="status-badge ${client.is_online ? 'online' : 'offline'}">
@@ -636,14 +1127,139 @@
 
         // Python Templates
         const pythonTemplates = {
-            wallpaper_color: `from PIL import Image; import os; import ctypes
-# Change wallpaper to red
-img = Image.new('RGB', (1920, 1080), (255, 0, 0))
-path = os.path.join(os.environ['TEMP'], 'wallpaper.png')
-img.save(path)
+            // Wallpaper colors - creates image and sets immediately
+            wallpaper_blue: `import ctypes, os
+from PIL import Image
+# Create blue wallpaper
+img = Image.new('RGB', (1920, 1080), (0, 0, 255))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_blue.bmp')
+img.save(path, 'BMP')
 ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
-print('Wallpaper changed to red')`,
+print('Wallpaper changed to BLUE')`,
 
+            wallpaper_red: `import ctypes, os
+from PIL import Image
+# Create red wallpaper
+img = Image.new('RGB', (1920, 1080), (255, 0, 0))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_red.bmp')
+img.save(path, 'BMP')
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to RED')`,
+
+            wallpaper_green: `import ctypes, os
+from PIL import Image
+# Create green wallpaper
+img = Image.new('RGB', (1920, 1080), (0, 255, 0))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_green.bmp')
+img.save(path, 'BMP')
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to GREEN')`,
+
+            wallpaper_black: `import ctypes, os
+from PIL import Image
+# Create black wallpaper
+img = Image.new('RGB', (1920, 1080), (0, 0, 0))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_black.bmp')
+img.save(path, 'BMP')
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to BLACK')`,
+
+            wallpaper_white: `import ctypes, os
+from PIL import Image
+# Create white wallpaper - great for visibility
+img = Image.new('RGB', (1920, 1080), (255, 255, 255))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_white.bmp')
+img.save(path, 'BMP')
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to WHITE')`,
+
+            wallpaper_gray: `import ctypes, os
+from PIL import Image
+# Create gray wallpaper - neutral background
+img = Image.new('RGB', (1920, 1080), (128, 128, 128))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_gray.bmp')
+img.save(path, 'BMP')
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to GRAY')`,
+
+            wallpaper_purple: `import ctypes, os
+from PIL import Image
+# Create purple wallpaper
+img = Image.new('RGB', (1920, 1080), (128, 0, 255))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_purple.bmp')
+img.save(path, 'BMP')
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to PURPLE')`,
+
+            wallpaper_orange: `import ctypes, os
+from PIL import Image
+# Create orange wallpaper
+img = Image.new('RGB', (1920, 1080), (255, 165, 0))
+path = os.path.join(os.environ['TEMP'], 'wallpaper_orange.bmp')
+img.save(path, 'BMP')
+ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
+print('Wallpaper changed to ORANGE')`,
+
+            // User Interaction
+            messagebox: `import ctypes
+# Display Message Box
+# Icons: 0x10=Error, 0x20=Question, 0x30=Warning, 0x40=Info
+ctypes.windll.user32.MessageBoxW(0, "Hello from Admin Dashboard!", "FormAI", 0x40)
+print('Message displayed')`,
+
+            input_box: `import ctypes
+import ctypes.wintypes as wintypes
+
+# Simple input using PowerShell
+import subprocess
+result = subprocess.run([
+    'powershell', '-Command',
+    '[Microsoft.VisualBasic.Interaction]::InputBox("Enter your message:", "FormAI Input", "")'
+], capture_output=True, text=True)
+print(f"User entered: {result.stdout.strip()}")`,
+
+            play_sound: `import winsound
+import time
+# Play system sounds
+print("Playing system sounds...")
+winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+time.sleep(0.5)
+winsound.Beep(440, 500)  # 440Hz for 500ms
+winsound.Beep(880, 500)  # 880Hz for 500ms
+print("Done!")`,
+
+            speak_text: `import subprocess
+# Text to Speech
+text = "Hello! This is FormAI speaking to you remotely."
+subprocess.run([
+    'powershell', '-Command',
+    f'Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{text}")'
+], shell=True)
+print(f"Spoke: {text}")`,
+
+            // System Control
+            lock_screen: `import ctypes
+# Lock the workstation
+ctypes.windll.user32.LockWorkStation()
+print('Screen locked')`,
+
+            open_url: `import webbrowser
+# Open URL in default browser
+url = "https://google.com"
+webbrowser.open(url)
+print(f"Opened: {url}")`,
+
+            open_notepad: `import subprocess
+# Open Notepad with a message
+subprocess.Popen(['notepad.exe'])
+print('Notepad opened')`,
+
+            open_calc: `import subprocess
+# Open Calculator
+subprocess.Popen(['calc.exe'])
+print('Calculator opened')`,
+
+            // System Info
             system_info: `import platform; import psutil
 # System Information
 info = f\"\"\"
@@ -656,10 +1272,12 @@ Python: {platform.python_version()}
 print(info)`,
 
             processes: `import psutil
-# Running Processes
+# Running Processes (Top 20 by memory)
+print(f"{'PID':>6} {'Name':30} {'Memory':>8}")
+print("-" * 50)
 for proc in sorted(psutil.process_iter(['pid', 'name', 'memory_percent']), key=lambda p: p.info['memory_percent'] or 0, reverse=True)[:20]:
     try:
-        print(f"{proc.info['pid']:>6} {proc.info['name']:30} {proc.info['memory_percent']:.1f}%")
+        print(f"{proc.info['pid']:>6} {proc.info['name'][:30]:30} {proc.info['memory_percent']:.1f}%")
     except:
         pass`,
 
@@ -673,7 +1291,8 @@ print("\\nNetwork Interfaces:")
 for iface, addrs in psutil.net_if_addrs().items():
     print(f"  {iface}:")
     for addr in addrs:
-        print(f"    {addr.address}")`,
+        if addr.family.name == 'AF_INET':
+            print(f"    IPv4: {addr.address}")`,
 
             disk_usage: `import psutil
 # Disk Usage
@@ -687,15 +1306,11 @@ for partition in psutil.disk_partitions():
     except:
         pass`,
 
-            messagebox: `import ctypes
-# Display Message Box
-ctypes.windll.user32.MessageBoxW(0, "Hello from Admin Dashboard!", "FormAI", 0x40)
-print('Message displayed')`,
-
             env_vars: `import os
-# Environment Variables
+# Environment Variables (first 20)
 for key in sorted(os.environ.keys())[:20]:
-    print(f"{key:30} = {os.environ[key][:50]}")`,
+    val = os.environ[key][:50] + "..." if len(os.environ[key]) > 50 else os.environ[key]
+    print(f"{key:30} = {val}")`,
 
             user_info: `import os; import getpass; import platform
 # Current User Info
@@ -712,7 +1327,14 @@ for item in sorted(os.listdir(cwd))[:50]:
     path = os.path.join(cwd, item)
     size = os.path.getsize(path) if os.path.isfile(path) else 0
     type_icon = "📁" if os.path.isdir(path) else "📄"
-    print(f"{type_icon} {item:40} {size:>10} bytes")`
+    print(f"{type_icon} {item:40} {size:>10} bytes")`,
+
+            clipboard: `import subprocess
+# Get clipboard content
+result = subprocess.run(['powershell', '-Command', 'Get-Clipboard'], capture_output=True, text=True)
+print("Clipboard Content:")
+print("-" * 40)
+print(result.stdout if result.stdout else "(empty)")`,
         };
 
         // Open Python templates modal
@@ -761,10 +1383,154 @@ for item in sorted(os.listdir(cwd))[:50]:
                 });
 
                 const result = await response.json();
-                alert(`Python command sent! Command ID: ${result.command_id}`);
-                closePythonTemplatesModal();
+                const commandId = result.command_id;
+
+                // Show waiting message in textarea
+                document.getElementById('pythonCode').value = '⏳ Executing... waiting for result...';
+
+                // Poll for result and display it
+                setTimeout(() => pollCommandResult(commandId, (res) => {
+                    let output = '';
+                    if (res.status === 'success') {
+                        output = '✅ SUCCESS\n\n';
+                        if (res.stdout) output += '--- OUTPUT ---\n' + res.stdout + '\n';
+                        if (res.stderr) output += '--- ERRORS ---\n' + res.stderr + '\n';
+                        output += '\n[Execution mode: ' + (res.execution_mode || 'python') + ']';
+                    } else {
+                        output = '❌ ERROR\n\n' + (res.message || 'Unknown error');
+                        if (res.stderr) output += '\n\n--- ERRORS ---\n' + res.stderr;
+                    }
+                    document.getElementById('pythonCode').value = output;
+                }), 1500);
             } catch (error) {
                 alert('Failed to send Python command: ' + error.message);
+            }
+        }
+
+        // Client Detail Modal
+        let currentDetailClient = null;
+
+        function openClientDetail(client) {
+            currentDetailClient = client;
+
+            // Populate header
+            document.getElementById('clientDetailTitle').textContent = `📱 ${client.hostname}`;
+            const statusBadge = document.getElementById('clientDetailStatus');
+            statusBadge.textContent = client.is_online ? '● Online' : '● Offline';
+            statusBadge.className = 'status-badge ' + (client.is_online ? 'online' : 'offline');
+
+            // Populate stats
+            document.getElementById('cdHostname').textContent = client.hostname || '-';
+            document.getElementById('cdIP').textContent = client.local_ip || '-';
+            document.getElementById('cdPlatform').textContent = client.platform || '-';
+            document.getElementById('cdHeartbeats').textContent = client.heartbeat_count || '0';
+
+            // Last seen
+            if (client.last_heartbeat) {
+                const lastSeen = new Date(client.last_heartbeat);
+                const now = new Date();
+                const diff = Math.floor((now - lastSeen) / 1000);
+                if (diff < 60) {
+                    document.getElementById('cdLastSeen').textContent = diff + 's ago';
+                } else if (diff < 3600) {
+                    document.getElementById('cdLastSeen').textContent = Math.floor(diff / 60) + 'm ago';
+                } else {
+                    document.getElementById('cdLastSeen').textContent = Math.floor(diff / 3600) + 'h ago';
+                }
+            } else {
+                document.getElementById('cdLastSeen').textContent = '-';
+            }
+
+            // System info
+            document.getElementById('cdOS').textContent = `${client.platform || ''} ${client.platform_release || ''}`;
+            document.getElementById('cdMachine').textContent = client.machine || '-';
+            document.getElementById('cdProcessor').textContent = client.processor || '-';
+            document.getElementById('cdPython').textContent = client.python_version || '-';
+            document.getElementById('cdVersion').textContent = client.version || '-';
+            document.getElementById('cdLicense').textContent = client.license_key || 'None';
+            document.getElementById('cdMachineId').textContent = client.machine_id || '-';
+
+            // Connection info
+            document.getElementById('cdClientId').textContent = client.client_id || '-';
+            document.getElementById('cdFirstSeen').textContent = client.first_seen ? new Date(client.first_seen).toLocaleString() : '-';
+            document.getElementById('cdLastHeartbeat').textContent = client.last_heartbeat ? new Date(client.last_heartbeat).toLocaleString() : '-';
+
+            document.getElementById('clientDetailModal').classList.add('active');
+
+            // Load screenshots for this client
+            loadClientScreenshots(client.client_id, client.hostname);
+        }
+
+        async function loadClientScreenshots(clientId, hostname) {
+            const container = document.getElementById('clientScreenshots');
+            container.innerHTML = '<div style="color: #525252; text-align: center; padding: 20px;">Loading...</div>';
+
+            try {
+                const response = await fetch('/api/screenshots');
+                const data = await response.json();
+
+                // Filter screenshots for this client (by hostname in filename)
+                const clientScreenshots = data.screenshots.filter(s =>
+                    s.client_id === clientId || s.filename.includes(hostname)
+                ).slice(0, 6); // Show last 6
+
+                if (clientScreenshots.length === 0) {
+                    container.innerHTML = '<div style="color: #525252; text-align: center; padding: 20px;">No screenshots yet. Click 📸 Screenshot to capture.</div>';
+                    return;
+                }
+
+                container.innerHTML = clientScreenshots.map(s => `
+                    <div style="cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid #262626;"
+                         onclick="window.open('/api/screenshots/${s.filename}', '_blank')">
+                        <img src="/api/screenshots/${s.filename}"
+                             style="width: 100%; height: 100px; object-fit: cover;"
+                             alt="${s.filename}">
+                        <div style="padding: 5px; font-size: 10px; color: #a3a3a3; text-align: center;">
+                            ${new Date(s.timestamp).toLocaleString()}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 20px;">Failed to load screenshots</div>';
+            }
+        }
+
+        function closeClientDetail() {
+            document.getElementById('clientDetailModal').classList.remove('active');
+            currentDetailClient = null;
+        }
+
+        function takeScreenshotFromDetail() {
+            if (currentDetailClient) {
+                takeScreenshot(currentDetailClient.client_id);
+            }
+        }
+
+        function openFileBrowserFromDetail() {
+            if (currentDetailClient) {
+                closeClientDetail();
+                openFileBrowser(currentDetailClient.client_id);
+            }
+        }
+
+        function openPythonFromDetail() {
+            if (currentDetailClient) {
+                closeClientDetail();
+                openPythonTemplatesModal(currentDetailClient.client_id);
+            }
+        }
+
+        function openCommandFromDetail() {
+            if (currentDetailClient) {
+                closeClientDetail();
+                openCommandModal(currentDetailClient.client_id);
+            }
+        }
+
+        function restartClientFromDetail() {
+            if (currentDetailClient && confirm('Restart this client?')) {
+                sendCommand(currentDetailClient.client_id, 'restart', {});
+                closeClientDetail();
             }
         }
 
@@ -795,10 +1561,17 @@ for item in sorted(os.listdir(cwd))[:50]:
         let currentParentPath = null;
         let currentFileContent = null;
         let currentFileName = null;
+        let browseHistory = [];  // Back history stack
+        let forwardHistory = []; // Forward history stack
+        let selectedFilePath = null;  // Currently selected file/folder
+        let selectedFileName = null;
+        let selectedIsDir = false;
 
         // Open file browser
         async function openFileBrowser(clientId, startPath = null) {
             currentFileBrowserClientId = clientId;
+            browseHistory = [];  // Reset history when opening
+            forwardHistory = [];
             document.getElementById('fileBrowserModal').classList.add('active');
 
             // Default to a common starting path if not specified
@@ -819,8 +1592,14 @@ for item in sorted(os.listdir(cwd))[:50]:
         }
 
         // Browse directory
-        async function browseDirectory(path) {
+        async function browseDirectory(path, navType = 'normal') {
             if (!currentFileBrowserClientId) return;
+
+            // Handle history based on navigation type
+            if (navType === 'normal' && currentBrowserPath && currentBrowserPath !== path) {
+                browseHistory.push(currentBrowserPath);
+                forwardHistory = []; // Clear forward when navigating normally
+            }
 
             try {
                 const response = await fetch('/api/send_command', {
@@ -843,6 +1622,24 @@ for item in sorted(os.listdir(cwd))[:50]:
             }
         }
 
+        // Go back to previous directory
+        function goBack() {
+            if (browseHistory.length > 0) {
+                forwardHistory.push(currentBrowserPath); // Save current for forward
+                const previousPath = browseHistory.pop();
+                browseDirectory(previousPath, 'back');
+            }
+        }
+
+        // Go forward to next directory
+        function goForward() {
+            if (forwardHistory.length > 0) {
+                browseHistory.push(currentBrowserPath); // Save current for back
+                const nextPath = forwardHistory.pop();
+                browseDirectory(nextPath, 'forward');
+            }
+        }
+
         // Refresh file list
         function refreshFileList() {
             if (currentBrowserPath) {
@@ -860,14 +1657,20 @@ for item in sorted(os.listdir(cwd))[:50]:
         // Display directory listing
         function displayDirectoryListing(result) {
             if (result.status === 'error') {
-                document.getElementById('fileList').innerHTML = `<div class="no-clients" style="color: #ff3b3b;">Error: ${result.message}</div>`;
+                document.getElementById('fileList').innerHTML = `<div class="no-clients" style="color: #ef4444;">Error: ${result.message}</div>`;
                 return;
             }
 
             currentBrowserPath = result.path;
             currentParentPath = result.parent;
-            document.getElementById('currentPath').value = result.path;
+
+            // Update breadcrumb path
+            document.getElementById('breadcrumbPath').textContent = result.path;
+
+            // Update navigation buttons
             document.getElementById('parentBtn').disabled = !result.parent;
+            document.getElementById('backBtn').disabled = browseHistory.length === 0;
+            document.getElementById('forwardBtn').disabled = forwardHistory.length === 0;
 
             const fileList = document.getElementById('fileList');
 
@@ -876,24 +1679,32 @@ for item in sorted(os.listdir(cwd))[:50]:
                 return;
             }
 
+            // Reset selection when directory changes
+            selectedFilePath = null;
+            selectedFileName = null;
+            selectedIsDir = false;
+            document.getElementById('deleteBtn').disabled = true;
+            document.getElementById('downloadBtn').disabled = true;
+
             fileList.innerHTML = result.items.map(item => {
                 const icon = item.is_dir ? '📁' : '📄';
                 const size = item.is_file ? formatFileSize(item.size) : '-';
                 const date = new Date(item.modified).toLocaleString();
-                const clickAction = item.is_dir
-                    ? `onclick="browseDirectory('${escapeHtml(item.path)}')"`
-                    : `onclick="viewFile('${escapeHtml(item.path)}', '${escapeHtml(item.name)}')"`;
+                const dblClickAction = item.is_dir
+                    ? `ondblclick="browseDirectory('${escapeHtml(item.path)}')"`
+                    : `ondblclick="viewFile('${escapeHtml(item.path)}', '${escapeHtml(item.name)}')"`;
 
                 return `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #30363d; cursor: pointer; transition: background 0.2s;"
-                         ${clickAction}
-                         onmouseover="this.style.background='#161b22'"
-                         onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #262626; cursor: pointer; transition: background 0.2s; border-radius: 4px; margin-bottom: 2px;"
+                         onclick="selectFile('${escapeHtml(item.path)}', '${escapeHtml(item.name)}', ${item.is_dir}, this)"
+                         ${dblClickAction}
+                         onmouseover="if(!this.classList.contains('selected')) this.style.background='#171717'"
+                         onmouseout="if(!this.classList.contains('selected')) this.style.background='transparent'">
                         <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                            <span style="font-size: 20px;">${icon}</span>
-                            <span style="font-weight: ${item.is_dir ? 'bold' : 'normal'};">${escapeHtml(item.name)}</span>
+                            <span style="font-size: 18px;">${icon}</span>
+                            <span style="font-weight: ${item.is_dir ? '600' : '400'}; color: #fafafa;">${escapeHtml(item.name)}</span>
                         </div>
-                        <div style="display: flex; gap: 20px; color: #aaa; font-size: 12px;">
+                        <div style="display: flex; gap: 20px; color: #a3a3a3; font-size: 12px;">
                             <span style="min-width: 80px; text-align: right;">${size}</span>
                             <span style="min-width: 150px;">${date}</span>
                         </div>
@@ -951,8 +1762,66 @@ for item in sorted(os.listdir(cwd))[:50]:
         // Close file viewer
         function closeFileViewer() {
             document.getElementById('fileViewerModal').classList.remove('active');
-            currentFileContent = null;
-            currentFileName = null;
+        }
+
+        // Edit current file
+        function editCurrentFile() {
+            if (!currentFileContent) return;
+
+            document.getElementById('fileViewerModal').classList.remove('active');
+            document.getElementById('fileEditorTitle').textContent = `Edit: ${currentFileName}`;
+            document.getElementById('fileEditorPathLabel').textContent = currentFileContent.path;
+            document.getElementById('fileEditorContent').value = currentFileContent.encoding === 'text' ? currentFileContent.content : '[Binary file - cannot edit]';
+            document.getElementById('fileEditorModal').classList.add('active');
+        }
+
+        // Close file editor
+        function closeFileEditor() {
+            document.getElementById('fileEditorModal').classList.remove('active');
+        }
+
+        // Save file content
+        async function saveFileContent() {
+            const content = document.getElementById('fileEditorContent').value;
+            const path = document.getElementById('fileEditorPathLabel').textContent;
+
+            if (!path || !currentFileBrowserClientId) {
+                alert('No file path');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentFileBrowserClientId,
+                        command: 'write_file',
+                        params: {
+                            path: path,
+                            content: content,
+                            encoding: 'text'
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                setTimeout(() => pollCommandResult(commandId, (res) => {
+                    if (res.status === 'success') {
+                        alert('File saved successfully!');
+                        closeFileEditor();
+                        currentFileContent = null;
+                        currentFileName = null;
+                        refreshFileList();
+                    } else {
+                        alert('Failed to save: ' + (res.message || 'Unknown error'));
+                    }
+                }), 1000);
+            } catch (error) {
+                alert('Failed to save: ' + error.message);
+            }
         }
 
         // Download current file
@@ -1010,8 +1879,8 @@ for item in sorted(os.listdir(cwd))[:50]:
 
         // Poll for command result
         function pollCommandResult(commandId, callback, attempts = 0) {
-            if (attempts >= 20) {
-                alert('Timeout waiting for command result');
+            if (attempts >= 40) {
+                alert('Timeout waiting for command result (commands can take up to 15 seconds)');
                 return;
             }
 
@@ -1053,6 +1922,455 @@ for item in sorted(os.listdir(cwd))[:50]:
             return text.replace(/[&<>"'\\]/g, m => map[m]);
         }
 
+        // Toggle New menu dropdown
+        function toggleNewMenu() {
+            const menu = document.getElementById('newMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+
+            // Close menu when clicking outside
+            if (menu.style.display === 'block') {
+                setTimeout(() => {
+                    document.addEventListener('click', closeNewMenuOnClickOutside);
+                }, 0);
+            }
+        }
+
+        function closeNewMenuOnClickOutside(e) {
+            const menu = document.getElementById('newMenu');
+            const button = e.target.closest('button');
+            if (!menu.contains(e.target) && (!button || !button.textContent.includes('New'))) {
+                menu.style.display = 'none';
+                document.removeEventListener('click', closeNewMenuOnClickOutside);
+            }
+        }
+
+        // Create new folder
+        async function createNewFolder() {
+            document.getElementById('newMenu').style.display = 'none';
+
+            const folderName = prompt('Enter folder name:', 'New Folder');
+            if (!folderName) return;
+
+            if (!currentFileBrowserClientId || !currentBrowserPath) {
+                alert('No directory selected');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentFileBrowserClientId,
+                        command: 'create_folder',
+                        params: {
+                            path: currentBrowserPath + '\\' + folderName
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                // Poll for result then refresh
+                setTimeout(() => pollCommandResult(commandId, (res) => {
+                    if (res.status === 'success') {
+                        refreshFileList();
+                    } else {
+                        alert('Failed to create folder: ' + (res.message || 'Unknown error'));
+                    }
+                }), 1000);
+            } catch (error) {
+                alert('Failed to create folder: ' + error.message);
+            }
+        }
+
+        // Create new file - opens editor
+        async function createNewFile(extension) {
+            document.getElementById('newMenu').style.display = 'none';
+
+            const defaultNames = {
+                'txt': 'New Text Document.txt',
+                'py': 'script.py',
+                'json': 'data.json'
+            };
+
+            const fileName = prompt('Enter file name:', defaultNames[extension] || 'newfile.' + extension);
+            if (!fileName) return;
+
+            if (!currentFileBrowserClientId || !currentBrowserPath) {
+                alert('No directory selected');
+                return;
+            }
+
+            // Default content based on file type
+            const defaultContent = {
+                'txt': '',
+                'py': '#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\n',
+                'json': '{\n  \n}\n'
+            };
+
+            const fullPath = currentBrowserPath + '\\' + fileName;
+
+            // Open editor for the new file
+            document.getElementById('fileEditorTitle').textContent = `New: ${fileName}`;
+            document.getElementById('fileEditorPathLabel').textContent = fullPath;
+            document.getElementById('fileEditorContent').value = defaultContent[extension] || '';
+            document.getElementById('fileEditorModal').classList.add('active');
+
+            // Set current file info so save works
+            currentFileName = fileName;
+            currentFileContent = { path: fullPath, encoding: 'text', content: '' };
+        }
+
+        // Select file (for delete/download operations)
+        function selectFile(path, name, isDir, element) {
+            // Deselect previous
+            document.querySelectorAll('#fileList > div').forEach(el => {
+                el.style.background = 'transparent';
+            });
+
+            // Select current
+            element.style.background = '#262626';
+            selectedFilePath = path;
+            selectedFileName = name;
+            selectedIsDir = isDir;
+
+            // Enable/disable buttons
+            document.getElementById('deleteBtn').disabled = false;
+            document.getElementById('downloadBtn').disabled = isDir; // Can't download folders directly
+        }
+
+        // Delete selected file/folder
+        async function deleteSelectedFile() {
+            if (!selectedFilePath) {
+                alert('No file selected');
+                return;
+            }
+
+            const type = selectedIsDir ? 'folder' : 'file';
+            if (!confirm(`Are you sure you want to delete this ${type}?\n\n${selectedFileName}`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentFileBrowserClientId,
+                        command: 'delete_file',
+                        params: { path: selectedFilePath }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                // Poll for result then refresh
+                setTimeout(() => pollCommandResult(commandId, (res) => {
+                    if (res.status === 'success') {
+                        selectedFilePath = null;
+                        selectedFileName = null;
+                        selectedIsDir = false;
+                        document.getElementById('deleteBtn').disabled = true;
+                        document.getElementById('downloadBtn').disabled = true;
+                        refreshFileList();
+                    } else {
+                        alert('Failed to delete: ' + (res.message || 'Unknown error'));
+                    }
+                }), 1000);
+            } catch (error) {
+                alert('Failed to delete: ' + error.message);
+            }
+        }
+
+        // Download selected file
+        async function downloadSelectedFile() {
+            if (!selectedFilePath || selectedIsDir) {
+                alert('Please select a file (not folder) to download');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/send_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentFileBrowserClientId,
+                        command: 'download_file',
+                        params: { path: selectedFilePath }
+                    })
+                });
+
+                const result = await response.json();
+                const commandId = result.command_id;
+
+                // Poll for result then trigger download
+                setTimeout(() => pollCommandResult(commandId, handleFileDownload), 1000);
+            } catch (error) {
+                alert('Failed to download: ' + error.message);
+            }
+        }
+
+        // License Management
+        let currentLicenseKey = null;
+
+        // Load licenses
+        async function loadLicenses() {
+            try {
+                const response = await fetch('/api/licenses');
+                const data = await response.json();
+
+                // Update active licenses count
+                const activeLicenses = data.filter(l => l.is_active).length;
+                document.getElementById('activeLicensesCount').textContent = activeLicenses;
+
+                const licensesList = document.getElementById('licenses-list');
+
+                if (data.length === 0) {
+                    licensesList.innerHTML = '<div class="no-clients">No licenses created yet</div>';
+                    return;
+                }
+
+                licensesList.innerHTML = data.map(license => {
+                    const created = new Date(license.created_at);
+                    const expires = license.expires_at ? new Date(license.expires_at) : null;
+                    const isExpired = expires && expires < new Date();
+                    const statusClass = license.is_active && !isExpired ? 'online' : 'offline';
+                    const statusText = !license.is_active ? 'Revoked' : (isExpired ? 'Expired' : 'Active');
+
+                    return `
+                        <div class="client-card ${statusClass}">
+                            <div class="client-info">
+                                <h3>${license.customer_name || 'Unknown Customer'}</h3>
+                                <p><strong>Key:</strong> ${license.license_key.substring(0, 15)}...</p>
+                                <p><strong>Tier:</strong> ${license.tier} | <strong>Machines:</strong> ${license.bound_machines.length}/${license.max_machines}</p>
+                                <p><strong>Created:</strong> ${created.toLocaleDateString()} | <strong>Expires:</strong> ${expires ? expires.toLocaleDateString() : 'Never'}</p>
+                                <div class="command-controls">
+                                    <button onclick="viewLicense('${license.license_key}')">
+                                        👁️ View
+                                    </button>
+                                    <button onclick="copyToClipboard('${license.license_key}')" style="font-size: 12px;">
+                                        📋 Copy
+                                    </button>
+                                    ${license.is_active ? `
+                                        <button onclick="quickRevokeLicense('${license.license_key}')" class="button-danger" style="font-size: 12px;">
+                                            🚫 Revoke
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div>
+                                <span class="status-badge ${statusClass}">
+                                    ● ${statusText}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load licenses:', error);
+                // Show friendly message - likely no licenses exist yet
+                document.getElementById('licenses-list').innerHTML = '<div class="no-clients">No licenses created yet. Generate your first license above!</div>';
+                document.getElementById('activeLicensesCount').textContent = '0';
+            }
+        }
+
+        // Create license form handler
+        document.getElementById('createLicenseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const customer = document.getElementById('licenseCustomer').value.trim();
+            const tier = document.getElementById('licenseTier').value;
+            const maxMachines = parseInt(document.getElementById('licenseMaxMachines').value);
+            const expiryDays = parseInt(document.getElementById('licenseExpiryDays').value);
+
+            try {
+                const button = e.target.querySelector('button[type="submit"]');
+                button.disabled = true;
+                button.textContent = '⏳ Generating...';
+
+                const response = await fetch('/api/licenses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_name: customer,
+                        tier: tier,
+                        max_machines: maxMachines,
+                        expires_in_days: expiryDays
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.license_key) {
+                    // Show the new license
+                    currentLicenseKey = result.license_key;
+                    document.getElementById('licenseKeyDisplay').textContent = result.license_key;
+                    document.getElementById('licenseCustomerDisplay').textContent = customer;
+                    document.getElementById('licenseTierDisplay').textContent = tier;
+                    document.getElementById('licenseStatusDisplay').textContent = 'Active';
+                    document.getElementById('licenseMaxMachinesDisplay').textContent = maxMachines;
+                    document.getElementById('licenseBoundMachinesDisplay').textContent = '0';
+                    document.getElementById('licenseCreatedDisplay').textContent = new Date().toLocaleString();
+                    document.getElementById('licenseExpiresDisplay').textContent = result.expires_at ? new Date(result.expires_at).toLocaleString() : 'Never';
+                    document.getElementById('licenseLastUsedDisplay').textContent = 'Never';
+
+                    document.getElementById('licenseModal').classList.add('active');
+
+                    // Reset form
+                    document.getElementById('licenseCustomer').value = '';
+                    loadLicenses();
+                } else {
+                    alert('Failed to create license: ' + (result.detail || 'Unknown error'));
+                }
+
+                button.disabled = false;
+                button.textContent = '🔑 Generate';
+            } catch (error) {
+                alert('Failed to create license: ' + error.message);
+                const button = e.target.querySelector('button[type="submit"]');
+                button.disabled = false;
+                button.textContent = '🔑 Generate';
+            }
+        });
+
+        // View license details
+        async function viewLicense(licenseKey) {
+            try {
+                const response = await fetch(`/api/licenses/${licenseKey}`);
+                const license = await response.json();
+
+                if (license.detail) {
+                    alert('License not found');
+                    return;
+                }
+
+                currentLicenseKey = licenseKey;
+                document.getElementById('licenseKeyDisplay').textContent = license.license_key;
+                document.getElementById('licenseCustomerDisplay').textContent = license.customer_name || 'Unknown';
+                document.getElementById('licenseTierDisplay').textContent = license.tier;
+                document.getElementById('licenseStatusDisplay').textContent = license.is_active ? 'Active' : 'Revoked';
+                document.getElementById('licenseMaxMachinesDisplay').textContent = license.max_machines;
+                document.getElementById('licenseBoundMachinesDisplay').textContent = license.bound_machines.length;
+                document.getElementById('licenseCreatedDisplay').textContent = new Date(license.created_at).toLocaleString();
+                document.getElementById('licenseExpiresDisplay').textContent = license.expires_at ? new Date(license.expires_at).toLocaleString() : 'Never';
+                document.getElementById('licenseLastUsedDisplay').textContent = license.last_used_at ? new Date(license.last_used_at).toLocaleString() : 'Never';
+
+                document.getElementById('licenseModal').classList.add('active');
+            } catch (error) {
+                alert('Failed to load license: ' + error.message);
+            }
+        }
+
+        // Close license modal
+        function closeLicenseModal() {
+            document.getElementById('licenseModal').classList.remove('active');
+            currentLicenseKey = null;
+        }
+
+        // Copy license key
+        function copyLicenseKey() {
+            if (currentLicenseKey) {
+                copyToClipboard(currentLicenseKey);
+            }
+        }
+
+        // Copy to clipboard helper
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('License key copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('License key copied to clipboard!');
+            });
+        }
+
+        // Revoke license from modal
+        async function revokeLicense() {
+            if (!currentLicenseKey) return;
+
+            if (!confirm('Are you sure you want to revoke this license? This will disable all clients using it.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/licenses/${currentLicenseKey}/revoke`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('License revoked successfully');
+                    closeLicenseModal();
+                    loadLicenses();
+                } else {
+                    alert('Failed to revoke license: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Failed to revoke license: ' + error.message);
+            }
+        }
+
+        // Quick revoke from list
+        async function quickRevokeLicense(licenseKey) {
+            if (!confirm('Are you sure you want to revoke this license?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/licenses/${licenseKey}/revoke`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('License revoked successfully');
+                    loadLicenses();
+                } else {
+                    alert('Failed to revoke license: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Failed to revoke license: ' + error.message);
+            }
+        }
+
+        // Unbind machines from license
+        async function unbindLicense() {
+            if (!currentLicenseKey) return;
+
+            if (!confirm('Are you sure you want to unbind all machines from this license?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/licenses/${currentLicenseKey}/unbind`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Machines unbound successfully');
+                    document.getElementById('licenseBoundMachinesDisplay').textContent = '0';
+                    loadLicenses();
+                } else {
+                    alert('Failed to unbind machines: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Failed to unbind machines: ' + error.message);
+            }
+        }
+
         // Update Management
         let currentDeployVersion = null;
         let cachedClients = [];
@@ -1083,13 +2401,13 @@ for item in sorted(os.listdir(cwd))[:50]:
                                 <p><strong>Size:</strong> ${sizeMB} MB | <strong>SHA256:</strong> ${hash}</p>
                                 <p><strong>Uploaded:</strong> ${date.toLocaleString()}</p>
                                 <div class="command-controls">
+                                    <button onclick="openRunModal('${update.version}')" style="background: #22c55e;">
+                                        ▶️ Run
+                                    </button>
                                     <button onclick="deployToAll('${update.version}')">
-                                        🚀 Deploy to All
+                                        🚀 Update All
                                     </button>
-                                    <button onclick="openDeployModal('${update.version}')">
-                                        🎯 Deploy to Selected
-                                    </button>
-                                    <button onclick="deleteUpdate('${update.version}')" style="background: #991b1b;">
+                                    <button onclick="deleteUpdate('${update.version}')" class="button-danger">
                                         🗑️ Delete
                                     </button>
                                 </div>
@@ -1145,7 +2463,7 @@ for item in sorted(os.listdir(cwd))[:50]:
                     versionInput.value = '';
                     loadUpdates();
                 } else {
-                    alert('Upload failed: ' + result.message);
+                    alert('Upload failed: ' + (result.detail || result.message || 'Unknown error'));
                 }
 
                 button.disabled = false;
@@ -1158,9 +2476,90 @@ for item in sorted(os.listdir(cwd))[:50]:
             }
         });
 
-        // Deploy to all clients
+        // Run Modal
+        let currentRunVersion = null;
+
+        async function openRunModal(version) {
+            currentRunVersion = version;
+            document.getElementById('runVersion').textContent = version;
+
+            // Load clients into checkboxes
+            try {
+                const response = await fetch('/api/clients');
+                const data = await response.json();
+
+                const checkboxContainer = document.getElementById('runClientCheckboxes');
+
+                if (data.clients.length === 0) {
+                    checkboxContainer.innerHTML = '<div class="no-clients">No clients connected</div>';
+                } else {
+                    checkboxContainer.innerHTML = data.clients.map(client => `
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #262626; cursor: pointer;">
+                            <input type="checkbox" value="${client.client_id}" ${client.is_online ? 'checked' : ''}>
+                            <span style="flex: 1;">
+                                <strong>${client.hostname}</strong>
+                                <span style="color: ${client.is_online ? '#22c55e' : '#666'}; font-size: 12px;">
+                                    ${client.is_online ? '● Online' : '○ Offline'}
+                                </span>
+                            </span>
+                        </label>
+                    `).join('');
+                }
+
+                document.getElementById('runModal').classList.add('active');
+            } catch (error) {
+                alert('Failed to load clients: ' + error.message);
+            }
+        }
+
+        function closeRunModal() {
+            document.getElementById('runModal').classList.remove('active');
+            currentRunVersion = null;
+        }
+
+        function selectAllRunClients() {
+            document.querySelectorAll('#runClientCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllRunClients() {
+            document.querySelectorAll('#runClientCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        async function runOnSelected() {
+            const checkboxes = document.querySelectorAll('#runClientCheckboxes input[type="checkbox"]:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+            if (selectedIds.length === 0) {
+                alert('Please select at least one client');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/updates/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        version: currentRunVersion,
+                        client_ids: selectedIds
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`Program v${currentRunVersion} sent to ${result.deployed_to} client(s)!`);
+                    closeRunModal();
+                } else {
+                    alert('Run failed: ' + (result.detail || result.message));
+                }
+            } catch (error) {
+                alert('Run failed: ' + error.message);
+            }
+        }
+
+        // Deploy update to all clients (replaces FormAI)
         async function deployToAll(version) {
-            if (!confirm(`Deploy v${version} to ALL clients?`)) {
+            if (!confirm(`Deploy FormAI update v${version} to ALL clients?\n\nThis will REPLACE FormAI and restart clients.`)) {
                 return;
             }
 
@@ -1200,12 +2599,12 @@ for item in sorted(os.listdir(cwd))[:50]:
                     checkboxContainer.innerHTML = '<div class="no-clients">No clients available</div>';
                 } else {
                     checkboxContainer.innerHTML = data.clients.map(client => `
-                        <div style="padding: 8px; border-bottom: 1px solid #30363d;">
+                        <div style="padding: 10px; border-bottom: 1px solid #262626;">
                             <label style="display: flex; align-items: center; cursor: pointer;">
                                 <input type="checkbox" value="${client.client_id}" ${client.is_online ? 'checked' : 'disabled'}
-                                       style="margin-right: 10px; cursor: pointer;">
+                                       style="margin-right: 12px; cursor: pointer; width: 16px; height: 16px;">
                                 <div style="flex: 1;">
-                                    <strong>${client.hostname}</strong> (${client.local_ip})
+                                    <strong style="color: #fafafa;">${client.hostname}</strong> <span style="color: #a3a3a3;">(${client.local_ip})</span>
                                     <span class="status-badge ${client.is_online ? 'online' : 'offline'}" style="margin-left: 10px; padding: 2px 8px; font-size: 10px;">
                                         ${client.is_online ? '● Online' : '● Offline'}
                                     </span>
@@ -1294,6 +2693,7 @@ for item in sorted(os.listdir(cwd))[:50]:
             loadClients();
             loadScreenshots();
             loadUpdates();
+            loadLicenses();
         }
 
         // Initial load

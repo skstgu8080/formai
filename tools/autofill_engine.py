@@ -765,18 +765,83 @@ class AutofillEngine:
         checked = 0
         for selector in checkboxes:
             try:
+                # Try multiple strategies to click checkbox/label
+                clicked = False
+
+                # Strategy 1: Check if element is visible and click it
                 if self.sb.is_element_visible(selector):
-                    # Use SeleniumBase click which handles UC mode
-                    if not self.sb.is_selected(selector):
-                        self.sb.click(selector)
-                        checked += 1
-                        logger.info(f"Checked checkbox: {selector}")
-                        await asyncio.sleep(self.field_delay)
-                    else:
-                        logger.debug(f"Checkbox already checked: {selector}")
-                        checked += 1
+                    try:
+                        # For label elements, just click (don't check is_selected)
+                        is_label = self.sb.execute_script(f"""
+                            var el = document.querySelector('{selector}');
+                            return el ? el.tagName.toLowerCase() === 'label' : false;
+                        """)
+
+                        if is_label:
+                            # Labels should be clicked directly - they toggle their associated checkbox
+                            self.sb.click(selector)
+                            clicked = True
+                            logger.info(f"Clicked label to toggle checkbox: {selector}")
+                        else:
+                            # For actual checkbox inputs, check if already selected
+                            if not self.sb.is_selected(selector):
+                                self.sb.click(selector)
+                                clicked = True
+                                logger.info(f"Checked checkbox: {selector}")
+                            else:
+                                logger.debug(f"Checkbox already checked: {selector}")
+                                clicked = True
+                    except Exception as click_err:
+                        logger.debug(f"Standard click failed: {click_err}")
+
+                # Strategy 2: Try JavaScript click if standard click failed
+                if not clicked:
+                    try:
+                        js_clicked = self.sb.execute_script(f"""
+                            var el = document.querySelector('{selector}');
+                            if (el) {{
+                                el.click();
+                                return true;
+                            }}
+                            return false;
+                        """)
+                        if js_clicked:
+                            clicked = True
+                            logger.info(f"JS clicked checkbox/label: {selector}")
+                    except Exception as js_err:
+                        logger.debug(f"JS click failed: {js_err}")
+
+                # Strategy 3: Try finding checkbox by partial selector match
+                if not clicked and ('label' in selector.lower() or 'newsletter' in selector.lower()):
+                    try:
+                        # Try clicking by text content
+                        text_selectors = ['Subscribe', 'newsletter', 'marketing', 'agree', 'accept']
+                        for text in text_selectors:
+                            try:
+                                self.sb.execute_script(f"""
+                                    var labels = document.querySelectorAll('label');
+                                    for (var i = 0; i < labels.length; i++) {{
+                                        if (labels[i].textContent.toLowerCase().includes('{text.lower()}')) {{
+                                            labels[i].click();
+                                            return true;
+                                        }}
+                                    }}
+                                    return false;
+                                """)
+                                clicked = True
+                                logger.info(f"Clicked label containing '{text}'")
+                                break
+                            except:
+                                continue
+                    except Exception as text_err:
+                        logger.debug(f"Text-based click failed: {text_err}")
+
+                if clicked:
+                    checked += 1
+                    await asyncio.sleep(self.field_delay)
                 else:
-                    logger.warning(f"Checkbox not visible: {selector}")
+                    logger.warning(f"Could not click checkbox: {selector}")
+
             except Exception as e:
                 logger.error(f"Checkbox error for {selector}: {e}")
 

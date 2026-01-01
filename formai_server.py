@@ -4,8 +4,20 @@ FormAI Server - FastAPI with SeleniumBase automation
 """
 import os
 import sys
+import io
 import ctypes
 import platform
+
+# Fix Windows console encoding for Unicode
+if sys.platform == "win32":
+    try:
+        # Only wrap if not already wrapped and buffer exists
+        if hasattr(sys.stdout, 'buffer') and not isinstance(sys.stdout, io.TextIOWrapper):
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+        if hasattr(sys.stderr, 'buffer') and not isinstance(sys.stderr, io.TextIOWrapper):
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+    except Exception:
+        pass  # Silently ignore encoding setup failures
 
 # ============================================
 # Admin Privilege Check (Cross-platform)
@@ -21,6 +33,104 @@ def is_admin():
             return False
     except:
         return False
+
+def setup_firewall_rules():
+    """Add firewall rules silently on Windows to prevent firewall prompt.
+    Uses port-based rules which don't require admin rights to check."""
+    if sys.platform != "win32":
+        return
+
+    import subprocess
+
+    # Check if already configured
+    marker_dir = os.path.join(os.environ.get('LOCALAPPDATA', '.'), 'FormAI')
+    marker_file = os.path.join(marker_dir, '.firewall_ok')
+
+    if os.path.exists(marker_file):
+        return  # Already configured
+
+    # Check if we have admin rights - if not, create a helper script
+    if not is_admin():
+        try:
+            # Create a PowerShell script to add firewall rules
+            script_path = os.path.join(marker_dir, 'setup_firewall.ps1')
+            os.makedirs(marker_dir, exist_ok=True)
+
+            ps_script = '''
+# FormAI Firewall Setup
+$ErrorActionPreference = 'SilentlyContinue'
+
+# Remove old rules
+netsh advfirewall firewall delete rule name="FormAI Server" 2>$null
+netsh advfirewall firewall delete rule name="FormAI Client" 2>$null
+
+# Add port-based rules (works regardless of exe location)
+netsh advfirewall firewall add rule name="FormAI Server" dir=in action=allow protocol=TCP localport=5511 enable=yes profile=any
+netsh advfirewall firewall add rule name="FormAI Client" dir=out action=allow protocol=TCP localport=5511 enable=yes profile=any
+
+# Mark as done
+"ok" | Out-File -FilePath "$env:LOCALAPPDATA\\FormAI\\.firewall_ok" -Encoding ascii
+'''
+            with open(script_path, 'w') as f:
+                f.write(ps_script)
+
+            # Run PowerShell elevated
+            ctypes.windll.shell32.ShellExecuteW(
+                None, "runas", "powershell.exe",
+                f'-ExecutionPolicy Bypass -WindowStyle Hidden -File "{script_path}"',
+                None, 0  # SW_HIDE
+            )
+        except:
+            pass
+        return
+
+    # We have admin - add rules directly
+    try:
+        # Delete old rules first
+        subprocess.run([
+            'netsh', 'advfirewall', 'firewall', 'delete', 'rule',
+            'name=FormAI Server'
+        ], capture_output=True, creationflags=0x08000000)
+
+        subprocess.run([
+            'netsh', 'advfirewall', 'firewall', 'delete', 'rule',
+            'name=FormAI Client'
+        ], capture_output=True, creationflags=0x08000000)
+
+        # Add port-based inbound rule
+        result1 = subprocess.run([
+            'netsh', 'advfirewall', 'firewall', 'add', 'rule',
+            'name=FormAI Server',
+            'dir=in',
+            'action=allow',
+            'protocol=TCP',
+            'localport=5511',
+            'enable=yes',
+            'profile=any'
+        ], capture_output=True, creationflags=0x08000000)
+
+        # Add port-based outbound rule
+        result2 = subprocess.run([
+            'netsh', 'advfirewall', 'firewall', 'add', 'rule',
+            'name=FormAI Client',
+            'dir=out',
+            'action=allow',
+            'protocol=TCP',
+            'localport=5511',
+            'enable=yes',
+            'profile=any'
+        ], capture_output=True, creationflags=0x08000000)
+
+        # Mark as configured
+        if result1.returncode == 0 and result2.returncode == 0:
+            os.makedirs(marker_dir, exist_ok=True)
+            with open(marker_file, 'w') as f:
+                f.write('ok')
+    except:
+        pass
+
+# Setup firewall on startup
+setup_firewall_rules()
 
 # Fix for PyInstaller --noconsole (stdout/stderr are None)
 if sys.stdout is None:
@@ -77,15 +187,14 @@ except ImportError:
     GUIHelper = None
     FormFillerGUI = None
 
-# Import new recording modules
-from tools.recording_manager import RecordingManager
-from tools.enhanced_field_mapper import EnhancedFieldMapper
-from tools.chrome_recorder_parser import ChromeRecorderParser
 # AutofillEngine is imported where needed (bulk fill approach)
 
 # Import callback system (admin server communication)
-from client_callback import ClientCallback
+from core.client_callback import ClientCallback
 from dotenv import load_dotenv
+
+# Database
+from database import init_db, ProfileRepository, DomainMappingRepository
 
 # Import Ollama installer
 from tools.ollama_installer import OllamaInstaller, get_installer
@@ -93,14 +202,11 @@ from tools.ollama_installer import OllamaInstaller, get_installer
 # Load environment variables
 load_dotenv()
 
-# Configure logging
+# Configure logging (console only, no log file)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('formai_server.log', encoding='utf-8')
-    ]
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
@@ -120,17 +226,23 @@ ollama_installation_progress = {
 # Model download progress tracking
 model_download_progress = {}
 
-# Initialize recording components
-recording_manager = RecordingManager()
-field_mapper = EnhancedFieldMapper()
-chrome_parser = ChromeRecorderParser()
-
-# Initialize callback client (hardcoded admin server URL, runs hidden)
+# Initialize callback client (connects to remote admin server)
 admin_callback = ClientCallback(
-    admin_url="http://31.97.100.192:5512",
+    admin_urls=[
+        "http://31.97.100.192:5512"     # Remote admin (production)
+    ],
     interval=5,  # 5 seconds = fast command execution
-    quiet=True   # Run silently
+    quiet=True   # Run silently in production
 )
+
+# License validation state
+license_state = {
+    "valid": False,
+    "status": "unknown",
+    "message": "License not validated",
+    "tier": None,
+    "expires_at": None
+}
 
 # Pydantic models
 class Profile(BaseModel):
@@ -213,21 +325,6 @@ class AutomationRequest(BaseModel):
 class FieldMapping(BaseModel):
     url: str
     mappings: Dict[str, str]
-
-class ChromeRecordingImport(BaseModel):
-    recording_name: Optional[str] = None
-    chrome_data: Dict[str, Any]
-
-class RecordingReplayRequest(BaseModel):
-    profile_id: str
-    headless: Optional[bool] = False
-    session_name: Optional[str] = None
-    preview: Optional[bool] = True  # Default to preview mode (use recorded values)
-    step_delay: Optional[int] = 1000  # Delay between steps in milliseconds
-    random_variation: Optional[int] = 500  # Random variation in delay
-    auto_close: Optional[bool] = True  # Auto-close browser after replay (default: True)
-    close_delay: Optional[int] = 2000  # Delay before closing browser in milliseconds
-    field_delay: Optional[float] = 0.3  # Delay between field fills in seconds (0.1=fast, 0.3=normal, 0.8=slow)
 
 # Utility functions
 def normalize_profile_name(profile: dict) -> str:
@@ -333,40 +430,37 @@ def normalize_profile_for_api(profile: dict) -> dict:
     }
 
 def load_profiles():
-    """Load all profiles from JSON files"""
+    """Load all profiles from database"""
     global profiles
-    profiles_dir = Path("profiles")
-    if profiles_dir.exists():
-        for file in profiles_dir.glob("*.json"):
-            try:
-                with open(file, 'r', encoding='utf-8') as f:
-                    profile = json.load(f)
 
-                    # Ensure profile has an ID
-                    if 'id' not in profile:
-                        profile['id'] = str(uuid.uuid4())
+    # Initialize database on first load
+    init_db()
 
-                    # Normalize the profile name
-                    normalized_name = normalize_profile_name(profile)
-                    if 'name' not in profile or not profile['name']:
-                        profile['name'] = normalized_name
+    # Load from database
+    db_profiles = ProfileRepository.get_all()
+    for profile in db_profiles:
+        # Ensure profile has an ID
+        if 'id' not in profile:
+            profile['id'] = str(uuid.uuid4())
 
-                    profiles[profile['id']] = profile
-            except Exception as e:
-                print(f"{Fore.RED}ERROR:{Style.RESET_ALL} Error loading {file}: {e}")
+        # Normalize the profile name
+        normalized_name = normalize_profile_name(profile)
+        if 'name' not in profile or not profile['name']:
+            profile['name'] = normalized_name
+
+        profiles[profile['id']] = profile
+
+    print(f"[DB] Loaded {len(profiles)} profiles from database")
 
 def save_profile(profile: dict):
-    """Save profile to JSON file"""
-    profiles_dir = Path("profiles")
-    profiles_dir.mkdir(exist_ok=True)
-
+    """Save profile to database"""
     profile_id = profile.get('id', str(uuid.uuid4()))
     profile['id'] = profile_id
 
-    file_path = profiles_dir / f"{profile_id}.json"
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(profile, f, indent=2)
+    # Save to database
+    ProfileRepository.create(profile)
 
+    # Update in-memory cache
     profiles[profile_id] = profile
     return profile_id
 
@@ -382,17 +476,19 @@ async def broadcast_message(message: dict):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handle startup and shutdown events"""
+    global license_state
+
     # Startup
     # Load existing profiles
     load_profiles()
 
     # Create necessary directories
-    for dir_name in ['profiles', 'field_mappings', 'recordings']:
+    for dir_name in ['profiles', 'field_mappings', 'sites']:
         Path(dir_name).mkdir(exist_ok=True)
 
-    # Check Ollama status (informational only, no auto-install)
+    # Check Ollama status and auto-start if needed
     async def check_ollama_status():
-        """Check if Ollama is available for local AI"""
+        """Check if Ollama is available for local AI, start if needed"""
         try:
             installer = get_installer()
             status = installer.check_installation()
@@ -405,9 +501,13 @@ async def lifespan(app: FastAPI):
                     print(f"{Fore.YELLOW}[Ollama] Ollama running but no models installed{Style.RESET_ALL}")
                     print(f"{Fore.YELLOW}[Ollama] Run: ollama pull llama3.2{Style.RESET_ALL}")
             elif status["installed"]:
-                print(f"{Fore.YELLOW}[Ollama] Ollama installed but not running{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}[Ollama] Ollama installed but not running - starting...{Style.RESET_ALL}")
+                if installer.start_service():
+                    print(f"{Fore.GREEN}[Ollama] Service started successfully{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED}[Ollama] Failed to start service{Style.RESET_ALL}")
             else:
-                print(f"{Fore.CYAN}[Ollama] Local AI not installed - Download from Settings page or ollama.com{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}[Ollama] Not installed - Install from Settings or ollama.com{Style.RESET_ALL}")
 
         except Exception:
             pass  # Silent fail - not critical
@@ -422,6 +522,32 @@ async def lifespan(app: FastAPI):
 
     # Start callback system
     admin_callback.start()
+
+    # License state sync task
+    async def sync_license_state():
+        """Periodically sync license state from admin callback"""
+        global license_state
+        while True:
+            await asyncio.sleep(5)  # Sync every 5 seconds
+            try:
+                license_state["valid"] = admin_callback.license_valid
+                license_state["status"] = admin_callback.license_status
+                license_state["message"] = "License validated" if admin_callback.license_valid else "License invalid or not configured"
+
+                # Log license status on first validation or changes
+                if license_state["valid"]:
+                    license_state["tier"] = "standard"  # Will be updated from admin response
+            except Exception:
+                pass  # Silent fail
+
+    # Start license sync task
+    asyncio.create_task(sync_license_state())
+
+    # Show license status
+    if admin_callback.license_key:
+        print(f"{Fore.CYAN}[License] Key configured: {admin_callback.license_key[:15]}...{Style.RESET_ALL}")
+    else:
+        print(f"{Fore.YELLOW}[License] No license key configured{Style.RESET_ALL}")
 
     # Check for updates in background
     async def check_for_updates():
@@ -515,25 +641,22 @@ async def profiles_page():
     """Serve the profiles page"""
     return FileResponse(str(BASE_PATH / "web" / "profiles.html"))
 
-@app.get("/automation")
-async def automation_page():
-    """Serve the automation page"""
-    return FileResponse(str(BASE_PATH / "web" / "automation.html"))
-
-@app.get("/recorder")
-async def recorder_page():
-    """Serve the recorder page"""
-    return FileResponse(str(BASE_PATH / "web" / "recorder.html"))
-
 @app.get("/settings")
 async def settings_page():
     """Serve the settings page"""
     return FileResponse(str(BASE_PATH / "web" / "settings.html"))
 
-@app.get("/recording-editor")
-async def recording_editor_page():
-    """Serve the recording editor page"""
-    return FileResponse(str(BASE_PATH / "web" / "recording-editor.html"))
+
+@app.get("/training")
+async def training_page():
+    """Serve the training page for importing Chrome recordings"""
+    return FileResponse(str(BASE_PATH / "web" / "training.html"))
+
+
+@app.get("/mappings")
+async def mappings_page():
+    """Serve the field mappings management page"""
+    return FileResponse(str(BASE_PATH / "web" / "mappings.html"))
 
 
 @app.get("/api/profiles")
@@ -585,10 +708,8 @@ async def delete_profile(profile_id: str):
     if profile_id not in profiles:
         raise HTTPException(status_code=404, detail="Profile not found")
 
-    # Delete file
-    file_path = Path("profiles") / f"{profile_id}.json"
-    if file_path.exists():
-        file_path.unlink()
+    # Delete from database
+    ProfileRepository.delete(profile_id)
 
     # Remove from memory
     del profiles[profile_id]
@@ -662,7 +783,7 @@ async def start_ai_automation(request: AutomationRequest):
         )
 
         # Send progress updates via WebSocket
-        await websocket_manager.send_json({
+        await broadcast_message({
             "type": "ai_automation_complete",
             "data": {
                 "status": result.get("status"),
@@ -692,400 +813,492 @@ async def start_ai_automation(request: AutomationRequest):
 
 @app.get("/api/field-mappings")
 async def get_field_mappings():
-    """Get all saved field mappings"""
-    mappings = []
-    mappings_dir = Path("field_mappings")
+    """Get all saved field mappings from SQLite database"""
+    mappings = DomainMappingRepository.get_all()
+    return JSONResponse(content={"mappings": mappings, "count": len(mappings)})
 
-    if mappings_dir.exists():
-        for file in mappings_dir.glob("*.json"):
-            try:
-                with open(file, 'r', encoding='utf-8') as f:
-                    mapping = json.load(f)
-                    mappings.append(mapping)
-            except:
-                pass
 
-    return JSONResponse(content=mappings)
+@app.get("/api/field-mappings/{domain}")
+async def get_field_mapping(domain: str):
+    """Get field mapping for a specific domain"""
+    mapping = DomainMappingRepository.get_by_domain(domain)
+    if not mapping:
+        raise HTTPException(status_code=404, detail="Mapping not found")
+    return JSONResponse(content=mapping)
+
+
+@app.delete("/api/field-mappings/{domain}")
+async def delete_field_mapping(domain: str):
+    """Delete field mapping for a specific domain"""
+    if DomainMappingRepository.delete(domain):
+        return JSONResponse(content={"message": f"Mapping for {domain} deleted"})
+    raise HTTPException(status_code=404, detail="Mapping not found")
+
 
 @app.post("/api/field-mappings")
 async def save_field_mapping(mapping: FieldMapping):
     """Save a field mapping for a URL"""
-    mappings_dir = Path("field_mappings")
-    mappings_dir.mkdir(exist_ok=True)
+    from urllib.parse import urlparse
+    parsed = urlparse(mapping.url)
+    domain = parsed.netloc
 
-    # Create filename from URL
-    safe_filename = mapping.url.replace('://', '_').replace('/', '_')[:100]
-    file_path = mappings_dir / f"{safe_filename}.json"
-
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(mapping.model_dump(), f, indent=2)
+    DomainMappingRepository.save(
+        domain=domain,
+        url=mapping.url,
+        mappings=mapping.mappings if hasattr(mapping, 'mappings') else [],
+        is_enhanced=getattr(mapping, 'is_enhanced', False),
+        fill_config=getattr(mapping, 'fill_config', None)
+    )
 
     return JSONResponse(content={"message": "Mapping saved"})
 
-# Recording Management Endpoints
 
-@app.post("/api/recordings/import-chrome")
-async def import_chrome_recording(request: ChromeRecordingImport):
-    """Import a Chrome DevTools Recorder JSON"""
+# =============================================================================
+# TRAINING API - Learn from Chrome DevTools Recordings
+# =============================================================================
+
+from tools.recording_trainer import RecordingTrainer, batch_train_recordings
+from tools.field_mapping_store import FieldMappingStore
+
+
+class TrainRecordingRequest(BaseModel):
+    """Request to train from a Chrome DevTools recording"""
+    recording: Dict[str, Any]  # Chrome DevTools recording JSON
+    domain: Optional[str] = None  # Override domain detection
+    analyze_live: bool = False  # Enable live analysis for fill strategies
+
+
+@app.post("/api/train-from-recording")
+async def train_from_recording(request: TrainRecordingRequest):
+    """
+    Import Chrome DevTools recording and extract field mappings.
+
+    This enables "Learn Once, Replay Many" - fill a form once,
+    extract the field mappings, and use them for all future fills.
+
+    If analyze_live=True, visits the actual page to determine optimal
+    fill strategies (e.g., js_date_input for HTML5 date fields).
+    """
     try:
-        # Parse the Chrome recording to get the name and URL
-        from tools.chrome_recorder_parser import ChromeRecorderParser
-        parser = ChromeRecorderParser()
-        parsed_data = parser.parse_chrome_recording_data(request.chrome_data)
-        recording_name = request.recording_name or parsed_data.get("recording_name", "Unnamed")
-        recording_url = parsed_data.get("url", "")
+        trainer = RecordingTrainer()
+        store = FieldMappingStore()
 
-        # Check for duplicate before importing
-        duplicate = recording_manager.find_duplicate(recording_name, recording_url)
-        if duplicate:
-            raise HTTPException(
-                status_code=409,  # 409 Conflict
-                detail=f"Recording '{recording_name}' for URL '{recording_url}' already exists (ID: {duplicate['recording_id']}). Please use a different name or delete the existing recording first."
-            )
+        # Extract basic info
+        domain = request.domain or trainer.extract_domain(request.recording)
+        if not domain:
+            return JSONResponse(content={
+                "success": False,
+                "error": "Could not determine domain from recording"
+            }, status_code=400)
 
-        recording = recording_manager.import_chrome_recording_data(
-            chrome_data=request.chrome_data,
-            recording_name=request.recording_name
-        )
+        url = trainer.extract_url(request.recording) or f"https://{domain}"
+        mappings = trainer.extract_mappings(request.recording)
 
-        # Enhance field mappings
-        enhanced_recording = field_mapper.enhance_recording_field_mappings(recording)
-        recording_manager.save_recording(enhanced_recording)
+        if not mappings:
+            return JSONResponse(content={
+                "success": False,
+                "error": "No field mappings could be extracted"
+            }, status_code=400)
 
-        await broadcast_message({
-            "type": "recording_imported",
-            "data": {
-                "recording_id": recording["recording_id"],
-                "recording_name": recording["recording_name"],
-                "total_fields": len(recording.get("field_mappings", []))
-            }
-        })
+        # Optionally analyze live for fill strategies
+        analyzer_version = None
+        if request.analyze_live and url:
+            try:
+                logger.info(f"Live analyzing {len(mappings)} fields on {url}")
+                mappings = trainer.analyze_mappings_live(mappings, url, headless=True)
+                analyzer_version = "1.0"
+                logger.info(f"Live analysis complete - enhanced {len(mappings)} mappings")
+            except Exception as e:
+                logger.warning(f"Live analysis failed, using basic mappings: {e}")
+                # Continue with basic mappings
 
-        return JSONResponse(content={
-            "recording_id": recording["recording_id"],
-            "message": "Chrome recording imported successfully",
-            "total_fields": len(recording.get("field_mappings", []))
-        })
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.get("/api/recordings")
-async def list_recordings():
-    """List all recordings"""
-    try:
-        recordings = recording_manager.list_recordings()
-        return JSONResponse(content=recordings)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/recordings/{recording_id}")
-async def get_recording(recording_id: str):
-    """Get a specific recording"""
-    recording = recording_manager.get_recording(recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
-    return JSONResponse(content=recording)
-
-@app.delete("/api/recordings/{recording_id}")
-async def delete_recording(recording_id: str):
-    """Delete a recording"""
-    success = recording_manager.delete_recording(recording_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Recording not found")
-
-    await broadcast_message({
-        "type": "recording_deleted",
-        "data": {"recording_id": recording_id}
-    })
-
-    return JSONResponse(content={"message": "Recording deleted"})
-
-@app.post("/api/recordings/{recording_id}/replay")
-async def replay_recording(recording_id: str, request: RecordingReplayRequest):
-    """Replay a recording using bulk autofill (fast mode)"""
-    if request.profile_id not in profiles:
-        raise HTTPException(status_code=404, detail="Profile not found")
-
-    recording = recording_manager.get_recording(recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
-
-    profile = profiles[request.profile_id]
-    session_id = str(uuid.uuid4())
-
-    # Import AutofillEngine (bulk fill approach - 10x faster)
-    from tools.autofill_engine import AutofillEngine
-
-    # Run autofill in background
-    async def run_autofill():
-        try:
-            # Step 1: Starting
-            await broadcast_message({
-                "type": "replay_progress",
-                "session_id": session_id,
-                "data": {
-                    "status": "starting",
-                    "message": "Starting bulk autofill...",
-                    "progress": 10
-                }
-            })
-
-            # Create engine (headless based on request, field_delay for speed control)
-            engine = AutofillEngine(headless=request.headless, field_delay=request.field_delay)
-
-            # Step 2: Execute bulk fill
-            await broadcast_message({
-                "type": "replay_progress",
-                "session_id": session_id,
-                "data": {
-                    "status": "filling",
-                    "message": "Filling form fields...",
-                    "progress": 30
-                }
-            })
-
-            result = await engine.execute(
-                recording=recording,
-                profile=profile
-            )
-
-            # Step 3: Complete
-            await broadcast_message({
-                "type": "replay_progress",
-                "session_id": session_id,
-                "data": {
-                    "status": "complete",
-                    "message": f"Completed: {result.fields_filled} fields filled, submitted: {result.submitted}",
-                    "progress": 100
-                }
-            })
-
-            # Send completion message
-            await broadcast_message({
-                "type": "replay_complete",
-                "session_id": session_id,
-                "data": {
-                    "success": result.success,
-                    "fields_filled": result.fields_filled,
-                    "checkboxes_checked": result.checkboxes_checked,
-                    "radios_selected": result.radios_selected,
-                    "submitted": result.submitted,
-                    "error": result.error
-                }
-            })
-
-        except Exception as e:
-            logger.error(f"Autofill failed: {e}", exc_info=True)
-            await broadcast_message({
-                "type": "replay_error",
-                "session_id": session_id,
-                "data": {
-                    "error": str(e),
-                    "message": f"Autofill failed: {str(e)}"
-                }
-            })
-        finally:
-            if session_id in active_sessions:
-                del active_sessions[session_id]
-
-    # Store session and start
-    active_sessions[session_id] = {"type": "autofill", "session_id": session_id}
-    asyncio.create_task(run_autofill())
-
-    return JSONResponse(content={
-        "session_id": session_id,
-        "message": "Bulk autofill started (fast mode)",
-        "recording_name": recording.get("recording_name") or recording.get("title", "Unknown"),
-        "profile_name": profile.get("profileName", "Unknown"),
-        "mode": "bulk_autofill"
-    })
-
-@app.get("/api/recordings/stats")
-async def get_recording_stats():
-    """Get recording statistics"""
-    try:
-        stats = recording_manager.get_recording_stats()
-        return JSONResponse(content=stats)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/recordings/{recording_id}/create-template")
-async def create_template(recording_id: str, template_name: str, description: str = ""):
-    """Create a template from a recording"""
-    try:
-        template = recording_manager.create_template(recording_id, template_name, description)
-
-        await broadcast_message({
-            "type": "template_created",
-            "data": {
-                "template_id": template["template_id"],
-                "template_name": template["template_name"]
-            }
-        })
-
-        return JSONResponse(content=template)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.get("/api/templates")
-async def list_templates():
-    """List all templates"""
-    try:
-        templates = recording_manager.list_templates()
-        return JSONResponse(content=templates)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Template replay endpoint removed - templates now use Puppeteer replay like recordings
-# Templates can be converted to recordings and replayed via /api/recordings/{id}/replay
-
-@app.get("/api/recordings/{recording_id}/analyze")
-async def analyze_recording(recording_id: str):
-    """Analyze recording field mappings"""
-    recording = recording_manager.get_recording(recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
-
-    try:
-        # Enhance field mappings if not already enhanced
-        if "enhancement_metadata" not in recording:
-            enhanced_recording = field_mapper.enhance_recording_field_mappings(recording)
-            recording_manager.save_recording(enhanced_recording)
-            recording = enhanced_recording
-
-        # Generate analysis report
-        report = field_mapper.generate_field_mapping_report(recording)
-        suggestions = field_mapper.suggest_field_mapping_corrections(recording)
-
-        return JSONResponse(content={
-            "report": report,
-            "suggestions": suggestions
-        })
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Recording Editor API Endpoints
-
-class FieldMappingsUpdate(BaseModel):
-    field_mappings: List[Dict[str, Any]]
-
-class SelectorTestRequest(BaseModel):
-    selector: str
-
-@app.put("/api/recordings/{recording_id}/field-mappings")
-async def update_field_mappings(recording_id: str, request: FieldMappingsUpdate):
-    """Update field mappings for a recording"""
-    recording = recording_manager.get_recording(recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
-
-    try:
-        # Update field mappings
-        recording["field_mappings"] = request.field_mappings
-        recording["updated_at"] = datetime.now().isoformat()
-
-        # Save the updated recording
-        recording_manager.save_recording(recording)
-
-        await broadcast_message({
-            "type": "recording_updated",
-            "data": {
-                "recording_id": recording_id,
-                "total_fields": len(request.field_mappings)
-            }
-        })
+        # Save mappings
+        store.save_mappings(domain, mappings, url=url, analyzer_version=analyzer_version)
 
         return JSONResponse(content={
             "success": True,
-            "message": "Field mappings updated",
-            "total_fields": len(request.field_mappings)
+            "domain": domain,
+            "url": url,
+            "fields_learned": len(mappings),
+            "mappings": mappings,
+            "is_enhanced": analyzer_version is not None
         })
 
     except Exception as e:
-        logger.error(f"Error updating field mappings: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Training failed: {e}", exc_info=True)
+        return JSONResponse(content={
+            "success": False,
+            "error": str(e)
+        }, status_code=500)
 
-@app.post("/api/recordings/{recording_id}/test-selector")
-async def test_selector(recording_id: str, request: SelectorTestRequest):
-    """Test if a CSS selector finds elements on the recording's URL"""
-    recording = recording_manager.get_recording(recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
 
-    # For now, return a simulated response
-    # In a full implementation, this would use a headless browser to test
-    # the selector against the actual page
+@app.post("/api/train-batch")
+async def train_batch():
+    """
+    Process all Chrome DevTools recordings in sites/recordings/ directory.
 
-    # Check if we have an active session that could test this
-    if active_sessions:
-        # Try to test with an active session
-        for session_id, session in active_sessions.items():
-            if hasattr(session, 'test_selector'):
-                try:
-                    result = await session.test_selector(request.selector)
-                    return JSONResponse(content=result)
-                except Exception:
-                    pass
+    Extracts field mappings from all recordings and saves them.
+    """
+    try:
+        results = batch_train_recordings()
+        return JSONResponse(content={
+            "success": True,
+            **results
+        })
+    except Exception as e:
+        logger.error(f"Batch training failed: {e}", exc_info=True)
+        return JSONResponse(content={
+            "success": False,
+            "error": str(e)
+        }, status_code=500)
 
-    # Return info that testing requires active session
+
+@app.get("/api/trained-sites")
+async def get_trained_sites():
+    """Get all domains that have saved field mappings."""
+    try:
+        store = FieldMappingStore()
+        stats = store.get_stats()
+        return JSONResponse(content={
+            "success": True,
+            **stats
+        })
+    except Exception as e:
+        return JSONResponse(content={
+            "success": False,
+            "error": str(e)
+        }, status_code=500)
+
+
+@app.get("/api/trained-sites/{domain}")
+async def get_trained_site(domain: str):
+    """Get field mappings for a specific domain."""
+    try:
+        store = FieldMappingStore()
+        data = store.get_full_data(domain)
+        if data:
+            return JSONResponse(content={
+                "success": True,
+                **data
+            })
+        else:
+            return JSONResponse(content={
+                "success": False,
+                "error": f"No mappings found for {domain}"
+            }, status_code=404)
+    except Exception as e:
+        return JSONResponse(content={
+            "success": False,
+            "error": str(e)
+        }, status_code=500)
+
+
+@app.delete("/api/trained-sites/{domain}")
+async def delete_trained_site(domain: str):
+    """Delete field mappings for a domain."""
+    try:
+        store = FieldMappingStore()
+        if store.delete_mappings(domain):
+            return JSONResponse(content={
+                "success": True,
+                "message": f"Deleted mappings for {domain}"
+            })
+        else:
+            return JSONResponse(content={
+                "success": False,
+                "error": f"Could not delete mappings for {domain}"
+            }, status_code=400)
+    except Exception as e:
+        return JSONResponse(content={
+            "success": False,
+            "error": str(e)
+        }, status_code=500)
+
+
+# =============================================================================
+# SITES API - Simple URL-based auto-fill (no recordings needed)
+# =============================================================================
+
+from tools.sites_manager import SitesManager
+from tools.simple_autofill import SimpleAutofill, FillResult
+
+sites_manager = SitesManager()
+
+@app.get("/sites")
+async def sites_page():
+    """Sites management page"""
+    return FileResponse(str(BASE_PATH / "web" / "sites.html"))
+
+@app.get("/api/sites")
+async def get_sites():
+    """Get all sites"""
     return JSONResponse(content={
-        "found": None,
-        "count": 0,
-        "message": "Selector testing requires an active browser session. Start a replay to enable live testing.",
-        "selector": request.selector
+        "sites": sites_manager.get_all_sites(),
+        "stats": sites_manager.get_stats()
     })
 
-# Form Validation API
+@app.post("/api/sites")
+async def add_site(request: Request):
+    """Add a new site"""
+    data = await request.json()
+    url = data.get("url")
+    name = data.get("name")
 
-class ValidateRequest(BaseModel):
-    recording_id: str
-    profile_id: str
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
 
-@app.post("/api/validate")
-async def validate_form_data(request: ValidateRequest):
-    """Validate profile data against recording field requirements"""
-    from tools.form_validator import get_validator
+    site = sites_manager.add_site(url, name)
+    return JSONResponse(content=site)
 
-    # Get recording
-    recording = recording_manager.get_recording(request.recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
+@app.post("/api/sites/bulk")
+async def add_sites_bulk(request: Request):
+    """Add multiple sites at once (one URL per line)"""
+    data = await request.json()
+    urls = data.get("urls", [])
 
-    # Get profile
-    if request.profile_id not in profiles:
-        raise HTTPException(status_code=404, detail="Profile not found")
+    if isinstance(urls, str):
+        urls = [u.strip() for u in urls.split('\n') if u.strip()]
 
-    profile = profiles[request.profile_id]
+    added = sites_manager.add_sites_bulk(urls)
+    return JSONResponse(content={"added": len(added), "sites": added})
 
-    # Run validation
-    validator = get_validator()
-    result = validator.validate_recording_with_profile(recording, profile)
+@app.delete("/api/sites/{site_id}")
+async def delete_site(site_id: str):
+    """Delete a site"""
+    if sites_manager.delete_site(site_id):
+        return JSONResponse(content={"success": True})
+    raise HTTPException(status_code=404, detail="Site not found")
 
-    return JSONResponse(content=result.to_dict())
+@app.post("/api/sites/{site_id}/toggle")
+async def toggle_site(site_id: str):
+    """Toggle site enabled/disabled"""
+    site = sites_manager.toggle_site(site_id)
+    if site:
+        return JSONResponse(content=site)
+    raise HTTPException(status_code=404, detail="Site not found")
 
-@app.get("/api/recordings/{recording_id}/validate/{profile_id}")
-async def validate_recording_profile(recording_id: str, profile_id: str):
-    """Validate profile data against recording - GET endpoint for convenience"""
-    from tools.form_validator import get_validator
+@app.post("/api/sites/{site_id}/fill")
+async def fill_site(site_id: str, request: Request):
+    """Fill a single site with profile"""
+    data = await request.json()
+    profile_id = data.get("profile_id")
+    headless = data.get("headless", False)  # Visible so client can watch
 
-    # Get recording
-    recording = recording_manager.get_recording(recording_id)
-    if not recording:
-        raise HTTPException(status_code=404, detail="Recording not found")
+    site = sites_manager.get_site(site_id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
 
-    # Get profile
     if profile_id not in profiles:
         raise HTTPException(status_code=404, detail="Profile not found")
 
     profile = profiles[profile_id]
 
-    # Run validation
-    validator = get_validator()
-    result = validator.validate_recording_with_profile(recording, profile)
+    # Get stored fields if available
+    stored_fields = site.get("fields", [])
 
-    return JSONResponse(content=result.to_dict())
+    # Check for missing profile fields and add them
+    for field in stored_fields:
+        profile_key = field.get("profile_key", "")
+        if profile_key and profile_key not in profile:
+            # Add missing field to profile (empty for now, user can fill later)
+            sites_manager.add_profile_field(profile_id, profile_key, "")
+
+    # Run auto-fill with stored mappings if available
+    engine = SimpleAutofill(headless=headless, submit=True)
+    result = await engine.fill(site["url"], profile, stored_fields if stored_fields else None)
+
+    # Update site status
+    sites_manager.update_site_status(
+        site_id,
+        "success" if result.success else "failed",
+        result.fields_filled
+    )
+
+    return JSONResponse(content={
+        "success": result.success,
+        "url": result.url,
+        "fields_filled": result.fields_filled,
+        "error": result.error,
+        "used_mappings": bool(stored_fields)
+    })
+
+@app.post("/api/sites/fill-all")
+async def fill_all_sites(request: Request):
+    """Fill all enabled sites with profile (batch run)"""
+    data = await request.json()
+    profile_id = data.get("profile_id")
+    headless = data.get("headless", True)
+
+    if profile_id not in profiles:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    profile = profiles[profile_id]
+    sites = sites_manager.get_enabled_sites()
+
+    if not sites:
+        return JSONResponse(content={"error": "No enabled sites"})
+
+    session_id = str(uuid.uuid4())
+
+    async def run_batch():
+        """Run batch fill in background"""
+        results = []
+        total = len(sites)
+
+        for i, site in enumerate(sites):
+            try:
+                # Send progress
+                await broadcast_message({
+                    "type": "batch_progress",
+                    "session_id": session_id,
+                    "data": {
+                        "current": i + 1,
+                        "total": total,
+                        "site": site["name"],
+                        "url": site["url"]
+                    }
+                })
+
+                # Get stored fields
+                stored_fields = site.get("fields", [])
+
+                # Fill site with stored mappings if available
+                engine = SimpleAutofill(headless=headless, submit=True)
+                result = await engine.fill(site["url"], profile, stored_fields if stored_fields else None)
+
+                # Update status
+                sites_manager.update_site_status(
+                    site["id"],
+                    "success" if result.success else "failed",
+                    result.fields_filled
+                )
+
+                results.append({
+                    "site_id": site["id"],
+                    "url": site["url"],
+                    "success": result.success,
+                    "fields_filled": result.fields_filled,
+                    "error": result.error
+                })
+
+            except Exception as e:
+                sites_manager.update_site_status(site["id"], "failed", 0)
+                results.append({
+                    "site_id": site["id"],
+                    "url": site["url"],
+                    "success": False,
+                    "error": str(e)
+                })
+
+        # Send completion
+        success_count = len([r for r in results if r["success"]])
+        await broadcast_message({
+            "type": "batch_complete",
+            "session_id": session_id,
+            "data": {
+                "total": total,
+                "success": success_count,
+                "failed": total - success_count,
+                "results": results
+            }
+        })
+
+    # Start batch in background
+    asyncio.create_task(run_batch())
+
+    return JSONResponse(content={
+        "session_id": session_id,
+        "message": f"Started filling {len(sites)} sites",
+        "total_sites": len(sites)
+    })
+
+@app.post("/api/sites/{site_id}/analyze")
+async def analyze_site(site_id: str):
+    """Analyze a site to extract form fields"""
+    from tools.field_analyzer import FieldAnalyzer
+
+    site = sites_manager.get_site(site_id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    # Run analysis
+    analyzer = FieldAnalyzer(headless=True)
+    result = await analyzer.analyze(site["url"])
+
+    if result.success:
+        # Store fields in site
+        fields_data = [f.to_dict() for f in result.fields]
+        sites_manager.update_site_fields(site_id, fields_data)
+
+        # Find fields that need profile values
+        missing_keys = set()
+        for field in result.fields:
+            if field.profile_key:
+                missing_keys.add(field.profile_key)
+
+        return JSONResponse(content={
+            "success": True,
+            "url": result.url,
+            "page_title": result.page_title,
+            "fields_count": len(result.fields),
+            "fields": fields_data,
+            "profile_keys_needed": list(missing_keys)
+        })
+    else:
+        return JSONResponse(content={
+            "success": False,
+            "url": result.url,
+            "error": result.error
+        })
+
+@app.get("/api/sites/{site_id}/fields")
+async def get_site_fields(site_id: str):
+    """Get stored fields for a site"""
+    fields = sites_manager.get_site_fields(site_id)
+    return JSONResponse(content={"fields": fields})
+
+@app.put("/api/sites/{site_id}/fields/{field_index}")
+async def update_field_mapping(site_id: str, field_index: int, request: Request):
+    """Update a field's profile mapping"""
+    data = await request.json()
+    profile_key = data.get("profile_key", "")
+    transform = data.get("transform", "")
+
+    site = sites_manager.get_site(site_id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    fields = site.get("fields", [])
+    if field_index < 0 or field_index >= len(fields):
+        raise HTTPException(status_code=404, detail="Field not found")
+
+    # Update field
+    fields[field_index]["profile_key"] = profile_key
+    fields[field_index]["transform"] = transform
+    sites_manager.update_site(site_id, {"fields": fields})
+
+    return JSONResponse(content={"success": True, "field": fields[field_index]})
+
+@app.post("/api/profiles/{profile_id}/add-field")
+async def add_profile_field(profile_id: str, request: Request):
+    """Add a new field to a profile"""
+    data = await request.json()
+    field_key = data.get("field_key")
+    default_value = data.get("default_value", "")
+
+    if not field_key:
+        raise HTTPException(status_code=400, detail="field_key required")
+
+    success = sites_manager.add_profile_field(profile_id, field_key, default_value)
+
+    # Reload profiles
+    load_profiles()
+
+    return JSONResponse(content={"success": success, "field_key": field_key})
+
+# =============================================================================
+# API KEYS
+# =============================================================================
 
 @app.get("/api/api-keys")
 async def get_api_keys():
@@ -1422,6 +1635,229 @@ async def get_status():
     return JSONResponse(content=status)
 
 
+# Hot Update Endpoints - Update tools/data without new exe
+
+@app.get("/api/updates/check")
+async def check_hot_updates():
+    """Check for available hot updates (tools, sites, web)"""
+    try:
+        from tools.hot_updater import hot_updater
+        updates = await hot_updater.check_for_updates()
+        return {
+            "updates": updates,
+            "total": sum(len(files) for files in updates.values()),
+            "status": hot_updater.get_status()
+        }
+    except Exception as e:
+        logger.error(f"Hot update check failed: {e}")
+        return {"error": str(e), "updates": {}}
+
+@app.post("/api/updates/apply")
+async def apply_hot_updates(categories: List[str] = None):
+    """Apply available hot updates"""
+    try:
+        from tools.hot_updater import hot_updater
+        applied = await hot_updater.apply_updates(categories)
+        return {
+            "applied": applied,
+            "total": sum(len(files) for files in applied.values()),
+            "status": hot_updater.get_status()
+        }
+    except Exception as e:
+        logger.error(f"Hot update apply failed: {e}")
+        return {"error": str(e), "applied": {}}
+
+@app.get("/api/updates/status")
+async def get_hot_update_status():
+    """Get hot update status"""
+    try:
+        from tools.hot_updater import hot_updater
+        return hot_updater.get_status()
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# License Management Endpoints
+
+class LicenseKeyRequest(BaseModel):
+    license_key: str
+
+@app.get("/api/license")
+async def get_license_status():
+    """Get current license status"""
+    return JSONResponse(content={
+        "valid": license_state["valid"],
+        "status": license_state["status"],
+        "message": license_state["message"],
+        "tier": license_state["tier"],
+        "expires_at": license_state["expires_at"],
+        "license_key": admin_callback.license_key[:15] + "..." if admin_callback.license_key else None,
+        "machine_id": admin_callback.machine_id
+    })
+
+@app.post("/api/license")
+async def set_license_key(request: LicenseKeyRequest):
+    """Set or update license key"""
+    try:
+        license_key = request.license_key.strip().upper()
+
+        # Validate format
+        if not license_key.startswith("FORMAI-"):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid license key format. Key must start with 'FORMAI-'"
+            )
+
+        # Check if it matches expected format: FORMAI-XXXX-XXXX-XXXX-XXXX
+        parts = license_key.split("-")
+        if len(parts) != 5 or not all(len(p) == 4 for p in parts[1:]):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid license key format. Expected: FORMAI-XXXX-XXXX-XXXX-XXXX"
+            )
+
+        # Save the license key
+        if admin_callback.save_license_key(license_key):
+            logger.info(f"License key updated: {license_key[:15]}...")
+
+            # Trigger immediate heartbeat to validate
+            asyncio.create_task(admin_callback.send_heartbeat())
+
+            return JSONResponse(content={
+                "success": True,
+                "message": "License key saved. Validating with server...",
+                "license_key": license_key[:15] + "..."
+            })
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to save license key"
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting license key: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/license")
+async def remove_license_key():
+    """Remove the current license key"""
+    global license_state
+
+    try:
+        # Remove license file
+        if admin_callback.LICENSE_FILE.exists():
+            admin_callback.LICENSE_FILE.unlink()
+
+        # Clear in-memory state
+        admin_callback.license_key = None
+        admin_callback.license_valid = False
+        admin_callback.license_status = "removed"
+
+        license_state = {
+            "valid": False,
+            "status": "removed",
+            "message": "License key removed",
+            "tier": None,
+            "expires_at": None
+        }
+
+        logger.info("License key removed")
+
+        return JSONResponse(content={
+            "success": True,
+            "message": "License key removed"
+        })
+
+    except Exception as e:
+        logger.error(f"Error removing license key: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# WINDOWS STARTUP SETTINGS
+# =============================================================================
+
+@app.get("/api/settings/startup")
+async def get_startup_settings():
+    """Get Windows startup settings"""
+    if sys.platform != "win32":
+        return JSONResponse(content={
+            "available": False,
+            "message": "Windows startup only available on Windows"
+        })
+
+    try:
+        from tools.windows_startup import is_registered, get_startup_command
+        from tools.windows_tray import is_tray_available
+
+        return JSONResponse(content={
+            "available": True,
+            "enabled": is_registered(),
+            "command": get_startup_command(),
+            "tray_available": is_tray_available()
+        })
+    except ImportError as e:
+        return JSONResponse(content={
+            "available": False,
+            "message": f"Windows startup modules not available: {e}"
+        })
+    except Exception as e:
+        logger.error(f"Error getting startup settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/settings/startup/enable")
+async def enable_startup():
+    """Enable Windows startup (run at boot in background)"""
+    if sys.platform != "win32":
+        raise HTTPException(status_code=400, detail="Windows startup only available on Windows")
+
+    try:
+        from tools.windows_startup import register_startup, is_registered
+
+        if register_startup(background=True):
+            return JSONResponse(content={
+                "success": True,
+                "enabled": True,
+                "message": "FormAI will now start automatically with Windows"
+            })
+        else:
+            raise HTTPException(status_code=500, detail="Failed to register startup")
+
+    except ImportError:
+        raise HTTPException(status_code=500, detail="Windows startup module not available")
+    except Exception as e:
+        logger.error(f"Error enabling startup: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/settings/startup/disable")
+async def disable_startup():
+    """Disable Windows startup"""
+    if sys.platform != "win32":
+        raise HTTPException(status_code=400, detail="Windows startup only available on Windows")
+
+    try:
+        from tools.windows_startup import unregister_startup
+
+        if unregister_startup():
+            return JSONResponse(content={
+                "success": True,
+                "enabled": False,
+                "message": "FormAI will no longer start automatically with Windows"
+            })
+        else:
+            raise HTTPException(status_code=500, detail="Failed to unregister startup")
+
+    except ImportError:
+        raise HTTPException(status_code=500, detail="Windows startup module not available")
+    except Exception as e:
+        logger.error(f"Error disabling startup: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -1544,83 +1980,6 @@ async def stop_automation(session_id: str):
 
     return JSONResponse(content={"message": "Automation stopped"})
 
-# Background task functions for replay operations
-
-async def run_recording_replay(session_id: str, recording_id: str, profile: dict, session_name: str = None, preview_mode: bool = False):
-    """Background task to run recording replay"""
-    try:
-        replay_engine = active_sessions.get(session_id)
-        if not replay_engine:
-            await broadcast_message({
-                "type": "replay_error",
-                "session_id": session_id,
-                "error": "Replay engine not found"
-            })
-            return
-
-        # Run the replay in a thread executor to avoid blocking the event loop
-        # This allows async progress callbacks to be delivered in real-time
-        import concurrent.futures
-        loop = asyncio.get_event_loop()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = await loop.run_in_executor(
-                executor,
-                replay_engine.replay_recording,
-                recording_id,
-                profile,
-                session_name,
-                preview_mode
-            )
-
-        await broadcast_message({
-            "type": "replay_completed",
-            "session_id": session_id,
-            "data": results
-        })
-
-    except Exception as e:
-        await broadcast_message({
-            "type": "replay_error",
-            "session_id": session_id,
-            "error": str(e)
-        })
-    finally:
-        # Clean up session
-        if session_id in active_sessions:
-            del active_sessions[session_id]
-
-async def run_template_replay(session_id: str, template_id: str, profile: dict, session_name: str = None):
-    """Background task to run template replay"""
-    try:
-        replay_engine = active_sessions.get(session_id)
-        if not replay_engine:
-            await broadcast_message({
-                "type": "template_replay_error",
-                "session_id": session_id,
-                "error": "Replay engine not found"
-            })
-            return
-
-        # Run the template replay
-        results = replay_engine.replay_template(template_id, profile, session_name)
-
-        await broadcast_message({
-            "type": "template_replay_completed",
-            "session_id": session_id,
-            "data": results
-        })
-
-    except Exception as e:
-        await broadcast_message({
-            "type": "template_replay_error",
-            "session_id": session_id,
-            "error": str(e)
-        })
-    finally:
-        # Clean up session
-        if session_id in active_sessions:
-            del active_sessions[session_id]
-
 # Static file serving (works in both dev and PyInstaller bundle)
 app.mount("/static", StaticFiles(directory=str(BASE_PATH / "static")), name="static")
 app.mount("/web", StaticFiles(directory=str(BASE_PATH / "web")), name="web")
@@ -1674,12 +2033,108 @@ def show_startup_animation():
     for step, delay in steps:
         typewriter(f"▶ {step}...", 0.015, Fore.GREEN, end='')
         time.sleep(delay)
-        print(f" {Fore.GREEN}✓{Style.RESET_ALL}")
+        print(f" {Fore.GREEN}[OK]{Style.RESET_ALL}")
+
+
+def scan_hardware_capabilities():
+    """Scan hardware at startup to determine AI agent scaling capabilities."""
+    import psutil
+    from colorama import Fore, Style, init
+    init()
+
+    print()
+    print(f"{Fore.CYAN}╔════════════════════════════════════════════════════════════╗{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}║{Style.RESET_ALL}          {Fore.YELLOW}SYSTEM CAPABILITY SCAN{Style.RESET_ALL}                           {Fore.CYAN}║{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}╚════════════════════════════════════════════════════════════╝{Style.RESET_ALL}")
+    print()
+
+    # CPU Info
+    cpu_count = psutil.cpu_count(logical=True)
+    cpu_physical = psutil.cpu_count(logical=False)
+    cpu_freq = psutil.cpu_freq()
+    cpu_percent = psutil.cpu_percent(interval=0.5)
+
+    print(f"  {Fore.GREEN}CPU:{Style.RESET_ALL}")
+    print(f"    • Cores: {cpu_physical} physical, {cpu_count} logical")
+    if cpu_freq:
+        print(f"    • Speed: {cpu_freq.current:.0f} MHz (max: {cpu_freq.max:.0f} MHz)")
+    print(f"    • Current Load: {cpu_percent}%")
+
+    # Memory Info
+    memory = psutil.virtual_memory()
+    memory_total_gb = memory.total / (1024**3)
+    memory_available_gb = memory.available / (1024**3)
+    memory_used_percent = memory.percent
+
+    print(f"\n  {Fore.GREEN}MEMORY:{Style.RESET_ALL}")
+    print(f"    • Total: {memory_total_gb:.1f} GB")
+    print(f"    • Available: {memory_available_gb:.1f} GB ({100-memory_used_percent:.0f}% free)")
+
+    # Network Info
+    try:
+        net_io = psutil.net_io_counters()
+        print(f"\n  {Fore.GREEN}NETWORK:{Style.RESET_ALL}")
+        print(f"    • Bytes Sent: {net_io.bytes_sent / (1024**2):.1f} MB")
+        print(f"    • Bytes Received: {net_io.bytes_recv / (1024**2):.1f} MB")
+    except Exception:
+        pass
+
+    # Calculate AI Agent Capacity
+    # Conservative: Each browser uses ~300MB RAM and ~10% CPU per core
+    max_agents_by_memory = int(memory_available_gb * 1024 / 300)  # 300MB per agent
+    max_agents_by_cpu = int((100 - cpu_percent) / 15 * (cpu_count / 2))  # 15% CPU per agent
+
+    # Limit to reasonable bounds
+    max_parallel_agents = min(max_agents_by_memory, max_agents_by_cpu, 10)
+    max_parallel_agents = max(1, max_parallel_agents)
+
+    # Determine tier
+    if max_parallel_agents >= 5:
+        tier = "BEAST MODE"
+        tier_color = Fore.GREEN
+        tier_emoji = "[MAX]"
+    elif max_parallel_agents >= 3:
+        tier = "TURBO"
+        tier_color = Fore.CYAN
+        tier_emoji = "[FAST]"
+    elif max_parallel_agents >= 2:
+        tier = "STANDARD"
+        tier_color = Fore.YELLOW
+        tier_emoji = "[OK]"
+    else:
+        tier = "ECO"
+        tier_color = Fore.RED
+        tier_emoji = "[SLOW]"
+
+    print(f"\n  {Fore.GREEN}AI AGENT CAPACITY:{Style.RESET_ALL}")
+    print(f"    • Max Parallel Agents: {max_parallel_agents}")
+    print(f"    • Performance Tier: {tier_color}{tier_emoji} {tier}{Style.RESET_ALL}")
+
+    # Recommendations
+    if max_parallel_agents >= 3:
+        sites_per_hour = max_parallel_agents * 30  # ~2 min per site
+        print(f"    • Estimated Speed: ~{sites_per_hour} sites/hour")
+    else:
+        print(f"    • Recommendation: Close other applications for better performance")
+
+    print()
+    print(f"{Fore.CYAN}════════════════════════════════════════════════════════════{Style.RESET_ALL}")
+    print()
+
+    return {
+        "cpu_cores": cpu_count,
+        "cpu_physical": cpu_physical,
+        "cpu_percent": cpu_percent,
+        "memory_total_gb": memory_total_gb,
+        "memory_available_gb": memory_available_gb,
+        "max_parallel_agents": max_parallel_agents,
+        "performance_tier": tier
+    }
 
     print()
     typewriter("━" * 54, 0.005, Fore.CYAN)
-    typewriter("✓ Server running on http://localhost:5511", 0.02, Fore.GREEN)
-    typewriter("⚠ Close this window to stop FormAI", 0.02, Fore.YELLOW)
+    typewriter("[OK] Server running on http://localhost:5511", 0.02, Fore.GREEN)
+    typewriter("[!] Close this window to stop FormAI", 0.02, Fore.YELLOW)
     typewriter("━" * 54, 0.005, Fore.CYAN)
     print()
 
@@ -1687,8 +2142,8 @@ def show_startup_animation():
 # These endpoints are for the Docker-based job queue system
 
 try:
-    from queue_manager import get_queue_manager
-    from job_models import Job, JobSubmitRequest, JobStats
+    from core.queue_manager import get_queue_manager
+    from core.job_models import Job, JobSubmitRequest, JobStats
     REDIS_ENABLED = True
 except ImportError:
     REDIS_ENABLED = False
@@ -1782,13 +2237,536 @@ async def submit_job(request: JobSubmitRequest):
 @app.get("/jobs")
 async def jobs_page():
     """Serve the jobs dashboard page"""
-    return FileResponse("web/jobs.html")
+    return FileResponse(str(BASE_PATH / "web" / "jobs.html"))
+
+# ============================================
+# AI Agent Endpoints
+# ============================================
+
+class AIAgentRequest(BaseModel):
+    """Request for AI agent form filling"""
+    url: str
+    profile_id: str
+    headless: bool = False  # Visible so client can watch
+    isolate_form: bool = False  # Remove everything except the form
+
+class AIAgentBatchRequest(BaseModel):
+    """Request for batch AI agent form filling"""
+    urls: list
+    profile_id: str
+    headless: bool = False  # Visible so client can watch
+    isolate_form: bool = False  # Remove everything except the form
+    limit: int = 0  # 0 = no limit
+    parallel: bool = False  # Enable parallel processing
+    max_parallel: int = 0  # 0 = auto-detect based on system resources
+
+# Global agent state
+ai_agent_state = {
+    "running": False,
+    "current_site": None,
+    "progress": {}
+}
+
+@app.get("/api/ai-agent/status")
+async def get_ai_agent_status():
+    """Check AI agent and Ollama status"""
+    try:
+        from tools.ollama_agent import OllamaAgent
+        from tools.agent_memory import AgentMemory
+
+        ollama = OllamaAgent()
+        memory = AgentMemory()
+
+        available = await ollama.check_available()
+        stats = memory.get_stats()
+
+        return JSONResponse(content={
+            "ollama_available": available,
+            "model": ollama.model,
+            "agent_running": ai_agent_state["running"],
+            "current_site": ai_agent_state["current_site"],
+            "memory_stats": stats
+        })
+    except Exception as e:
+        logger.error(f"Failed to get AI agent status: {e}")
+        return JSONResponse(content={
+            "ollama_available": False,
+            "model": "unknown",
+            "error": str(e)
+        })
+
+
+@app.get("/api/system/metrics")
+async def get_system_metrics():
+    """Get real-time system metrics for dashboard display"""
+    try:
+        from tools.system_monitor import SystemMonitorAgent
+
+        monitor = SystemMonitorAgent()
+        metrics = monitor.get_system_metrics()
+        scaling = monitor.can_spawn_more_agents(ai_agent_state.get("active_agents", 0))
+
+        return JSONResponse(content={
+            "cpu_percent": metrics.get("cpu_percent", 0),
+            "memory_percent": metrics.get("memory_percent", 0),
+            "memory_available_mb": metrics.get("memory_available_mb", 0),
+            "memory_total_mb": metrics.get("memory_available_mb", 0) / (1 - metrics.get("memory_percent", 1) / 100) if metrics.get("memory_percent", 0) < 100 else 0,
+            "process_memory_mb": metrics.get("process_memory_mb", 0),
+            "active_threads": metrics.get("active_threads", 0),
+            "browser_processes": metrics.get("browser_processes", 0),
+            "network_bytes_sent": metrics.get("network_bytes_sent", 0),
+            "network_bytes_recv": metrics.get("network_bytes_recv", 0),
+            "active_agents": ai_agent_state.get("active_agents", 0),
+            "can_scale": scaling.get("can_spawn", False),
+            "max_additional_agents": scaling.get("max_additional", 0),
+            "max_parallel": scaling.get("recommended", 2) + ai_agent_state.get("active_agents", 0),
+            "scaling_reason": scaling.get("reason", ""),
+            "timestamp": metrics.get("timestamp", "")
+        })
+    except Exception as e:
+        logger.error(f"Failed to get system metrics: {e}")
+        return JSONResponse(content={
+            "error": str(e),
+            "cpu_percent": 0,
+            "memory_percent": 0
+        })
+
+
+@app.websocket("/ws/metrics")
+async def websocket_metrics(websocket: WebSocket):
+    """WebSocket endpoint for real-time system metrics push"""
+    await websocket.accept()
+
+    try:
+        from tools.system_monitor import SystemMonitorAgent
+        monitor = SystemMonitorAgent()
+
+        while True:
+            metrics = monitor.get_system_metrics()
+            scaling = monitor.can_spawn_more_agents(ai_agent_state.get("active_agents", 0))
+
+            await websocket.send_json({
+                "type": "system_metrics",
+                "data": {
+                    "cpu_percent": metrics.get("cpu_percent", 0),
+                    "memory_percent": metrics.get("memory_percent", 0),
+                    "memory_available_mb": metrics.get("memory_available_mb", 0),
+                    "active_threads": metrics.get("active_threads", 0),
+                    "browser_processes": metrics.get("browser_processes", 0),
+                    "active_agents": ai_agent_state.get("active_agents", 0),
+                    "can_scale": scaling.get("can_spawn", False),
+                    "max_additional_agents": scaling.get("max_additional", 0),
+                    "max_parallel": scaling.get("recommended", 2) + ai_agent_state.get("active_agents", 0)
+                }
+            })
+
+            await asyncio.sleep(2)  # Update every 2 seconds
+
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Metrics WebSocket error: {e}")
+    finally:
+        try:
+            await websocket.close()
+        except Exception:
+            pass
+
+@app.post("/api/ai-agent/fill")
+async def ai_agent_fill_site(request: AIAgentRequest):
+    """Fill a single site using AI agent"""
+    global ai_agent_state
+
+    if ai_agent_state["running"]:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "error": "Agent already running"}
+        )
+
+    try:
+        # Load profile
+        if request.profile_id not in profiles:
+            raise HTTPException(status_code=404, detail="Profile not found")
+
+        profile = profiles[request.profile_id]
+        profile_data = profile.get('data', profile)
+
+        from tools.seleniumbase_agent import SeleniumBaseAgent
+
+        ai_agent_state["running"] = True
+        ai_agent_state["current_site"] = request.url
+
+        try:
+            agent = SeleniumBaseAgent(
+                headless=request.headless,
+                hold_open=10,
+                isolate_form=request.isolate_form
+            )
+
+            # Send start notification via WebSocket
+            await broadcast_message({
+                "type": "ai_agent_action",
+                "data": {"action": "starting", "url": request.url}
+            })
+
+            result = await agent.fill_site(request.url, profile_data)
+
+            # Send completion via WebSocket
+            await broadcast_message({
+                "type": "ai_agent_complete",
+                "data": result
+            })
+
+            return JSONResponse(content={
+                "success": result.get("success", False),
+                "result": result
+            })
+
+        finally:
+            ai_agent_state["running"] = False
+            ai_agent_state["current_site"] = None
+
+    except Exception as e:
+        logger.error(f"AI agent error: {e}", exc_info=True)
+        ai_agent_state["running"] = False
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.post("/api/ai-agent/fill-batch")
+async def ai_agent_fill_batch(request: AIAgentBatchRequest, background_tasks: BackgroundTasks):
+    """Fill multiple sites using AI agent"""
+    global ai_agent_state
+
+    if ai_agent_state["running"]:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "error": "Agent already running"}
+        )
+
+    try:
+        # Load profile
+        if request.profile_id not in profiles:
+            raise HTTPException(status_code=404, detail="Profile not found")
+
+        profile = profiles[request.profile_id]
+        profile_data = profile.get('data', profile)
+
+        # Apply limit if specified
+        urls = request.urls
+        if request.limit > 0:
+            urls = urls[:request.limit]
+
+        async def run_batch():
+            global ai_agent_state
+            from tools.seleniumbase_agent import SeleniumBaseAgent
+
+            ai_agent_state["running"] = True
+            ai_agent_state["progress"] = {
+                "total": len(urls),
+                "completed": 0,
+                "successful": 0,
+                "failed": 0
+            }
+
+            try:
+                agent = SeleniumBaseAgent(
+                    headless=request.headless,
+                    hold_open=5,
+                    isolate_form=request.isolate_form
+                )
+
+                async def on_progress(info):
+                    if info["type"] == "site_complete":
+                        ai_agent_state["progress"]["completed"] += 1
+                        if info["result"].get("success"):
+                            ai_agent_state["progress"]["successful"] += 1
+                        else:
+                            ai_agent_state["progress"]["failed"] += 1
+
+                        # Check for missing fields from the crew (self-learning)
+                        if info.get("result", {}).get("missing_fields"):
+                            missing = info["result"]["missing_fields"]
+                            suggestions = info["result"].get("profile_suggestions", {})
+                            await broadcast_message({
+                                "type": "ai_agent_missing_fields",
+                                "data": {
+                                    "site": info.get("site"),
+                                    "missing_count": len(missing),
+                                    "missing_fields": [
+                                        {
+                                            "selector": f.get("selector"),
+                                            "suggested_key": f.get("category") or f.get("profile_key"),
+                                            "labels": f.get("labels", [])
+                                        }
+                                        for f in missing[:10]  # Limit to 10
+                                    ],
+                                    "suggestions": suggestions
+                                }
+                            })
+
+                    # Handle missing field notifications from crew
+                    elif info.get("type") == "missing_field":
+                        await broadcast_message({
+                            "type": "ai_agent_missing_field",
+                            "data": info
+                        })
+
+                    ai_agent_state["current_site"] = info.get("site")
+
+                    # Send via WebSocket
+                    await broadcast_message({
+                        "type": "ai_agent_progress",
+                        "data": {
+                            **info,
+                            "progress": ai_agent_state["progress"]
+                        }
+                    })
+
+                # SeleniumBase agent uses sequential processing for stability
+                ai_agent_state["parallel"] = False
+                result = await agent.fill_sites(urls, profile_data, on_progress=on_progress)
+
+                await broadcast_message({
+                    "type": "ai_agent_batch_complete",
+                    "data": result
+                })
+
+            except Exception as e:
+                logger.error(f"Batch AI agent error: {e}", exc_info=True)
+                await broadcast_message({
+                    "type": "ai_agent_error",
+                    "data": {"error": str(e)}
+                })
+            finally:
+                ai_agent_state["running"] = False
+                ai_agent_state["current_site"] = None
+                ai_agent_state["active_agents"] = 0
+                ai_agent_state["parallel"] = False
+
+        # Run in background
+        task_id = str(uuid.uuid4())[:8]
+        ai_agent_state["task_id"] = task_id
+        background_tasks.add_task(run_batch)
+
+        return JSONResponse(content={
+            "success": True,
+            "message": f"AI agent started for {len(urls)} sites",
+            "total_sites": len(urls),
+            "task_id": task_id
+        })
+
+    except Exception as e:
+        logger.error(f"AI agent batch error: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.post("/api/ai-agent/stop")
+async def stop_ai_agent():
+    """Stop the running AI agent"""
+    global ai_agent_state
+    ai_agent_state["running"] = False
+    return JSONResponse(content={"success": True, "message": "Stop signal sent"})
+
+@app.get("/api/ai-agent/memory/stats")
+async def get_ai_memory_stats():
+    """Get AI agent learning statistics"""
+    try:
+        from tools.agent_memory import AgentMemory
+        memory = AgentMemory()
+        return JSONResponse(content=memory.get_stats())
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+@app.get("/api/ai-agent/memory/export")
+async def export_ai_memory():
+    """Export learned data for backup"""
+    try:
+        from tools.agent_memory import AgentMemory
+        memory = AgentMemory()
+        return JSONResponse(content=memory.export_learning())
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+@app.post("/api/ai-agent/memory/import")
+async def import_ai_memory(data: dict):
+    """Import learned data from backup"""
+    try:
+        from tools.agent_memory import AgentMemory
+        memory = AgentMemory()
+        memory.import_learning(data)
+        return JSONResponse(content={"success": True, "message": "Learning data imported"})
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+
+# ============================================================================
+# EMAIL VERIFICATION ENDPOINTS
+# ============================================================================
+
+EMAIL_SESSION_FILE = Path("data/email_session.json")
+EMAIL_PROVIDERS = {
+    "gmail": "https://mail.google.com",
+    "outlook": "https://outlook.live.com",
+    "yahoo": "https://mail.yahoo.com",
+}
+
+@app.get("/api/email/status")
+async def get_email_status():
+    """Get email session status."""
+    has_session = EMAIL_SESSION_FILE.exists()
+    return {
+        "hasSession": has_session,
+        "providers": list(EMAIL_PROVIDERS.keys())
+    }
+
+@app.post("/api/email/setup")
+async def setup_email_session(request: Request):
+    """Launch browser for user to sign into email."""
+    try:
+        data = await request.json()
+        provider = data.get("provider", "gmail")
+        url = EMAIL_PROVIDERS.get(provider.lower(), EMAIL_PROVIDERS["gmail"])
+
+        from playwright.async_api import async_playwright
+
+        # Launch visible browser
+        pw = await async_playwright().start()
+        browser = await pw.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page = await context.new_page()
+
+        # Navigate to email
+        await page.goto(url)
+
+        # Store reference for later saving
+        global _email_browser, _email_context
+        _email_browser = browser
+        _email_context = context
+
+        return {
+            "success": True,
+            "message": f"Browser opened to {provider}. Sign in, then click 'Save Session'.",
+            "provider": provider,
+            "url": url
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.post("/api/email/save-session")
+async def save_email_session():
+    """Save the current email browser session."""
+    try:
+        global _email_browser, _email_context
+
+        if not _email_context:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "No browser session to save. Run setup first."}
+            )
+
+        # Save session state
+        EMAIL_SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
+        await _email_context.storage_state(path=str(EMAIL_SESSION_FILE))
+
+        # Close browser
+        await _email_browser.close()
+        _email_browser = None
+        _email_context = None
+
+        return {"success": True, "message": "Email session saved successfully!"}
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.post("/api/email/verify")
+async def verify_email(request: Request):
+    """Open email to check for verification messages."""
+    try:
+        data = await request.json()
+        search_term = data.get("searchTerm", "")
+
+        if not EMAIL_SESSION_FILE.exists():
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "No email session. Set up email first."}
+            )
+
+        from playwright.async_api import async_playwright
+
+        pw = await async_playwright().start()
+        browser = await pw.chromium.launch(headless=False)
+        context = await browser.new_context(storage_state=str(EMAIL_SESSION_FILE))
+        page = await context.new_page()
+
+        # Go to Gmail
+        await page.goto("https://mail.google.com")
+
+        # Search for verification emails if search term provided
+        if search_term:
+            try:
+                import asyncio
+                await asyncio.sleep(3)  # Wait for page load
+                search_box = page.locator('input[aria-label="Search mail"]')
+                await search_box.fill(f"{search_term} verify")
+                await search_box.press("Enter")
+            except:
+                pass
+
+        # Store browser reference for later closing
+        global _verify_browser
+        _verify_browser = browser
+
+        return {
+            "success": True,
+            "message": "Email opened. Find and click verification links, then close browser."
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.post("/api/email/clear-session")
+async def clear_email_session():
+    """Clear saved email session."""
+    try:
+        if EMAIL_SESSION_FILE.exists():
+            EMAIL_SESSION_FILE.unlink()
+        return {"success": True, "message": "Email session cleared"}
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+# Global browser references for email
+_email_browser = None
+_email_context = None
+_verify_browser = None
 
 MODE = os.getenv("MODE", "web")
 
 if __name__ == "__main__":
     if MODE == "worker":
-        from worker import main as worker_main
+        from core.worker import main as worker_main
         print("Running in worker mode")
         asyncio.run(worker_main())
     else:
@@ -1796,10 +2774,11 @@ if __name__ == "__main__":
         import threading
         import time
 
-        # Skip startup animation when launched from test.bat
-        # show_startup_animation()
+        # Show startup and scan hardware
+        print("Initializing KPR...\n")
+        hardware_caps = scan_hardware_capabilities()
 
-        print("\nServer starting on http://localhost:5511")
+        print("Server starting on http://localhost:5511")
         print("Close this window to stop FormAI\n")
 
         def open_browser():
@@ -1814,9 +2793,41 @@ if __name__ == "__main__":
         threading.Thread(target=open_browser, daemon=True).start()
 
         # Run the server (when terminal closes, this exits and server stops)
+        # Try LAN IP for remote admin access, fallback to localhost if binding fails
+        import socket
+
+        def get_lan_ip():
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.connect(("8.8.8.8", 80))
+                ip = s.getsockname()[0]
+                s.close()
+                return ip
+            except:
+                return None
+
+        def test_bind(host, port):
+            """Test if we can bind to this address"""
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind((host, port))
+                s.close()
+                return True
+            except:
+                return False
+
+        # Bind to 0.0.0.0 to accept connections from both localhost and LAN
+        lan_ip = get_lan_ip()
+        host_ip = "0.0.0.0"
+        if lan_ip:
+            print(f"Binding to 0.0.0.0:5511 (localhost + LAN at {lan_ip})")
+        else:
+            print(f"Binding to 0.0.0.0:5511 (all interfaces)")
+
         uvicorn.run(
             app,
-            host="0.0.0.0",
+            host=host_ip,
             port=5511,
             log_level="info"
         )

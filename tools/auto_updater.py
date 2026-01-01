@@ -168,7 +168,7 @@ class AutoUpdater:
             logger.info(f"Downloading update v{self.latest_version}...")
             self.download_progress = 0
 
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 async with client.stream("GET", self._download_url, timeout=300) as resp:
                     if resp.status_code != 200:
                         self.update_error = f"Download failed: HTTP {resp.status_code}"

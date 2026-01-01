@@ -65,7 +65,13 @@
       "Bash(cd:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__MCP_DOCKER__list_issues",
-      "mcp__MCP_DOCKER__fetch"
+      "mcp__MCP_DOCKER__fetch",
+      "Bash(ping:*)",
+      "Bash(chcp 65001)",
+      "Bash(ollama pull:*)",
+      "Bash(ollama list:*)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:2captcha.com)"
     ],
     "deny": [],
     "ask": []

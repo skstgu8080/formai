@@ -1,33 +1,50 @@
 # FormAI - System Architecture
 
-> **Last Updated:** 2025-12-01
-> **Version:** 1.0.0
+> **Last Updated:** 2025-12-31
+> **Version:** 1.1.1
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Technology Stack](#technology-stack)
 - [System Diagram](#system-diagram)
+- [7-Phase Pipeline](#7-phase-pipeline)
 - [Directory Structure](#directory-structure)
-- [Data Storage Schema](#data-storage-schema)
+- [Data Storage](#data-storage)
 - [API Reference](#api-reference)
-- [Data Flow Diagrams](#data-flow-diagrams)
-- [External Integrations](#external-integrations)
-- [Deployment Architecture](#deployment-architecture)
+- [Detailed Documentation](#detailed-documentation)
 
 ---
 
 ## Overview
 
-FormAI is a **Python-based browser automation platform** for intelligent form filling with AI-powered field detection.
+FormAI is a **Python-based browser automation platform** for intelligent form filling.
 
-**Key Features:**
-- Dual-server architecture (client + admin monitoring)
-- SeleniumBase browser automation with anti-bot bypass
-- AI-powered form field mapping
-- Chrome recording import and replay
-- Real-time progress via WebSocket
-- Profile-based form filling
+**Core Concept:**
+```
+┌─────────────────────────────────────────────────────┐
+│              CLIENT PC = THE BODY                    │
+│  - Runs browser (SeleniumBase/Playwright)           │
+│  - Executes form filling actions                    │
+│  - Processes sites at scale                         │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│              OLLAMA = THE BRAIN                      │
+│  - Analyzes form fields via DOM                     │
+│  - Decides what to fill and how                     │
+│  - Returns structured mappings                      │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│         FORMAI (localhost:5511) = CONTROL CENTER     │
+│  - User selects profile + sites                     │
+│  - Launches AI agent                                │
+│  - WebSocket for live updates                       │
+└─────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -36,69 +53,93 @@ FormAI is a **Python-based browser automation platform** for intelligent form fi
 | Layer | Technology |
 |-------|------------|
 | Backend | Python 3.x, FastAPI, Uvicorn |
-| Browser Automation | SeleniumBase, Playwright, PyAutoGUI |
-| AI Integration | OpenRouter, Ollama, Langchain |
+| Database | SQLite (`data/formai.db`) |
+| Browser | SeleniumBase (UC Mode), Playwright |
+| AI | Ollama (local), 2Captcha API |
 | Frontend | HTML, JavaScript, Tailwind CSS |
 | Real-time | WebSockets |
-| Data Storage | JSON files |
 
 ---
 
 ## System Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              FormAI Platform                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLIENTS                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  WEB UI (5511)              CLI                   API            │
+│  • Dashboard                python cli.py         POST /api/*    │
+│  • Profiles                 fill <site_id>                       │
+│  • Sites                    fill-all                             │
+│  • Settings                                                      │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    CLIENT SERVER (Port 5511)                     │
+├─────────────────────────────────────────────────────────────────┤
+│  formai_server.py                                                │
+│  ├── FastAPI endpoints                                           │
+│  ├── WebSocket hub                                               │
+│  └── Static file server                                          │
+├─────────────────────────────────────────────────────────────────┤
+│  AUTOMATION ENGINES                                              │
+│  ├── SeleniumBaseAgent (tools/seleniumbase_agent.py)            │
+│  │   └── 7-phase pipeline, UC Mode, AI-powered                  │
+│  └── SimpleAutofill (tools/simple_autofill.py)                  │
+│      └── Lightweight Playwright, fast forms                     │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+          ┌─────────────────────┼─────────────────────┐
+          ▼                     ▼                     ▼
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│     SQLite       │  │     Ollama       │  │  Admin Server    │
+│  data/formai.db  │  │  localhost:11434 │  │   Port 5512      │
+├──────────────────┤  ├──────────────────┤  ├──────────────────┤
+│ • profiles       │  │ • Form analysis  │  │ • Monitoring     │
+│ • sites          │  │ • Field mapping  │  │ • Remote cmds    │
+│ • domain_mappings│  │ • CAPTCHA vision │  │ • Screenshots    │
+│ • fill_history   │  │                  │  │                  │
+└──────────────────┘  └──────────────────┘  └──────────────────┘
+```
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                CLIENTS                                       │
-├──────────────────────────────┬──────────────────────────────────────────────┤
-│        WEB BROWSER           │              API CONSUMERS                    │
-│                              │                                              │
-│  ┌────────────────────────┐  │  ┌────────────────────────────────────────┐  │
-│  │ Dashboard (Port 5511)  │  │  │ REST API Endpoints                     │  │
-│  │ • Profiles             │  │  │ • Automation control                   │  │
-│  │ • Recordings           │  │  │ • Profile management                   │  │
-│  │ • Automation           │  │  │ • Recording import                     │  │
-│  │ • Settings             │  │  └────────────────────────────────────────┘  │
-│  └────────────────────────┘  │                                              │
-└──────────────────────────────┴──────────────────────────────────────────────┘
-                                       │
-                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         CLIENT SERVER (Port 5511)                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────────┐ │
-│  │   FastAPI Server   │  │   WebSocket Hub    │  │   Static File Server   │ │
-│  │   formai_server.py │  │   Real-time updates│  │   HTML/CSS/JS          │ │
-│  └────────────────────┘  └────────────────────┘  └────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────────┐ │
-│  │ Profile Manager    │  │ Recording Manager  │  │ Field Mapper           │ │
-│  │ CRUD operations    │  │ Import/replay      │  │ AI-powered matching    │ │
-│  └────────────────────┘  └────────────────────┘  └────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                    Browser Automation Engine                           │ │
-│  │  selenium_automation.py                                                │ │
-│  │  • SeleniumBase with UC mode (anti-bot bypass)                        │ │
-│  │  • CDP (Chrome DevTools Protocol) support                             │ │
-│  │  • Form detection and filling                                          │ │
-│  │  • Human-like interaction delays                                       │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                       │
-                    ┌──────────────────┼──────────────────┐
-                    ▼                  ▼                  ▼
-┌──────────────────────────┐ ┌──────────────────┐ ┌──────────────────────────┐
-│    JSON File Storage     │ │   AI Providers   │ │   Admin Server (5512)    │
-├──────────────────────────┤ ├──────────────────┤ ├──────────────────────────┤
-│  profiles/               │ │  OpenRouter API  │ │  Client monitoring       │
-│  recordings/             │ │  Ollama (local)  │ │  Remote commands         │
-│  field_mappings/         │ │  OpenAI          │ │  Screenshot collection   │
-│  admin_data/             │ │                  │ │  Statistics aggregation  │
-└──────────────────────────┘ └──────────────────┘ └──────────────────────────┘
+---
+
+## 7-Phase Pipeline
+
+**File:** `tools/seleniumbase_agent.py`
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  PHASE 1: NAVIGATE                                               │
+│  • SeleniumBase UC Mode (Undetected Chrome)                     │
+│  • Bypass Cloudflare, bot detection                             │
+├─────────────────────────────────────────────────────────────────┤
+│  PHASE 2: CLEAR                                                  │
+│  • Close popups, modals, cookie banners                         │
+│  • Remove overlays blocking form                                │
+├─────────────────────────────────────────────────────────────────┤
+│  PHASE 3: DETECT                                                 │
+│  • Layer 1: Load saved mappings (instant)                       │
+│  • Layer 2: AI analysis via Ollama (3-5 sec)                    │
+│  • Layer 3: Pattern matching fallback                           │
+├─────────────────────────────────────────────────────────────────┤
+│  PHASE 4: FILL                                                   │
+│  • Map profile fields → form fields                             │
+│  • Handle: text, select, checkbox, password, DOB                │
+├─────────────────────────────────────────────────────────────────┤
+│  PHASE 5: CAPTCHA                                                │
+│  • Detect reCAPTCHA, hCaptcha                                   │
+│  • Solve via 2Captcha API or Ollama vision                      │
+├─────────────────────────────────────────────────────────────────┤
+│  PHASE 6: SUBMIT                                                 │
+│  • Find and click submit button                                 │
+│  • Handle multi-step forms                                      │
+├─────────────────────────────────────────────────────────────────┤
+│  PHASE 7: LEARN                                                  │
+│  • Save successful mappings to database                         │
+│  • "Learn Once, Replay Many"                                    │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -107,99 +148,104 @@ FormAI is a **Python-based browser automation platform** for intelligent form fi
 
 ```
 FormAI/
-├── formai_server.py          # Main client server (FastAPI, port 5511)
-├── admin_server.py           # Admin monitoring server (port 5512)
-├── selenium_automation.py    # Browser automation engine
+├── formai_server.py          # Main server (port 5511)
+├── admin_server.py           # Admin server (port 5512)
 ├── client_callback.py        # Admin callback system
+├── cli.py                    # CLI for headless automation
+├── version.py                # Version info (1.1.1)
 │
-├── web/                      # HTML pages
-│   ├── index.html           # Main dashboard
+├── database/                 # SQLite layer
+│   ├── db.py                # Schema and connections
+│   └── repositories.py      # Data access (ProfileRepository, etc.)
+│
+├── tools/                    # Automation tools
+│   ├── seleniumbase_agent.py    # Main 7-phase AI agent
+│   ├── simple_autofill.py       # Lightweight Playwright filler
+│   ├── field_analyzer.py        # DOM field extraction
+│   ├── field_mapping_store.py   # Save/load learned mappings
+│   ├── captcha_solver.py        # 2Captcha, vision solving
+│   ├── ollama_agent.py          # Ollama API client
+│   ├── recording_trainer.py     # Learn from Chrome recordings
+│   └── system_monitor.py        # System metrics
+│
+├── web/                      # HTML pages (7 pages)
+│   ├── index.html           # Dashboard
 │   ├── profiles.html        # Profile management
-│   ├── automation.html      # Automation interface
-│   ├── recorder.html        # Recording management
-│   ├── settings.html        # Settings page
-│   └── admin.html           # Admin dashboard
+│   ├── sites.html           # Sites management (292+)
+│   ├── training.html        # Import Chrome recordings
+│   ├── jobs.html            # Job queue
+│   ├── settings.html        # Settings
+│   └── admin.html           # Admin monitoring
 │
-├── static/                   # Static assets
-│   ├── css/
-│   │   ├── input.css        # Tailwind source
-│   │   └── tailwind.css     # Built CSS
-│   ├── js/                  # JavaScript modules
-│   └── Models.json          # AI model configs
+├── static/
+│   ├── css/                 # Tailwind CSS
+│   └── js/
+│       ├── sidebar.js       # Navigation sidebar
+│       ├── system-status.js # Footer status
+│       └── theme.js         # Dark/light mode
 │
-├── tools/                    # Automation utilities
-│   ├── enhanced_field_mapper.py
-│   ├── chrome_recorder_parser.py
-│   ├── recording_manager.py
-│   ├── ai_form_filler.py
-│   ├── ai_value_replacer.py
-│   └── puppeteer_replay_wrapper.py
+├── data/                     # Runtime data
+│   └── formai.db            # SQLite database
 │
-├── profiles/                 # User profile JSON files
-├── recordings/               # Chrome DevTools recordings
-├── field_mappings/           # Website field mappings
-├── admin_data/               # Admin server data
-│   ├── clients.json
-│   ├── commands.json
-│   └── screenshots/
+├── sites/                    # Site definitions (292+)
 │
-├── api_keys/                 # API key configurations
-├── tests/                    # Test files
-├── docs/                     # Documentation
-├── scripts/                  # Utility scripts
-└── requirements.txt          # Python dependencies
+└── .claude/                  # Documentation
+    ├── field-mapping.md     # Field extraction logic
+    ├── automation-engine.md # 7-phase pipeline
+    ├── ai-integration.md    # Ollama, 2Captcha
+    └── ...
 ```
 
 ---
 
-## Data Storage Schema
+## Data Storage
+
+### SQLite Database (`data/formai.db`)
+
+| Table | Purpose |
+|-------|---------|
+| `profiles` | User profiles (name, email, phone, address...) |
+| `sites` | 292+ sites with URLs and field configs |
+| `domain_mappings` | Learned field mappings per domain |
+| `learned_fields` | Selector → profile_key mappings |
+| `fill_history` | Fill operation logs |
 
 ### Profile Schema
-```json
-{
-  "id": "profile-001",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "phone": "+1-555-123-4567",
-  "address": {
-    "street": "123 Main St",
-    "city": "New York",
-    "state": "NY",
-    "zip": "10001"
-  },
-  "personal": {
-    "firstName": "John",
-    "lastName": "Doe"
-  },
-  "created_at": "2025-12-01T10:30:00Z",
-  "updated_at": "2025-12-01T10:30:00Z"
-}
+
+```sql
+CREATE TABLE profiles (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    first_name TEXT,
+    last_name TEXT,
+    email TEXT,
+    phone TEXT,
+    password TEXT,
+    birthdate TEXT,
+    gender TEXT,
+    address1 TEXT,
+    city TEXT,
+    state TEXT,
+    zip TEXT,
+    country TEXT,
+    company TEXT,
+    data JSON,  -- Extra fields
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
 ```
 
-### Recording Schema
-```json
-{
-  "id": "recording-001",
-  "title": "Example Form",
-  "url": "https://example.com/form",
-  "steps": [
-    {"type": "navigate", "url": "https://example.com"},
-    {"type": "click", "selectors": ["#button"]},
-    {"type": "change", "selectors": ["#input"], "value": "{{field}}"}
-  ],
-  "created_at": "2025-12-01T10:30:00Z"
-}
-```
+### Domain Mappings Schema
 
-### Field Mapping Schema
-```json
-{
-  "domain": "example.com",
-  "mappings": [
-    {"selector": "#first-name", "profile_field": "firstName"},
-    {"selector": "#email", "profile_field": "email"}
-  ]
-}
+```sql
+CREATE TABLE domain_mappings (
+    domain TEXT PRIMARY KEY,
+    url TEXT,
+    mappings JSON NOT NULL,  -- [{selector, profile_field}, ...]
+    fields_count INTEGER,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
 ```
 
 ---
@@ -208,7 +254,7 @@ FormAI/
 
 ### Client Server (Port 5511)
 
-#### Profile Management
+#### Profiles
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/profiles` | List all profiles |
@@ -221,174 +267,79 @@ FormAI/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/automation/start` | Start automation |
-| POST | `/api/automation/stop` | Stop all automation |
-| POST | `/api/automation/stop/{id}` | Stop specific session |
-| GET | `/api/status` | Get server status |
+| POST | `/api/automation/stop` | Stop all |
+| GET | `/api/status` | Server status |
 
-#### Recordings
+#### Sites
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/recordings` | List recordings |
-| GET | `/api/recordings/{id}` | Get recording |
-| POST | `/api/recordings/import-chrome` | Import Chrome recording |
-| DELETE | `/api/recordings/{id}` | Delete recording |
-| POST | `/api/recordings/{id}/replay` | Replay with profile |
-| GET | `/api/recordings/{id}/analyze` | Analyze fields |
+| GET | `/api/sites` | List all sites |
+| GET | `/api/sites/{id}` | Get site |
+| POST | `/api/sites` | Create site |
+| DELETE | `/api/sites/{id}` | Delete site |
 
-#### Real-time
+#### WebSocket
 | Endpoint | Description |
 |----------|-------------|
-| `WS /ws` | WebSocket for live updates |
+| `WS /ws` | Real-time automation updates |
 
 ### Admin Server (Port 5512)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/heartbeat` | Receive client heartbeat |
-| GET | `/api/clients` | List registered clients |
-| GET | `/api/stats` | Aggregated statistics |
-| POST | `/api/send_command` | Send command to client |
-| GET | `/api/command_results` | Get command results |
-| GET | `/api/screenshots` | List screenshots |
+| POST | `/api/heartbeat` | Client heartbeat |
+| GET | `/api/clients` | List clients |
+| POST | `/api/send_command` | Remote command |
 
 ---
 
-## Data Flow Diagrams
+## Detailed Documentation
 
-### Automation Flow
-```
-User selects profile → User selects recording → Start automation
-                                                       │
-                                                       ▼
-                                    ┌─────────────────────────────────┐
-                                    │ Load profile and recording      │
-                                    └─────────────────────────────────┘
-                                                       │
-                                                       ▼
-                                    ┌─────────────────────────────────┐
-                                    │ Initialize browser (UC mode)    │
-                                    └─────────────────────────────────┘
-                                                       │
-                                                       ▼
-                                    ┌─────────────────────────────────┐
-                                    │ Execute recording steps         │
-                                    │ • Navigate to URL               │
-                                    │ • Fill fields with profile data │
-                                    │ • Click buttons                 │
-                                    └─────────────────────────────────┘
-                                                       │
-                                                       ▼
-                                    ┌─────────────────────────────────┐
-                                    │ Send progress via WebSocket     │
-                                    └─────────────────────────────────┘
-                                                       │
-                                                       ▼
-                                    ┌─────────────────────────────────┐
-                                    │ Complete and cleanup browser    │
-                                    └─────────────────────────────────┘
-```
+For implementation details, see:
 
-### Admin Callback Flow
-```
-Client Server starts → Initialize callback system
-                              │
-                              ▼
-              ┌───────────────────────────────┐
-              │ Send heartbeat to Admin (5min)│◄────────┐
-              └───────────────────────────────┘         │
-                              │                         │
-                              ▼                         │
-              ┌───────────────────────────────┐         │
-              │ Poll for pending commands     │         │
-              └───────────────────────────────┘         │
-                              │                         │
-                              ▼                         │
-              ┌───────────────────────────────┐         │
-              │ Execute command if pending    │         │
-              └───────────────────────────────┘         │
-                              │                         │
-                              ▼                         │
-              ┌───────────────────────────────┐         │
-              │ Send result back to Admin     │─────────┘
-              └───────────────────────────────┘
-```
+| Topic | File |
+|-------|------|
+| Field Mapping Logic | [.claude/field-mapping.md](../.claude/field-mapping.md) |
+| Automation Engine | [.claude/automation-engine.md](../.claude/automation-engine.md) |
+| AI Integration | [.claude/ai-integration.md](../.claude/ai-integration.md) |
+| API Design | [.claude/api-design.md](../.claude/api-design.md) |
+| Security | [.claude/security.md](../.claude/security.md) |
+| Testing | [.claude/testing.md](../.claude/testing.md) |
+| UI Patterns | [.claude/ui-patterns.md](../.claude/ui-patterns.md) |
+| Code Standards | [.claude/standards.md](../.claude/standards.md) |
+| Database | [.claude/database.md](../.claude/database.md) |
 
 ---
 
-## External Integrations
+## Performance
 
-### AI Providers
-- **OpenRouter API**: Cloud-based LLM for field mapping
-- **Ollama**: Local LLM support for offline operation
-- **OpenAI**: Alternative cloud provider
-
-### Browser Engines
-- **SeleniumBase**: Primary automation with UC mode
-- **Playwright**: Alternative browser automation
-- **Puppeteer**: Recording replay support
+| Scenario | Time |
+|----------|------|
+| Simple form (saved mappings) | 5-10 sec |
+| Complex form (AI analysis) | 15-25 sec |
+| Multi-step form | 30-45 sec |
+| With CAPTCHA | +15-30 sec |
 
 ---
 
-## Deployment Architecture
+## Deployment
 
-### Single Instance (Default)
+### Development
+```bash
+python formai_server.py  # Port 5511
 ```
-┌──────────────────────┐
-│   User's Machine     │
-│  ┌────────────────┐  │
-│  │ Client Server  │  │
-│  │  Port 5511     │  │
-│  └────────────────┘  │
-│  ┌────────────────┐  │
-│  │ Chrome Browser │  │
-│  │ (automation)   │  │
-│  └────────────────┘  │
-└──────────────────────┘
+
+### Production (Executable)
+```bash
+python build_release.py  # Creates FormAI.exe (~59MB)
 ```
 
 ### Multi-Client with Admin
 ```
-┌──────────────────────┐     ┌──────────────────────┐
-│   Admin Server       │     │   Client Machine 1   │
-│   Port 5512          │◄────│   Port 5511          │
-│   • Monitoring       │     └──────────────────────┘
-│   • Commands         │
-│   • Screenshots      │◄────┌──────────────────────┐
-└──────────────────────┘     │   Client Machine 2   │
-                             │   Port 5511          │
-                             └──────────────────────┘
+Admin Server (VPS:5512)
+    ↑ heartbeat
+    │
+├── Client 1 (5511)
+├── Client 2 (5511)
+└── Client N (5511)
 ```
-
----
-
-## Statistics Summary
-
-| Metric | Count |
-|--------|-------|
-| HTML Pages | 8 |
-| API Endpoints | 25+ |
-| Python Modules | 35+ |
-| Tool Scripts | 15+ |
-
----
-
-## Related Documentation
-
-- [CLAUDE.md](../CLAUDE.md) - Development guidelines
-- [CHANGELOG.md](../CHANGELOG.md) - Change history
-- [docs/features/](./features/) - Feature documentation
-
----
-
-## Maintenance Notes
-
-### How to Update This Document
-
-1. **Adding new API endpoint**: Add to API Reference section
-2. **Adding new integration**: Add to External Integrations
-3. **Changing architecture**: Update System Diagram
-4. **Adding data schema**: Add to Data Storage Schema
-
-### Review Schedule
-- Review monthly for accuracy
-- Update immediately after major changes

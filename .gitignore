@@ -19,7 +19,6 @@ nul
 .env
 
 # User data directories (contains personal/sensitive data)
-profiles/
 profiles/*.json
 recordings/
 recordings/*.json
@@ -30,7 +29,20 @@ admin_data/screenshots/
 downloaded_files/
 training_data/
 saved_urls/
-field_mappings/
+
+# Runtime data (keep structure, ignore content)
+data/*.db
+data/*.json
+
+# Site analysis results (keep sites.json)
+sites/*_results*.json
+sites/batch_results/
+sites/*.md
+sites/chunk*.txt
+sites/all_urls.txt
+
+# Keep field_mappings (learned data is valuable)
+# field_mappings/
 
 # Python cache files
 __pycache__/

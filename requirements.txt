@@ -29,6 +29,7 @@ lxml>=5.0.0  # Fast XML/HTML parsing
 
 # Utilities
 colorama==0.4.6  # For colored console output on Windows
+pystray>=0.19.0  # System tray icon for Windows
 
 # Camera & Audio Remote Access (disabled for Docker/headless)
 # opencv-python==4.10.0.84  # For camera access

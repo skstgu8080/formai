@@ -5,6 +5,181 @@ All notable changes to FormAI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-31 (Project Reorganization)
+
+### Added
+- **18 Documentation Files** in `.claude/` directory
+  - `python-modules.md` - Complete index of all Python files
+  - `field-mapping.md` - Pattern dictionary and normalization
+  - `automation-engine.md` - 7-phase pipeline documentation
+  - `ai-integration.md` - Ollama/2Captcha integration
+  - `cli-usage.md` - CLI commands reference
+  - `recording-system.md` - Chrome recording import
+  - `sites-system.md` - 292+ sites management
+  - `multistep-forms.md` - Wizard form handling
+  - `update-system.md` - Auto-update mechanism
+  - `admin-callback.md` - Remote admin system
+- **Project Valuation** (`docs/project-worth.md`) - $150k-$250k development cost analysis
+
+### Changed
+- **Project Structure Reorganized**
+  - Created `core/` directory for supporting modules (client_callback, worker, queue_manager, job_models)
+  - Created `build/` directory for PyInstaller and release scripts
+  - Moved batch/shell scripts to `scripts/`
+  - Root now has only 5 entry-point Python files
+- **Slimmed node_modules** - Removed unused React/Puppeteer packages (67 packages vs 200+)
+- **Updated package.json** - Only Tailwind CSS dependencies remain
+- **Updated all imports** to use `core.` prefix
+
+### Removed
+- `selenium_automation.py` - Legacy, replaced by seleniumbase_agent
+- `callback_standalone.py` - Legacy wrapper
+- `config/` directory - Unused TypeScript/Tailwind configs
+- `project-kit/` - Template files
+- `api_keys/` - Migrated to .env
+- `training_data/` - 120+ old test screenshots
+- `saved_requests/`, `screenshots/`, `downloaded_files/`, `programs/` - Temp data
+- `sites/node_modules/` - Stray node_modules (84k lines of junk)
+
+---
+
+## [1.1.1] - 2025-12-31
+
+### Changed
+- **Field Mappings migrated to SQLite** - Consistent database storage
+  - Created `DomainMappingRepository` for domain-level mappings
+  - Added `domain_mappings` table to SQLite schema
+  - Migrated 183 JSON files from `field_mappings/` to database
+  - Updated all `/api/field-mappings` endpoints to use SQLite
+  - Updated `FieldMappingStore` class to use database
+  - Deleted legacy `field_mappings/` directory
+
+### Added
+- **Mappings Page** (`/mappings`) - Browse and manage learned field mappings
+  - View all trained sites with field counts
+  - Search by domain
+  - View detailed field mappings per site
+  - Delete mappings to re-learn sites
+
+### Fixed
+- Field mappings API now handles domain/filename mismatches correctly
+- Delete mappings works on Windows (file handle issue fixed)
+
+---
+
+## [1.1.0] - 2025-12-29 (Phase 3: Bulk Registration Engine)
+
+### Added
+- **10x Parallel Workers** - MAX_PARALLEL_AGENTS increased from 5 to 10
+- **Smart Field Matching** - Tiered intelligence (cache -> pattern -> AI)
+  - Tier 1: CACHED - Instant lookup from learned_fields.json
+  - Tier 2: PATTERN - 50+ common patterns in data/field_patterns.json
+  - Tier 3: AI - Only calls Ollama for unknown fields
+- **Multi-Step Form Manager** - Handle wizard registration flows
+  - Detects step indicators and progress bars
+  - Clicks Next for intermediate steps, Submit for final
+- **Vision CAPTCHA Solver** - Free auto-solve using Ollama + LLaVA
+  - Reads text CAPTCHAs with vision AI
+  - Cloudflare/Turnstile bypass via UC Mode
+- **Temp Email Handler** - Auto-verify email confirmation flows
+  - Creates disposable emails via mail.tm API
+  - Polls inbox and extracts verification links/codes
+
+### New Files
+- data/field_patterns.json - 50+ form field patterns
+- tools/multistep_manager.py - Multi-page form navigation
+- tools/captcha_solver.py - Vision CAPTCHA solving
+- tools/email_handler.py - Temp email verification
+
+---
+
+## [1.0.13] - 2025-12-29
+
+### Added
+- **Real-time System Metrics Dashboard** - Live CPU/memory monitoring on homepage
+  - New `/api/system/metrics` endpoint for real-time system stats
+  - New `/ws/metrics` WebSocket for 2-second metric pushes
+  - System Metrics card with progress bars for CPU/Memory
+  - Active agents counter showing parallel capacity
+  - Scaling indicator (green=can scale, yellow=at capacity)
+
+- **Error Recovery Agent** - Automatic retry with different strategies
+  - 6 recovery strategies: retry_with_delay, scroll_into_view, click_first, human_like_typing, clear_and_refill, alternative_selector
+  - Automatically activates when form fill actions fail
+  - Tracks attempted strategies per selector to avoid retrying same approach
+  - Integrated into CrewCoordinator for seamless error handling
+
+- **Parallel Batch Processing** - Fill multiple sites simultaneously
+  - New `fill_sites_parallel()` method using worker pattern
+  - Dynamic scaling based on system resources (CPU/memory)
+  - Each worker gets its own browser instance
+  - Progress tracking per worker with WebSocket updates
+  - Batch endpoint now supports `parallel: true` flag
+  - Auto-detects optimal number of workers based on hardware
+
+- **Hardware Capability Scan** - System scan at startup
+  - Displays CPU cores, speed, memory, network stats
+  - Calculates max parallel agents based on resources
+  - Performance tier: BEAST MODE (16+ cores), TURBO (8+ cores), STANDARD, ECO
+  - Estimated sites/hour calculation
+
+### Changed
+- System Monitor Agent now provides real-time metrics to dashboard
+- Batch fill endpoint accepts `parallel` and `max_parallel` parameters
+- CrewCoordinator reset now includes recovery agent and learner reset
+
+---
+
+## [1.0.12] - 2025-12-28
+
+### Added
+- **FormAI.exe Build** - PyInstaller build script for protected executable release
+  - `build_release.py` creates standalone 59MB exe
+  - Excludes heavy ML libraries (torch, tensorflow, scipy, sklearn, pandas)
+  - Source code protected in compiled form
+- **Silent Firewall Setup** - Auto-configure Windows Firewall on first run
+  - Creates PowerShell script for port 5511 rules
+  - Requests UAC elevation once, stores marker file
+  - No more "Windows Firewall has blocked..." prompts
+- **VPS SSH Management** - Can now edit VPS files directly via paramiko
+
+### Fixed
+- **Checkbox/Label Click** - Fix newsletter and consent checkboxes not being clicked
+  - Properly detects `<label>` elements and clicks directly (no is_selected check)
+  - Added JavaScript click fallback for stubborn elements
+  - Added text-based search for labels containing "Subscribe", "newsletter", etc.
+- **Playwright Replay** - Added `text/` selector support and offset-based clicks
+
+### Changed
+- **Admin Callback** - Removed localhost:5512 from default URLs (production only)
+- **Callback Mode** - Set to quiet=True for silent operation
+
+### Removed
+- **Statistics Page** - Removed admin_stats.html and sidebar link from admin panel
+
+---
+
+## [1.0.11] - 2025-12-27
+
+### Added
+- **Recording URL Input** - Add/edit target URL when importing recordings
+  - Auto-fills from navigate step or title
+  - Manual override for recordings without URLs
+  - Fixes automation failing on recordings with empty URL field
+
+### Fixed
+- **Auto-Updater Download** - Fix GitHub download redirects (HTTP 302) not being followed
+  - Added `follow_redirects=True` to httpx client
+  - Downloads now complete instead of showing stuck "Downloading..." message
+- **URL Extraction** - Autofill engine now checks multiple sources for URL:
+  - Navigate step URL
+  - Recording `url` field
+  - Title/recording_name if it looks like a URL
+- **Tailwindcss 404** - Removed build directive from CSS that caused browser 404 errors
+- **Pydantic Deprecation** - Changed `.dict()` to `.model_dump()` throughout codebase
+
+---
+
 ## [1.0.10] - 2025-12-26
 
 ### Fixed

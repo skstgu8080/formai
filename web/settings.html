@@ -85,9 +85,9 @@
         <div id="sidebar-container"></div>
 
         <!-- Main Content Area -->
-        <main class="flex-1 overflow-y-auto bg-background" id="main-content">
+        <main class="flex-1 overflow-y-auto bg-background pt-14 lg:pt-0" id="main-content">
             <!-- Header -->
-            <header class="bg-card/50 border-b border-gray-200 backdrop-blur-sm sticky top-0 z-10">
+            <header class="bg-card/50 border-b border-gray-200 backdrop-blur-sm sticky top-0 z-10 hidden lg:block">
                 <div class="px-6 py-4">
                     <div class="flex justify-between items-center">
                         <div>
@@ -141,7 +141,7 @@
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" class="sr-only peer" checked>
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between">
@@ -179,28 +179,17 @@
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" class="sr-only peer" checked>
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                     </label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- AI API Keys -->
+                        <!-- AI Configuration -->
                         <div class="bg-card border border-gray-200 rounded-lg p-6">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-lg font-medium text-card-foreground">AI API Keys</h3>
-                                    <p class="text-sm text-muted-foreground">Configure API keys for AI-powered form filling</p>
-                                </div>
-                                <a href="/docs/ai-providers" target="_blank" class="text-xs text-blue-500 hover:underline">
-                                    📚 Compare Providers
-                                </a>
-                            </div>
-                            <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                                <p class="text-xs text-blue-700 dark:text-blue-300">
-                                    💡 <strong>Tip:</strong> Use Ollama for free, private, offline AI. No API keys needed!
-                                    <a href="https://ollama.com/download" target="_blank" class="underline font-medium">Download Ollama</a>
-                                </p>
+                            <div class="mb-4">
+                                <h3 class="text-lg font-medium text-card-foreground">AI Configuration</h3>
+                                <p class="text-sm text-muted-foreground">Both options are free - choose local or cloud</p>
                             </div>
                             <div id="api-keys-container" class="space-y-4">
                                 <!-- API key forms will be inserted here -->
@@ -341,22 +330,12 @@
                             <div class="space-y-4">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <h4 class="text-sm font-medium text-card-foreground">Email Notifications</h4>
-                                        <p class="text-sm text-muted-foreground">Receive email notifications about automation status</p>
-                                    </div>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" class="sr-only peer" checked>
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                    </label>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
                                         <h4 class="text-sm font-medium text-card-foreground">Desktop Notifications</h4>
                                         <p class="text-sm text-muted-foreground">Show desktop notifications for important events</p>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between">
@@ -366,79 +345,102 @@
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" class="sr-only peer" checked>
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                     </label>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Sidebar Settings -->
-                    <div class="space-y-6">
-                        <!-- Appearance Settings -->
+                        <!-- Email Verification Settings -->
                         <div class="bg-card border border-gray-200 rounded-lg p-6">
-                            <h3 class="text-lg font-medium text-card-foreground mb-4">Appearance</h3>
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-medium text-card-foreground">Email Verification</h3>
+                                    <p class="text-sm text-muted-foreground">Set up email access to verify account registrations</p>
+                                </div>
+                                <span id="email-status-badge" class="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+                                    Checking...
+                                </span>
+                            </div>
+
+                            <!-- Email Session Info -->
+                            <div id="email-session-info" class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md hidden">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-green-900 dark:text-green-100">
+                                        Email session saved - Ready for verification
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- No Session Warning -->
+                            <div id="email-no-session" class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md hidden">
+                                <p class="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+                                    No email session configured
+                                </p>
+                                <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                                    Sign in to your email below to enable verification
+                                </p>
+                            </div>
+
+                            <!-- Setup Controls -->
                             <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="text-sm font-medium text-card-foreground">Theme</h4>
-                                        <p class="text-sm text-muted-foreground">Choose your preferred theme</p>
-                                    </div>
-                                    <select class="px-3 py-2 bg-background border border-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent">
-                                        <option value="light">Light</option>
-                                        <option value="dark">Dark</option>
-                                        <option value="auto">Auto</option>
+                                <!-- Provider Selection -->
+                                <div>
+                                    <label class="block text-sm font-medium text-card-foreground mb-2">
+                                        Email Provider
+                                    </label>
+                                    <select id="email-provider" class="w-full px-3 py-2 bg-background border border-gray-300 rounded-md text-sm text-card-foreground focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <option value="gmail">Gmail</option>
+                                        <option value="outlook">Outlook</option>
+                                        <option value="yahoo">Yahoo Mail</option>
                                     </select>
                                 </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="text-sm font-medium text-card-foreground">Sidebar Collapse</h4>
-                                        <p class="text-sm text-muted-foreground">Auto-collapse sidebar on mobile</p>
+
+                                <!-- Action Buttons -->
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button id="setup-email-btn"
+                                            class="px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground text-sm rounded-md transition-colors">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                        </svg>
+                                        Open Email Login
+                                    </button>
+                                    <button id="save-email-session-btn"
+                                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled>
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        Save Session
+                                    </button>
+                                </div>
+
+                                <!-- Verify Button -->
+                                <div class="pt-2 border-t border-gray-200">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <input type="text" id="email-search-term" placeholder="Search term (optional, e.g. site name)"
+                                               class="flex-1 px-3 py-2 bg-background border border-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm">
                                     </div>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" class="sr-only peer" checked>
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                    </label>
+                                    <button id="verify-email-btn"
+                                            class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled>
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Open Email & Verify
+                                    </button>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- System Info -->
-                        <div class="bg-card border border-gray-200 rounded-lg p-6">
-                            <h3 class="text-lg font-medium text-card-foreground mb-4">System Information</h3>
-                            <div class="space-y-3 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Version</span>
-                                    <span class="text-card-foreground">v1.0.0</span>
+                                <!-- Clear Session -->
+                                <div class="pt-2">
+                                    <button id="clear-email-session-btn"
+                                            class="text-sm text-red-600 hover:text-red-700 hover:underline">
+                                        Clear saved session
+                                    </button>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Build</span>
-                                    <span class="text-card-foreground">2024.01.15</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Uptime</span>
-                                    <span class="text-card-foreground">2d 14h 32m</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Memory</span>
-                                    <span class="text-card-foreground">45MB</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Actions -->
-                        <div class="bg-card border border-gray-200 rounded-lg p-6">
-                            <h3 class="text-lg font-medium text-card-foreground mb-4">Quick Actions</h3>
-                            <div class="space-y-3">
-                                <button class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                                    Save Settings
-                                </button>
-                                <button class="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors">
-                                    Reset to Defaults
-                                </button>
-                                <button class="w-full px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 transition-colors">
-                                    Clear Cache
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -497,7 +499,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/sidebar.js?v=2"></script>
     <script src="/static/js/dashboard.js"></script>
     <script src="/static/js/dashboard-enhanced.js"></script>
     <script src="/static/js/system-status.js"></script>
@@ -520,11 +522,13 @@
                 this.checkOllamaModelStatus();
                 this.bindOllamaEvents();
                 this.initializeTheme();
+                this.checkEmailStatus();
+                this.bindEmailEvents();
             }
 
             bindEvents() {
                 // Theme selector
-                const themeSelect = document.querySelector('select');
+                const themeSelect = document.getElementById('theme-select');
                 if (themeSelect) {
                     themeSelect.addEventListener('change', (e) => this.handleThemeChange(e));
                 }
@@ -645,8 +649,8 @@
 
             handleThemeChange(e) {
                 const theme = e.target.value;
-                this.settings.appearance.theme = theme;
-                
+                localStorage.setItem('theme', theme);
+
                 if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                 } else if (theme === 'light') {
@@ -659,8 +663,6 @@
                         document.documentElement.classList.remove('dark');
                     }
                 }
-                
-                this.saveSettings();
             }
 
             handleSettingChange(e) {
@@ -741,11 +743,23 @@
             }
 
             initializeTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const savedTheme = localStorage.getItem('theme') || 'auto';
+                const themeSelect = document.getElementById('theme-select');
 
-                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                if (themeSelect) {
+                    themeSelect.value = savedTheme;
+                }
+
+                // Apply theme
+                if (savedTheme === 'dark') {
                     document.documentElement.classList.add('dark');
+                } else if (savedTheme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                } else {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDark) {
+                        document.documentElement.classList.add('dark');
+                    }
                 }
             }
 
@@ -766,11 +780,9 @@
                 if (!container) return;
 
                 const services = [
-                    { id: 'ollama', name: 'Ollama (Local)', placeholder: 'http://localhost:11434', isUrl: true, description: 'Free local AI - Download from ollama.com' },
-                    { id: 'openai', name: 'OpenAI', placeholder: 'sk-...', description: 'GPT-4, GPT-3.5' },
-                    { id: 'anthropic', name: 'Anthropic (Claude)', placeholder: 'sk-ant-...', description: 'Claude Sonnet/Opus' },
-                    { id: 'google', name: 'Google AI', placeholder: 'AIza...', description: 'Gemini models' },
-                    { id: 'openrouter', name: 'OpenRouter', placeholder: 'sk-or-...', description: 'Multiple models' }
+                    { id: 'ollama', name: 'Ollama (Local)', placeholder: 'http://localhost:11434', isUrl: true, description: 'Free local AI - No internet required' },
+                    { id: 'openrouter', name: 'OpenRouter', placeholder: 'sk-or-...', description: 'Free tier available - Cloud AI' },
+                    { id: 'twocaptcha', name: '2Captcha', placeholder: 'Your 2Captcha API key', description: 'CAPTCHA solving service - Get key at 2captcha.com' }
                 ];
 
                 container.innerHTML = services.map(service => {
@@ -1184,6 +1196,312 @@
                 }
             }
 
+            // Windows Startup Settings
+            async checkStartupSettings() {
+                try {
+                    const response = await fetch('/api/settings/startup');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.updateStartupUI(data);
+                    }
+                } catch (error) {
+                    console.error('Failed to check startup settings:', error);
+                    // Hide the startup card if API fails (likely not on Windows)
+                    const card = document.getElementById('startup-settings-card');
+                    if (card) card.classList.add('hidden');
+                }
+            }
+
+            updateStartupUI(data) {
+                const card = document.getElementById('startup-settings-card');
+                const toggle = document.getElementById('startup-toggle');
+                const statusEl = document.getElementById('startup-status');
+                const trayStatusEl = document.getElementById('tray-status');
+
+                if (!data.available) {
+                    // Not on Windows or modules not available
+                    if (card) card.classList.add('hidden');
+                    return;
+                }
+
+                // Show the card
+                if (card) card.classList.remove('hidden');
+
+                // Update toggle
+                if (toggle) {
+                    toggle.checked = data.enabled;
+                }
+
+                // Update status text
+                if (statusEl) {
+                    if (data.enabled) {
+                        statusEl.innerHTML = `
+                            <span class="text-green-600 dark:text-green-400">
+                                ✓ FormAI will start automatically with Windows
+                            </span>
+                        `;
+                    } else {
+                        statusEl.textContent = 'FormAI will not start automatically';
+                    }
+                }
+
+                // Show tray status
+                if (trayStatusEl && data.tray_available) {
+                    trayStatusEl.classList.remove('hidden');
+                }
+            }
+
+            bindStartupEvents() {
+                const toggle = document.getElementById('startup-toggle');
+                if (toggle) {
+                    toggle.addEventListener('change', (e) => this.handleStartupToggle(e.target.checked));
+                }
+            }
+
+            async handleStartupToggle(enabled) {
+                const toggle = document.getElementById('startup-toggle');
+                const statusEl = document.getElementById('startup-status');
+
+                // Disable toggle while processing
+                if (toggle) toggle.disabled = true;
+                if (statusEl) statusEl.textContent = enabled ? 'Enabling startup...' : 'Disabling startup...';
+
+                try {
+                    const endpoint = enabled ? '/api/settings/startup/enable' : '/api/settings/startup/disable';
+                    const response = await fetch(endpoint, { method: 'POST' });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (statusEl) {
+                            statusEl.innerHTML = `
+                                <span class="${data.enabled ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}">
+                                    ${data.message}
+                                </span>
+                            `;
+                        }
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Failed to update startup settings');
+                    }
+                } catch (error) {
+                    console.error('Failed to toggle startup:', error);
+                    // Revert toggle
+                    if (toggle) toggle.checked = !enabled;
+                    if (statusEl) {
+                        statusEl.innerHTML = `
+                            <span class="text-red-600 dark:text-red-400">
+                                Error: ${error.message}
+                            </span>
+                        `;
+                    }
+                } finally {
+                    if (toggle) toggle.disabled = false;
+                }
+            }
+
+            // Email Verification Methods
+            async checkEmailStatus() {
+                try {
+                    const response = await fetch('/api/email/status');
+                    if (response.ok) {
+                        const status = await response.json();
+                        this.updateEmailUI(status);
+                    }
+                } catch (error) {
+                    console.error('Failed to check email status:', error);
+                    this.updateEmailUI({ hasSession: false });
+                }
+            }
+
+            updateEmailUI(status) {
+                const statusBadge = document.getElementById('email-status-badge');
+                const sessionInfo = document.getElementById('email-session-info');
+                const noSession = document.getElementById('email-no-session');
+                const verifyBtn = document.getElementById('verify-email-btn');
+
+                if (status.hasSession) {
+                    if (statusBadge) {
+                        statusBadge.textContent = 'Connected';
+                        statusBadge.className = 'text-xs px-2 py-1 rounded-full bg-green-200 text-green-700';
+                    }
+                    if (sessionInfo) sessionInfo.classList.remove('hidden');
+                    if (noSession) noSession.classList.add('hidden');
+                    if (verifyBtn) verifyBtn.disabled = false;
+                } else {
+                    if (statusBadge) {
+                        statusBadge.textContent = 'Not Set Up';
+                        statusBadge.className = 'text-xs px-2 py-1 rounded-full bg-yellow-200 text-yellow-700';
+                    }
+                    if (sessionInfo) sessionInfo.classList.add('hidden');
+                    if (noSession) noSession.classList.remove('hidden');
+                    if (verifyBtn) verifyBtn.disabled = true;
+                }
+            }
+
+            bindEmailEvents() {
+                const setupBtn = document.getElementById('setup-email-btn');
+                const saveBtn = document.getElementById('save-email-session-btn');
+                const verifyBtn = document.getElementById('verify-email-btn');
+                const clearBtn = document.getElementById('clear-email-session-btn');
+
+                if (setupBtn) {
+                    setupBtn.addEventListener('click', () => this.setupEmail());
+                }
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', () => this.saveEmailSession());
+                }
+                if (verifyBtn) {
+                    verifyBtn.addEventListener('click', () => this.verifyEmail());
+                }
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => this.clearEmailSession());
+                }
+            }
+
+            async setupEmail() {
+                const setupBtn = document.getElementById('setup-email-btn');
+                const saveBtn = document.getElementById('save-email-session-btn');
+                const providerSelect = document.getElementById('email-provider');
+
+                const provider = providerSelect ? providerSelect.value : 'gmail';
+
+                if (setupBtn) {
+                    setupBtn.disabled = true;
+                    setupBtn.textContent = 'Opening...';
+                }
+
+                try {
+                    const response = await fetch('/api/email/setup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ provider })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Enable save button
+                        if (saveBtn) saveBtn.disabled = false;
+                        alert(data.message || 'Browser opened. Sign in to your email, then click Save Session.');
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.error || 'Failed to open email'}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to setup email:', error);
+                    alert('Failed to open email browser');
+                } finally {
+                    if (setupBtn) {
+                        setupBtn.disabled = false;
+                        setupBtn.innerHTML = `
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            Open Email Login
+                        `;
+                    }
+                }
+            }
+
+            async saveEmailSession() {
+                const saveBtn = document.getElementById('save-email-session-btn');
+
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = 'Saving...';
+                }
+
+                try {
+                    const response = await fetch('/api/email/save-session', {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        alert(data.message || 'Email session saved!');
+                        // Refresh status
+                        await this.checkEmailStatus();
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.error || 'Failed to save session'}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to save email session:', error);
+                    alert('Failed to save email session');
+                } finally {
+                    if (saveBtn) {
+                        saveBtn.disabled = true;
+                        saveBtn.innerHTML = `
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Save Session
+                        `;
+                    }
+                }
+            }
+
+            async verifyEmail() {
+                const verifyBtn = document.getElementById('verify-email-btn');
+                const searchInput = document.getElementById('email-search-term');
+
+                const searchTerm = searchInput ? searchInput.value.trim() : '';
+
+                if (verifyBtn) {
+                    verifyBtn.disabled = true;
+                    verifyBtn.textContent = 'Opening...';
+                }
+
+                try {
+                    const response = await fetch('/api/email/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ searchTerm })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        alert(data.message || 'Email opened. Find and click verification links.');
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.error || 'Failed to open email'}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to verify email:', error);
+                    alert('Failed to open email for verification');
+                } finally {
+                    if (verifyBtn) {
+                        verifyBtn.disabled = false;
+                        verifyBtn.innerHTML = `
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Open Email & Verify
+                        `;
+                    }
+                }
+            }
+
+            async clearEmailSession() {
+                if (!confirm('Are you sure you want to clear your saved email session?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/email/clear-session', {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        alert('Email session cleared');
+                        await this.checkEmailStatus();
+                    } else {
+                        alert('Failed to clear session');
+                    }
+                } catch (error) {
+                    console.error('Failed to clear email session:', error);
+                    alert('Failed to clear session');
+                }
+            }
 
         }
 

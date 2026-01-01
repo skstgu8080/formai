@@ -239,23 +239,46 @@ pytest tests/ -v
 
 ## Deployment Options
 
-### Standalone (Default)
+### Standalone (Development)
 Run directly with Python:
 ```bash
 python formai_server.py
 ```
 
-### Executable Build
-Create a single executable:
+### Executable Build (Production)
+Create a protected standalone executable:
 ```bash
-build-formai.bat
-# Creates FormAI.exe (~160MB)
+python build_release.py
+# Creates dist/FormAI.exe (~59MB)
 ```
 
-### Multi-Client Setup
-1. Run admin server: `python admin_server.py`
-2. Configure clients with `ADMIN_URL` in `.env`
-3. Monitor all clients from admin dashboard
+**Features of the EXE:**
+- Source code protected (compiled)
+- Auto-configures Windows Firewall on first run
+- Connects to remote admin server automatically
+- No Python installation required on target machine
+
+### Multi-Client Deployment
+1. Build the exe: `python build_release.py`
+2. Distribute `FormAI.exe` to client machines
+3. Clients auto-connect to admin server at startup
+4. Monitor all clients from admin dashboard
+
+### Admin Server Setup
+```bash
+# Start admin server (monitoring)
+python admin_server.py
+
+# Access dashboard
+http://localhost:5512/admin.html
+```
+
+| Feature | Description |
+|---------|-------------|
+| Client List | View all connected installations |
+| Remote Commands | Execute commands on any client |
+| Screenshots | Capture client screens |
+| Updates | Push exe updates to clients |
 
 ---
 
