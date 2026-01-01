@@ -1,0 +1,2923 @@
+{
+  "sites": [
+    {
+      "id": "ysl-signup",
+      "url": "https://www.ysl.com/en-us/signup",
+      "name": "YSL Signup",
+      "enabled": true,
+      "last_run": "2025-12-30T16:38:51.941597",
+      "last_status": "success",
+      "fields_filled": 7
+    },
+    {
+      "id": "4034dcf3",
+      "url": "https://www.ysl.com/en-us/signup",
+      "name": "Create an Account | Saint Laurent | YSL US",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.689997",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a68060b2",
+      "url": "https://yogurtland.com/register",
+      "name": "Yogurtland: Real Rewards | Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.706086",
+      "last_run": "2025-12-30T02:09:20.505259",
+      "last_status": "success",
+      "fields_filled": 0
+    },
+    {
+      "id": "f8b6817c",
+      "url": "https://www.justserve.org/register",
+      "name": "Register - JustServe",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.720845",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3638357b",
+      "url": "https://auth.jackwills.com/account/register?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dbc8b834a58a143f3a73d164e9418b0cb%26response_type%3Dcode%26scope%3Dopenid%2520offline_access%2520email%2520email%26redirect_uri%3Dhttps%253A%252F%252Fwww.jackwills.com%252Fauth-callback%26state%3DeyJhIjoiMCIsIm4iOiJRTDRNaTRaaCIsInIiOiJodHRwczovL3d3dy5qYWNrd2lsbHMuY29tLyJ9%26prompt%3Dlogin%26suppressed_prompt%3Dlogin",
+      "name": "Jack Wills | Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.726072",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "f048628c",
+      "url": "https://www.torrid.com/account",
+      "name": "https://www.torrid.com/account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.749222",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a542b10e",
+      "url": "https://secure.penguinrandomhouse.com/as/authorize?response_type=code&client_id=f4bf523c-6833-4ecd-8306-c0b8162cbb49&redirect_uri=https%3A%2F%2Fwww.penguinrandomhouse.com%2Fsignin-reply%2F&scope=openid+email+profile+prh&state=6a633e0da52c8a00badf86a0f9dfc70f&nonce=4f61d001d141af3b33db00925594187d&acr_values=b5e71954b718f6db564a9bd5c5c6f1bb&ip=136.239.180.59&refurl=https%3A%2F%2Fwww.penguinrandomhouse.com%2F&loc=hdr-nav-banner",
+      "name": "Penguin Random House",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.779566",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4be0be8d",
+      "url": "https://auth.trivago.com/en-PH",
+      "name": "Log in or create an account - trivago",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.821100",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "7af169ae",
+      "url": "https://boxrec.com/en/register_user",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.834372",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e3bb54b1",
+      "url": "https://www.brooksrunning.com/en_us/brooks-run-club/",
+      "name": "Welcome to the Brooks Run Club | Brooks Running",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.881112",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ce1eb3ac",
+      "url": "https://www.modanisa.com/en/membership/login/?showRegister=true&return=%2F",
+      "name": "Modanisa",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.902023",
+      "last_run": "2025-12-30T02:13:37.498112",
+      "last_status": "success",
+      "fields_filled": 3
+    },
+    {
+      "id": "39b1c56f",
+      "url": "https://www.fandango.com/accounts/join-now?from=https%3A%2F%2Fwww.fandango.com%2F",
+      "name": "Create Account | Fandango",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.939603",
+      "last_run": "2025-12-30T02:09:42.476657",
+      "last_status": "success",
+      "fields_filled": 3
+    },
+    {
+      "id": "6243b7cf",
+      "url": "https://www.katespade.co.uk/account-login",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.951040",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5a19a924",
+      "url": "https://easyspirit.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Easy Spirit",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.951040",
+      "last_run": "2025-12-30T02:13:13.235964",
+      "last_status": "success",
+      "fields_filled": 5
+    },
+    {
+      "id": "40a1916d",
+      "url": "https://www.sundayswim.com/users/signup",
+      "name": "Sunday Swim",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:49.989190",
+      "last_run": "2025-12-30T02:13:21.756064",
+      "last_status": "success",
+      "fields_filled": 6
+    },
+    {
+      "id": "9e96e549",
+      "url": "https://www.southwest.com/",
+      "name": "Southwest Airlines | Airline Tickets and Low Fares",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.024974",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6e4b37f7",
+      "url": "https://app.squareup.com/signup/en-us?app=weebly&return_to=https%3A%2F%2Fwww.weebly.com%2Fapp%2Ffront-door%2Flogin%2Fsquare%3Fsso_intent%3Dsignup&v=weebly-sso&weebly_sso_enabled=true",
+      "name": "Sign up for Square",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.054736",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4c7ceee8",
+      "url": "https://api.punchh.com/customers/sign_up.iframe?slug=pancheros&sso=1",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.088269",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6b0d8e1b",
+      "url": "https://www.coursera.org/?authMode=signup",
+      "name": "Coursera | Online Courses & Credentials From Top Educators. Join for Free",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.120627",
+      "last_run": "2025-12-30T02:13:45.631822",
+      "last_status": "success",
+      "fields_filled": 1
+    },
+    {
+      "id": "95bc9ada",
+      "url": "https://lightningautofill.com/practice/",
+      "name": "https://lightningautofill.com/practice/",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.152339",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5c0cb01e",
+      "url": "https://www.amazon.ca/ap/register?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.ca%2Fshop%2Ffoodmeanderings%2F%3F_encoding%3DUTF8%26ref_%3Dnav_newcust&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=caflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "name": "Amazon Registration",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.174656",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3a9fb196",
+      "url": "https://auth.tennis.com/login?state=hKFo2SB4R2w5NGRNTFIxMEhqbGxISEpHQUphTGNkb1E1aGY0daFupWxvZ2luo3RpZNkgNlRoa0NyRmxMTU1xWGRQMnRFRmNyRGVTV0M5d29ZY0GjY2lk2SBBdlhHWEhkdVA0eHhSbkowWm1ZN2Vya0Jva2VnaTBTdg&client=AvXGXHduP4xxRnJ0ZmY7erkBokegi0Sv&protocol=oauth2&audience=https%3A%2F%2Fuser-management.tennis.com%2F&scope=openid%20profile%20email%20offline_access&response_type=code&response_mode=query&nonce=RmtZNkliMUp0U01yS3FFaUM4TVNLeFo3elJENklzaDZtM0tkTGdxaDlILg%3D%3D&redirect_uri=https%3A%2F%2Fwww.tennis.com&code_challenge=RAbs__m0ZSiKUlPVnOsJsVo1zcI3YcDsi-iwlLjBgV0&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtc3BhLWpzIiwidmVyc2lvbiI6IjEuMjIuNiJ9",
+      "name": "Tennis Live Scores News Videos Player Rankings | Tennis.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.228630",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d4defe1c",
+      "url": "https://www.badgergraphic.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.263125",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "0492f66b",
+      "url": "https://betseyjohnson.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Betsey Johnson",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.294808",
+      "last_run": "2025-12-30T02:12:56.656704",
+      "last_status": "success",
+      "fields_filled": 5
+    },
+    {
+      "id": "edc17f1c",
+      "url": "https://secure.aarp.org/applications/user/register?response_type=code&scope=bui+em&client_id=0oa44q7u6j2kfGSsu2p7&redirect_uri=https%3A%2F%2Fcreatethegood.aarp.org%2Fauth%2Fcallback&state=https%3A%2F%2Fcreatethegood.aarp.org%2F&promo=CTG",
+      "name": "Register Today to Create an AARP Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.349704",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b4cdff4d",
+      "url": "https://profile.theguardian.com/register/email?componentEventParams=componentType%3Didentityauthentication%26componentId%3Dguardian_signin_header&returnUrl=https%3A%2F%2Ftheguardian.com",
+      "name": "Register With Email | The Guardian",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.418866",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "2169f195",
+      "url": "https://www.windsorstore.com/account/register",
+      "name": "Create Account | Windsor",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.472270",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9a5eab8c",
+      "url": "https://www.ulta.com/u/login?state=hKFo2SBnQU4yV1p1alp6T0JVZUh5WUQ2a1ZSV3JrMnRzQVRlQ6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIEN0NWZrUmVIaVV4TUotQmF4UE5yczFOY1lRTmE4VEhto2NpZNkgZFlGeEhweVM3Tmc0cklwMXBES1pjVEttWmRIMnZ2S1E",
+      "name": "Log in | Ulta Prod Web",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.508205",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "03291b9b",
+      "url": "https://www.aljazeera.com/account/sign-up",
+      "name": "Sign up",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.540072",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "397e8822",
+      "url": "https://id.condenast.com/interaction/XH0Q7en4k6Ju0PV4y937V/email?_sp=a5c8b233-0b56-42a1-8d12-eeeefe7deea5.1761563932223&xid=40ce2fb0-6c40-4e12-b845-12a099530725&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2F%3F_sp%3Da5c8b233-0b56-42a1-8d12-eeeefe7deea5.1761563932223%22%7D&prompt=select_account%20consent&source=VERSO_NAVIGATION&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.608744bd5ce61191247151e9c4b3fc76&redirect_uri=https%3A%2F%2Fwww.bonappetit.com%2Fauth%2Fcomplete&response_type=code",
+      "name": "403 Forbidden",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.571971",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b059eb72",
+      "url": "https://www.amazon.com/ap/register?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Famz-books%2Fstore%2F%3F_encoding%3DUTF8%26ou%3Dpsf%26ref_%3Dnav_newcust&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "name": "Amazon Registration",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.612617",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8c01aee1",
+      "url": "https://www.ncl.com/in/en/shorex/register?SAMLRequest=jZFBb8IwDIX%2FSuR72jQFAREtYpvQkJhWjbLDbmkxUKlNIE6Bn78KVo3TtKPl9%2Fzsz9PZtanZGR1V1iQQBQIYmtJuK7NPYJMv%2BBhm6ZR0Ux%2FVvPUH84GnFsmzzmdI3RoJtM4oq6kiZXSDpHyp1vO3lZKBUEdnvS1tDWxOhM53Qc%2FWUNugW6M7VyVuPlYJHLw%2FkgrDy%2BUSmLIOStuEdLAOr2Ft95UBtrCuxNsOCex0TQhs%2BZKAKDAu5KDghRgjHwxxxItID7icxGIsRztRTLadkjJNVJ3x10vU4tKQ18YnIIUc8khwOcojoWKpYhGISH4By372f6rMncpfxxZ3EanXPM949r7OgX32dDsB9Cxv6e7%2FFHXPDtKe1ElzItvDmoaPg9O%2BfPxZ%2Bg0%3D",
+      "name": "Norwegian Cruise Ships | Cruise Ship Deck Plans | Norwegian Cruise Line",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.650009",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "804e47a7",
+      "url": "https://www.timberland.com/en-us/false/poslogon?langId=1&storeId=7101",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.675595",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ffbf31f7",
+      "url": "https://account.louisvuitton.com/eng-us/mylv/registration?response-code=code&register-url=https%3A%2F%2Faccount.louisvuitton.com%2Feng-us%2Fmylv%2Fregistration&reset-password-url=https%3A%2F%2Faccount.louisvuitton.com%2Feng-us%2Fmylv%2Fforgot-password&google=https%3A%2F%2Faccount.louisvuitton.com%2Feng-us%2Fmylv%2Fgoogle&line=https%3A%2F%2F%2Feng-us%2F&client-id=3MVG9A2kN3Bn17hvoqxK.akVTLUK1CtKpvdV2sbka7X4qecgMbRWXoXSWJ12evrTNYvAXbVbuVnC1QT36uOfu&state=OTc5MDIwNzQzMjI3NDM3NmE5MDdiNzcwZGI1ZDZkOTg0ZTcxNTc1NjJjNzQ0YjJmOGE4YTUxZDU5NzYwOTFjNy9lbmctdXM%3D&code-challenge=rg5AhC0uq6jwMb_nYh1AXAsQ5HNOEzd04UYLFToW48o&redirect-uri=https%3A%2F%2Fapi.louisvuitton.com%2Feco-us%2Flvcom-tkn-handlr-eapi%2Fv1%2Fcallback&error_redirect_url=https%3A%2F%2Fapi.louisvuitton.com%2Feng-us%2Fmylv%2Ferror",
+      "name": "LOUIS VUITTON",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.707194",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "42d0b726",
+      "url": "https://www.ssense.com/en-ph/account/login",
+      "name": "Login | SSENSE",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.754413",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "00087b61",
+      "url": "https://younger.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Younger.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.787206",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c48eb729",
+      "url": "https://www.sneakerdistrict.com/customer/account/create",
+      "name": "New Customer | Sneaker District COM",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.808779",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "aaa1c6c6",
+      "url": "https://login.dresslily.com/m-users-a-sign.htm?ref=https%3A%2F%2Fuser.dresslily.com%2Fm-users.htm",
+      "name": "Sign DressLily.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.850393",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "845578a8",
+      "url": "https://id.golfdigest.com/id/?stage=international&response_type=code&screen=login&redirect_uri=https:%2F%2Fwww.golfdigest.com%2Fapps%2Fapi%2Foauth2%2Fauthorize&state=a99b4772-4f7d-4fcc-bbe9-6b744f3252f0&client_id=zUkajvWJ04",
+      "name": "Authorization",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.878836",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6e411025",
+      "url": "https://engage.metmuseum.org/account/login/register/?returnUrl=https://engage.metmuseum.org/members/membership/?promocode=56373",
+      "name": "Register | The Metropolitan Museum of Art",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.905493",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e7704c96",
+      "url": "https://www.forever21.com/account/register",
+      "name": "Create Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.950880",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ca3fc790",
+      "url": "https://www.librarything.com/",
+      "name": "LibraryThing | Catalog your books online | LibraryThing",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:50.978549",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "0461df85",
+      "url": "https://circuitcity.com/customer/account/create/",
+      "name": "Create New Customer Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.025178",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "58cc516d",
+      "url": "https://www.tinycottons.com/usd_en/customer/account/create/",
+      "name": "Create New Customer Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.050272",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b9dc827b",
+      "url": "https://accounts.fantasticservices.com/auth/create-account?wa_sr=0&redirect_uri=https:%2F%2Fwww.fantasticservices.com%2F&int_src=ref-login",
+      "name": "https://accounts.fantasticservices.com/auth/create-account?wa_sr=0&redirect_uri=https:%2F%2Fwww.fantasticservices.com%2F&int_src=ref-login",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.100238",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "7dac9698",
+      "url": "https://www.pentagon-tactical.com/index.php?route=account/register",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.167696",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "69f85a7d",
+      "url": "https://tutorialsninja.com/demo/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.200736",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d9ed79d5",
+      "url": "https://www.tiffany.com/Customer/Account/CreateAccount.aspx",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.221231",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e989f647",
+      "url": "https://www.princess.com/my-princess/register/",
+      "name": "My Princess - Princess Cruises",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.258544",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5155e537",
+      "url": "https://www.aritzia.com/us/en/my-account/create-account",
+      "name": "Registration | Aritzia US",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.308575",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "87c33c64",
+      "url": "https://seasalt.com/customer/user/registration",
+      "name": "Registration",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.359213",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c24bd346",
+      "url": "https://ph.banggood.com/register.html",
+      "name": "Login & Join free",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.405147",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d19ff167",
+      "url": "https://knowledgexpert.bearcreek.com/login",
+      "name": "BearCreekAI",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.461767",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "73fb484a",
+      "url": "https://shop.tillamook.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Tillamook Shop",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.501185",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c258874a",
+      "url": "https://bjjfanatics.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c BJJ Fanatics",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.521226",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "292dc01f",
+      "url": "https://www.ourfriday.co.uk/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.569325",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6ed0f52c",
+      "url": "https://www.ulta.com/u/signup?state=hKFo2SBzTTNvZEZIQXBMVXBpU1lqQzBPb3BGTHpmdHlLRG95V6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIG5CVG43OFNzZjh6MWFYQ2dkc0VOaFotZ3Z2UVhzaDdBo2NpZNkgZFlGeEhweVM3Tmc0cklwMXBES1pjVEttWmRIMnZ2S1E",
+      "name": "Log in | Ulta Prod Web",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.617017",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8566fe99",
+      "url": "https://www.nordstrom.com/signin?cm_sp=SI_SP_A-_-SI_SP_B-_-SI_SP_C&origin=tab&ReturnURL=https%3A%2F%2Fwww.nordstrom.com%2F%3Forigin%3Dsign-out",
+      "name": "https://www.nordstrom.com/signin?cm_sp=SI_SP_A-_-SI_SP_B-_-SI_SP_C&origin=tab&ReturnURL=https%3A%2F%2Fwww.nordstrom.com%2F%3Forigin%3Dsign-out",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.651520",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9993db69",
+      "url": "https://www.shopbop.com/ap/register?showRememberMe=true&openid.return_to=https%3A%2F%2Fwww.shopbop.com%3A443%2Fauth%2Fafter%2Fauthportal%3Fnoul%3Dtrue&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=shopbop_us_aui&openid.mode=checkid_setup&siteState=g9%2BoLb2qE0kTbKxEMvAW6397trTmt6BfrEUwvh3lcDkYAAAAAQAAAABnTNWxcmF3AAAAAD1aGrfyIF6IE%2BJ7i%2Fa6ow%3D%3D%7Chttps%3A%2F%2Fwww.shopbop.com%3A443%2F%3Fnoul%3Dtrue%7C3&marketPlaceId=A2817T8MKXE20N&language=en_US&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&pageId=shopbop-desktop&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "name": "Shopbop Registration",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.680229",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a12c8ee9",
+      "url": "https://www.jackjones.com/en-us/login?view=signup",
+      "name": "Login",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.712537",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d62a82d2",
+      "url": "https://www.princess.com/my-princess/create-account/",
+      "name": "My Princess - Princess Cruises",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.759373",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e82679c3",
+      "url": "https://www.boohoo.com/sign-up?registrationPage=true",
+      "name": "Sign Up",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.791383",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "16b352f5",
+      "url": "https://auth.gymshark.com/u/login?state=hKFo2SBUdHcxTWFaYldxREdTek1VSm1Vck9RTzRyREhPUy1sTaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIENiUGZYVVUwSWVianA5RTdkT3JzWGlkdGNYcUR5R0pCo2NpZNkgMndiQ3lIVm0xRGRJWDJFd2RFN20wcVZJYlhqT0NUWGo",
+      "name": "Log in | Gymshark",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.822902",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "59e2859e",
+      "url": "https://account.bbc.com/auth/identifier/signin?realm=%2F&clientId=Account&action=register&ptrt=https%3A%2F%2Fwww.bbc.com%2Fnews&userOrigin=BBCS_BBC&purpose=free&isCasso=false&redirectUri=https%3A%2F%2Fsession.bbc.com%2Fsession%2Fcallback%3Frealm%3D%2F&service=IdRegisterService&nonce=Dy951HHL-_6n3UdvSXvTAVeBuXTRlhR7xYL8",
+      "name": "BBC",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.854957",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9db9c618",
+      "url": "https://www.suncountryvb.org/scvb-cart/?route=account/register",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.887592",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e8aad132",
+      "url": "https://www.tobi.com/login",
+      "name": "Sign In or Create Account | Tobi",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.954154",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "1ad0238b",
+      "url": "https://j316ministries.com/shop/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:51.987858",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "199d9601",
+      "url": "https://www.lashify.com/account/register",
+      "name": "https://www.lashify.com/account/register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.041001",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ee84e9d4",
+      "url": "https://login.shop.underarmour.com/oauth2/default/v1/authorize?client_id=3da6dbce-ce3f-4ce3-8b9c-e2424d64da49&code_challenge=s3Uu6Qg90crtBw-npbCfF39JHD2y5yHT7qUp_UGwT-A&code_challenge_method=S256&locale=en-us&redirect_uri=https%3A%2F%2Fwww.underarmour.com%2Fapi%2Fauth%2Fv2%2Flogin%2F&response_type=code&scope=openid+offline_access&state=20a5c3dc-e05e-409a-8519-e4be82b98fed&flow=register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.075027",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c107396d",
+      "url": "https://www.shiekh.com/customer/account/create/",
+      "name": "Create New Customer Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.096902",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c7c7ad21",
+      "url": "https://www.net-a-porter.com/en-ph/account/register?redirect=%2Fen-ph%2F",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.128486",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a6d872bc",
+      "url": "https://www.romwe.com/user/auth/login?direction=nav&from=navTop",
+      "name": "Sign In",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.175632",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4bcb6701",
+      "url": "https://secure.mealpal.com/signup?utm_content=HDcsQhSZVnAcbcAv&market=New%20York%20City&_gl=1*1mgtr4u*_ga*Njc1NDU2NjIwLjE3NDA2ODY5MjI.*_ga_H8TEJV29FZ*MTc0MDY4NjkyMS4xLjAuMTc0MDY4Njk1MC42MC4wLjA.*_gcl_au*NDc3MzQ4MDQwLjE3NDA2ODY5NTA.",
+      "name": "MealPal",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.204917",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "25058923",
+      "url": "https://lemonadefashion.com/sign-up",
+      "name": "Sign Up | PIPP",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.239406",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "acf2464d",
+      "url": "https://www.fortnite.com/id/register/date-of-birth?redirect_uri=http%3A%2F%2Fwww.fortnite.com%2F%3Flang%3Den-US&client_id=a485a2fde2e343dfb7559d5efeaf35d9&lang=en-US",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.280456",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d6734333",
+      "url": "https://zshadeusa.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.316804",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4751b32c",
+      "url": "https://cottonon.com/AU/account/register/",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.346638",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "61fed427",
+      "url": "https://www.superdroidrobots.com/store/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.404560",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9a777b58",
+      "url": "https://www.patpat.com/account/login?return_url=%2Faccount",
+      "name": "Account - PatPat",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.448731",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b27edb45",
+      "url": "https://myaccount.economist.com/s/login/SelfRegister?startURL=%2Fsetup%2Fsecur%2FRemoteAccessAuthorizationPage.apexp%3Fsource%3DCAAAAZoqZMCQMDAwMDAwMDAwMDAwMDAwAAABAmq0mHrMuqswM1uYw16nNFa8mImquhw5lUJY9SNh-gD6a_ST3IEHHZOSRoAWXYwfjTO3tMGA7Tb6ys9bltaDTjtc6kucrqKqxnLSoZqKmrs0LpwRz-OlON9Y_B0Voij0lHoOPWMOTsQJkAcGO1IPLg3gNOJSaLh3Dpi4BaRnttHtxHMeELJ9qCE20cDK8socllWA1XkIvx-Xa0t8Hxwghd0tnJkQi4sYpdCUoAMQNuQn-yV-tzHS73C4MZZN9UhdYUPZZLlouXmmHCvliXP_DoXb12f-WwB0MUt7VevyxECTKA8tJGUPlGMXXRK4biRE7_1VAIXeuJhiX_87JvzeTDYCZIxoK_HZD2xBXwzs1jZHohGE11D5dYMnSSRofYYADJx2rt-8yCHTwgsQz4XrfijyTOgwgUoXH4XgKyWhtFxoSY_9sbWzj76SVcdzrkfCywrfmmKCZdlTw6ru5kqvpSy7FgsHJeqqSFhx-uGVrfPDHYKv4TAST-iFH1ftwFJQb00fHZ8T_HdR0NBxlVKbg_TKw9Jy81Zg6Ju4nrJQeiwe2cMbqrPpw-xV7wuARZcqASULQFlOWDEhgFcTWFOhGSRWwsBihdIc2j3SIqOk8k9UbUq-W-I_yhufdK-Fq6qu_56cWVXqmorJmcefRRnHV7vSj0_CMEO-UGVLIjJth71jwLKdwxUbWH8HUMGxjtYcNjI7sts8hTuPSGczisR8Qkh_77FRBbQUzYaRCCUQKDdloBqv2l2xIrvC_EYVoT4o-g%3D%3D",
+      "name": "Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.479629",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "552bed21",
+      "url": "https://www.readers.com/account/register",
+      "name": "Create Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.508560",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "51fd0ebf",
+      "url": "https://id.condenast.com/interaction/wffDZSf675hs3bpM1e5qU/email?xid=53278a13-15f0-42d7-95e2-affafb6a726c&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2F%22%7D&prompt=select_account%20consent&source=VERSO_NAVIGATION&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.bd96ef0e8186fcea33396720bc76b8b9&redirect_uri=https%3A%2F%2Fwww.epicurious.com%2Fauth%2Fcomplete&response_type=code",
+      "name": "403 Forbidden",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.540570",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8964b66e",
+      "url": "https://verabradley.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Vera Bradley",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.584695",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "914d69c0",
+      "url": "https://www.childrensplace.com/us/home/register",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.605555",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6eb71c5e",
+      "url": "https://www.wassismeatmarket.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.653665",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "fffc97b1",
+      "url": "https://www.jasonsdeli.com/account/signup",
+      "name": "Jason's Deli: Account Sign Up Now & Save Your Favorites",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.676054",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "24fdb32f",
+      "url": "https://www.twopeasandtheirpod.com/register/",
+      "name": "Save your favorite recipes! - Two Peas & Their Pod",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.703187",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9362be92",
+      "url": "https://www.shoebacca.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Shoebacca",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.741459",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c9f7e5e9",
+      "url": "https://www.jimmyjohns.com/my-account/create-an-account",
+      "name": "Create an Account | Jimmy John's",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.779533",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "178f0420",
+      "url": "https://www.landsend.com/co/account/register?cTest=y",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.812869",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e62f00c9",
+      "url": "https://login.whitehouseblackmarket.com/u/signup?state=hKFo2SA3a25FbERPNzU0TEtkT0pvVVpGYUgwNldQYnRHZUtodaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDhPUEhHaEpxMzEtM1NSaGdZSk9pSjcxMUNQc0tuRC01o2NpZNkgVzNrTHBYb0hTNGhheDIxY3dOSHI0dkdjU2dlVE5WcU4",
+      "name": "Log in | whbm",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.862598",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "1a58672d",
+      "url": "https://www.cbssports.com/registration?end=https%3A%2F%2Fwww.cbssports.com%2F%3Ftid%3D341263&login=confirmed",
+      "name": "Registration",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.894509",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "df159d58",
+      "url": "https://nextgenerationgaming.com/m/create-account",
+      "name": "Create Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.926012",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e41f6b40",
+      "url": "https://auth.flannels.com/account/register?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dac38364727a948749cccabbc2c94669f%26response_type%3Dcode%26scope%3Dopenid%2520offline_access%2520email%2520email%26redirect_uri%3Dhttps%253A%252F%252Fwww.flannels.com%252Fauth-callback%26state%3DeyJhIjoiMCIsIm4iOiJ2U2QtTzJlNCIsInIiOiJodHRwczovL3d3dy5mbGFubmVscy5jb20vIn0%253D%26prompt%3Dlogin%26route%3Dregister%26anonymous_id%3Deef01446-9c91-4a9a-ad91-095dae034e7a%26suppressed_prompt%3Dlogin",
+      "name": "Flannels | Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.957954",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "7e7f5c7f",
+      "url": "https://kotamasmall.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:52.980205",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d7de0138",
+      "url": "https://fashion.rabanne.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Rabanne",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.026124",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4f06f52a",
+      "url": "https://www.newbalance.com/login/#",
+      "name": "New Balance Shoes & Apparel | Official New Balance\u00c3\u201a\u00c2\u00ae Site",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.037950",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6b9dc957",
+      "url": "https://id.condenast.com/interaction/i9CqT0o-GB7jjfdjWEjAa/email?_sp=a5c8b233-0b56-42a1-8d12-eeeefe7deea5.1761563932223&xid=40ce2fb0-6c40-4e12-b845-12a099530725&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2F%3F_sp%3Da5c8b233-0b56-42a1-8d12-eeeefe7deea5.1761563932223%22%7D&prompt=select_account%20consent&source=VERSO_NAVIGATION&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.608744bd5ce61191247151e9c4b3fc76&redirect_uri=https%3A%2F%2Fwww.bonappetit.com%2Fauth%2Fcomplete&response_type=code",
+      "name": "Sign in or create an account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.085865",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "01bc9039",
+      "url": "https://login.soma.com/u/login?state=hKFo2SBzS0Fzb3I3YVZGSXNGS1RoWUdVU3lqZGs4Rjk0bFNOMaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIGt2Y1puMTh4VFpQTFEtV2phYWlPRS1pZGJlOGJjbXU5o2NpZNkgeXQ1WGVEbEhWV2htOXlDcUdrS0dwM2pVTU91ajhkV0Y",
+      "name": "Log in | soma-intimates",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.132930",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3208d04e",
+      "url": "https://www.royalcaribbean.com/account/signin",
+      "name": "Royal Caribbean Cruises",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.175157",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "51e10ae1",
+      "url": "https://auth.reedsy.com/sign_up",
+      "name": "Reedsy",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.215843",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "1431abd1",
+      "url": "https://www.roots.com/on/demandware.store/Sites-RootsUS-Site/en_US/Register-Show",
+      "name": "Sites-RootsUS-Site",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.254367",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c29eba0d",
+      "url": "https://gw.lightinthebox.com/signin?src=mainLoginLink&targetUrl=https%3A%2F%2Fwww.lightinthebox.com%2F",
+      "name": "LightInTheBox - Global Online Shopping for Dresses, Home & Garden, Electronics, Wedding Apparel",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.304491",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "37cbdcc4",
+      "url": "https://account.formula1.com/#/en/register?redirect=https%3A%2F%2Fwww.formula1.com%2F&lead_source=web_f1core",
+      "name": "Formula 1\u00c2\u00ae",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.350012",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "03adfa24",
+      "url": "https://www.hockeyworld.com/index/page/static/subpage/new_account_page",
+      "name": "New account Page | Peranis Hockey World",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.373701",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "2b5467ec",
+      "url": "https://www.ziprecruiter.ie/profiles/sign_up",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.410695",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "97375ff2",
+      "url": "https://unity.hardrock.com/sign-up",
+      "name": "Create Your New Unity by Hard Rock",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.454283",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8b538a3f",
+      "url": "https://edition.cnn.com/account/register?redirect=https%3A%2F%2Fedition.cnn.com%2F",
+      "name": "Create a CNN account | CNN",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.482953",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "02261016",
+      "url": "https://join.ribamundotecnologia.es/Account/Register",
+      "name": "Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.521223",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "187bc8d7",
+      "url": "https://skims.com/en-gb/account/register",
+      "name": "SKIMS | SKIMS",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.559231",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "0069ccce",
+      "url": "https://reactormag.com/register",
+      "name": "Create an Account \u00e2\u20ac\u201c Reactor",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.579646",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5cff7705",
+      "url": "https://www.flicks.co.nz/member/login/",
+      "name": "Sign in to Flicks",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.633441",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "15624129",
+      "url": "https://www.chickensaladchick.com/account/signup/",
+      "name": "Sign Up | Chicken Salad Chick",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.654095",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a147512b",
+      "url": "https://www.kohls.com/myaccount/signin.jsp",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.699737",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "23c3786b",
+      "url": "https://dosomething.org/onboarding/registration?step=1",
+      "name": "Fueling Young People to Change the World | DoSomething.org",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.736820",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9078b5ea",
+      "url": "https://id.nbcuni.com/websdk/v2/authenticate/?defaultPage=signUp&brandData=eyJzb3VyY2VVcmwiOiJodHRwczovL3d3dy5uYmNzcG9ydHMuY29tLyIsInJlZGlyZWN0VXJsIjoiIn0%3D&version=2&configLocationHost=https%3A%2F%2Fid.nbcuni.com%2Fwebsdk%2Fconfig&env=production&redirectUrl=https%3A%2F%2Fwww.nbcsports.com%2Flogin&language=en&key=nbcsports&mParticleDeviceID=61006c9c-2fe9-4f79-9b65-c053de104855&crossDomain=true&codeChallenge=F0_XdcmnJ6lUmZ4kUawd_5iwk_5GEuf4oJMNxEyxyrI",
+      "name": "NBCUniversal Login",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.785901",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "208747b3",
+      "url": "https://chefschoice.com/account/register",
+      "name": "https://chefschoice.com/account/register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.817239",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "237e2c8f",
+      "url": "https://www.walgreens.com/register/regpersonalinfo?ru=%2Fyouraccount%2Fdefault.jsp",
+      "name": "Create Your Account | Walgreens",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.854667",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "514e88a0",
+      "url": "https://www.wafflehouse.com/regulars-club/",
+      "name": "Regulars Club - Waffle House",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.882692",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "99808375",
+      "url": "https://www.pullandbear.com/wy/login.html",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.916830",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b1284847",
+      "url": "https://www.katespade.com/account-login",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.950833",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "de54c4ea",
+      "url": "https://auth.fifa.com/as/authorize?response_type=code&response_mode=form_post&client_id=35072598-fc20-4142-a469-1b940db47e6f&scope=openid+profile+marketing+email+address+phone+p1%3Aupdate%3Auser%3Asafe-only+p1%3Areset%3AuserPassword&lang=en&flow=register&redirect_uri=https%3A%2F%2Fwww.fifa.com%2Fauth&state=%2Fen&campaign=Fifacom-Web",
+      "name": "FIFA Login",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.968167",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "baa82dbd",
+      "url": "https://orcid.org/register",
+      "name": "Register - ORCID",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:53.986886",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ee93ee36",
+      "url": "https://grandcinema.com/register",
+      "name": "The Grand Cinema",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.020803",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "41a3f49a",
+      "url": "https://www.pushsquare.com/register",
+      "name": "Push Square - Create Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.054245",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5178b31b",
+      "url": "https://id.gamer.network/account/create",
+      "name": "Create an account | Gamer Network ID",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.087706",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4fd495d5",
+      "url": "https://www.hiddeneurope.eu/shop/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.112581",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "175052be",
+      "url": "https://auth.olivemagazine.com/u/login?state=hKFo2SBQRmJ3dE8xSTlFdWs3OFRYb3VhaHI4dVdVVVdyNUFGZaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDJseVFYRnd5Z215YXpDdU1FdHNSZDVUMkx0MlFjaVQ5o2NpZNkgbmlNMTlWVkk4VnZnVDNVYnBFTHhsRWpQRjNSemVJV2Y",
+      "name": "Log in | olive Magazine",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.155102",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "19a974ff",
+      "url": "https://www.delta.com/joinskymiles/",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.179431",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3ed322f8",
+      "url": "https://www.travelocity.com/signup?ckoflag=0&challengeReferer=docs.google.com",
+      "name": "Bot or Not?",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.221123",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6ccf6de2",
+      "url": "https://www.buckle.com/register",
+      "name": "Register For An Account | Buckle",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.249756",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8d2da61b",
+      "url": "https://us.dockers.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Dockers\u00c2\u00ae",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.275426",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4370cbfd",
+      "url": "https://ninewest.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Nine West",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.296161",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c20ab260",
+      "url": "https://account.everlane.com/authentication/login?client_id=55c41b48-1540-4a24-bb1c-dfbe745d6d5e&locale=en&redirect_uri=%2Fauthentication%2Foauth%2Fauthorize%3Fclient_id%3D55c41b48-1540-4a24-bb1c-dfbe745d6d5e%26locale%3Den%26nonce%3Dc70348cf-bbfd-44f5-bcec-4fa270826bb9%26redirect_uri%3Dhttps%253A%252F%252Faccount.everlane.com%252Fcallback%253Fsource%253Dcore%26region_country%3DPH%26response_type%3Dcode%26scope%3Dopenid%2Bemail%2Bcustomer-account-api%253Afull%26state%3DhWN4ZVKrMeT82NWNFjMMdSQU&region_country=PH",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.341011",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4b02fe9e",
+      "url": "https://www.spotify.com/ph-en/signup?forward_url=https%3A%2F%2Fopen.spotify.com%2F",
+      "name": "Sign up - Spotify",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.367434",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b760e1e2",
+      "url": "https://id.condenast.com/interaction/lyd8k4XmTR12_AnV_jdjL/email?_sp=da7486bc-7c00-43f9-9756-4daae928f1ab.1733100268719&xid=e45a96c4-7ef5-4f04-9f25-9e2a11fc661c&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2Fnewsletter%3F_sp%3Dda7486bc-7c00-43f9-9756-4daae928f1ab.1733100268719%22%7D&prompt=select_account%20consent&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.d20cfbd5094f2301a2e26c9742c9da92&redirect_uri=https%3A%2F%2Fwww.glamour.com%2Fauth%2Fcomplete&response_type=code",
+      "name": "Sign in or create an account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.399295",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5ddfda72",
+      "url": "https://www.buydig.com/shop/Register.aspx?email=&confirmEmail=&np=Profile.aspx&sku=",
+      "name": "Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.445983",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d88745a4",
+      "url": "https://www.biblio.com/login?location=%2F",
+      "name": "Log in to your Biblio.com account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.480311",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4a8bba37",
+      "url": "https://www.jamesperse.com/account/register",
+      "name": "Create Account | James Perse Los Angeles",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.512503",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8d433940",
+      "url": "https://naveenautomationlabs.com/opencart/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.535041",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4c0dd583",
+      "url": "https://ph.diesel.com/en/signup",
+      "name": "Diesel - Create your account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.564428",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "36ff7ab2",
+      "url": "https://www.zara.com/us/en/signup",
+      "name": "Registration - ZARA United States - Official Website",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.596213",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "78e2e9ba",
+      "url": "https://www.thatsweatshop.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.636816",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "220b6f68",
+      "url": "https://www.mylo.id/signup?client_id=3hg9ll11hfau7l10ofmt2kh36t&redirect_uri=https%3A%2F%2Fwww.delish.com%2Fauth%2Flogin&state=HxI4WVVb-E-mxQyOWmLT_aULJRBgbUfrRSAk",
+      "name": "Sign Up for Delish",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.673567",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "1616d59f",
+      "url": "https://www.drmartens.com/us/en/login",
+      "name": "Help us verify real visitors, Dr. Martens",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.710693",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b502da14",
+      "url": "https://login.whitehouseblackmarket.com/u/login?state=hKFo2SBiTi0yaXpyZXl4Smp5UV9SZUlWMTlLNno5SmpCd2REUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDEteXRmMTl0MkpuYzRaYzZrSlhfRTQ3eXNfaTQ0d2ZMo2NpZNkgVzNrTHBYb0hTNGhheDIxY3dOSHI0dkdjU2dlVE5WcU4",
+      "name": "Log in | whbm",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.747630",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "bcfd4e5c",
+      "url": "https://account.ironman.com/wtcsso.onmicrosoft.com/b2c_1a_profile_signup_signin/oauth2/v2.0/authorize?client_id=c4f3cbf9-a0e2-4d54-b79e-48e45cdc5c8c&scope=offline_access%20openid&response_type=code%20id_token&redirect_uri=https%3A%2F%2Fmy.ironman.com%2Fapi%2Fauth%2Fcallback%2Fazureb2c&prompt=login&response_mode=form_post&client_secret=WWO8Q%7E9S%7E9bb6JHRNSxVrHn18T.zsUpQD.4Q-amY&brand=ironman&code_challenge=ffl0NoNFej8Gy6wA2SXahawnT6p2xJolphxOJ6cdl3U&code_challenge_method=S256",
+      "name": "Welcome to IRONMAN",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.771903",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9496a39d",
+      "url": "https://reebok.ph/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Reebok",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.799931",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "56d34add",
+      "url": "https://www.merrell.com/US/en/account?dwcont=C1790298967",
+      "name": "My Account | Merrell",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.837875",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c7282db9",
+      "url": "https://auth.bhg.com/realms/bhg/login-actions/registration?client_id=bhg&tab_id=LF3DwJbE6JE&client_data=eyJydSI6Imh0dHBzOi8vd3d3LmJoZy5jb20vYXV0aGVudGljYXRpb24vY29kZS1leGNoYW5nZSIsInJ0IjoiY29kZSIsInN0IjoiZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkV0lpT2lKakswTTFObEZSTW5wb1ZrRnBZVXBHYTJOU1MxTTBaVk55VmpCV1pubFVSa0ZEV0daVU5YaE9TV280UFNJc0luSmxaR2x5WldOMFZYSnNJam9pYUhSMGNITTZMeTkzZDNjdVltaG5MbU52YlM4aUxDSnBjM01pT2lKRWIzUmtZWE5vSUUxbGNtVmthWFJvSWl3aVpYaHdJam94TnpNek1qQTFOVE15TENKcFlYUWlPakUzTXpNeU1ESTRNeklzSW1ocFpHVkRiMjVtYVhKdFlYUnBiMjVDWVc1dVpYSWlPbVpoYkhObGZRLkRPWWhUWUZocjV2a0dNcXVhMmlBSHRRUnd1WXpwa2tWcEpwNmhhVUFWbkkifQ",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.880534",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d21d6d3a",
+      "url": "https://account.volleyballworld.com/volleyballworld.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_SIGNUP_SIGNIN_DYNAMIC&client_id=9d086c90-823a-47bb-a3c0-9711adc6ddee&nonce=defaultNonce&redirect_uri=https://login.volleyballworld.com/api/azureb2c/loginsuccess&scope=9d086c90-823a-47bb-a3c0-9711adc6ddee%20openid%20offline_access%20profile&response_type=id_token&response_mode=query&nonce=defaultNonce&prompt=login&state=https://www.volleyballworld.com",
+      "name": "Volleyball World - Sign In",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.911803",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b4ea233a",
+      "url": "https://secure.indeed.com/auth?continue=https%3A%2F%2Fsecure.indeed.com%2Foauth%2Fv2%2Fauthorize%3Fclient_id%3Db025a88942faa43ac7cce9a2f2fc1866302ca38a22bf45b27ad806268d8193ca%26scope%3Demail%2Boffline_access%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fwww.simplyhired.com%252Fapi%252Fauth%252Fverifier%26state%3DeyJjc3JmVG9rZW4iOiJqZjFyQXpGR0ZLZWFDY055SW5XaFdhT1hqdUhLZEltcG4xU0h1VUpfM0tjUmk3MGhwV1pWNjJqYnRLWENpS3RNcW9BREgwUXNnU3B4dXNZdXNwdEsiLCJyZWRpcmVjdFVybCI6Imh0dHBzOi8vd3d3LnNpbXBseWhpcmVkLmNvbS8iLCJyZWRpcmVjdERvbWFpbiI6Imh0dHBzOi8vd3d3LnNpbXBseWhpcmVkLmNvbSJ9%26from%3DSimplyHired&from=SimplyHired",
+      "name": "Blocked - Indeed.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.940758",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "79c34751",
+      "url": "https://www.crateandbarrel.com/account/create-account",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:54.976239",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "75a83700",
+      "url": "https://auth.www.abebooks.com/ap/register?showRememberMe=true&openid.pape.max_auth_age=899&openid.identity=http%3A%2F%2Fwww.amazon.com%2Fap%2Fspecs%2Fauth%2Fconfirm_credentials&pageId=abe_site_us&openid.return_to=https%3A%2F%2Fwww.abebooks.com%2Fservlet%2FSignInCompletion%3Fgoto%3DMembersMainMenu&prevRID=R1DBDVSK5YE0RP6HSV1W&openid.assoc_handle=abe_site_us&openid.mode=checkid_setup&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&prepopulatedLoginId=&failedSignInCount=0&openid.claimed_id=http%3A%2F%2Fwww.amazon.com%2Fap%2Fspecs%2Fauth%2Fconfirm_credentials&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "name": "AbeBooks Registration",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.009384",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "735df2ba",
+      "url": "https://bonobos.com/sign-in?redirect_to=%2F",
+      "name": "Account Sign In | Bonobos",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.054181",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d4ee4da0",
+      "url": "https://www.dsw.com/create-account",
+      "name": "Become a Member | DSW",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.097441",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "0736e4ee",
+      "url": "https://www.morphe.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Morphe US",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.120894",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "54634808",
+      "url": "https://auth.olivemagazine.com/u/signup?state=hKFo2SB3YnRxeEY3NXBKZUl6MVBPSUg4ampuVFpvY2tDWWRfcqFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIHJLVVVjVmZkMlllVkctM19zMHU1SHZzRUwwQjdHb3Bao2NpZNkgbmlNMTlWVkk4VnZnVDNVYnBFTHhsRWpQRjNSemVJV2Y",
+      "name": "Log in | olive Magazine",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.156463",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ea1b0731",
+      "url": "https://www.booksamillion.com/sitelogin",
+      "name": "Site Sign In : Booksamillion.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.204618",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "40e3d4b1",
+      "url": "https://identity.worldathletics.org/registration?source=waw&tag=waw",
+      "name": "World Athletics",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.249330",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c94ef674",
+      "url": "https://id.fanatics.com/account/create?client_id=ficioNoQAkuuYP2UOJBkc784bo_FNmyEFKfHln9Jam0whIkF&response_type=code&scope=openid+account:read&redirect_uri=https://www.fanatics.com/api/account/oauth/oidcreturn&state=eyJuZXh0UGF0aG5hbWUiOiIvYWNjb3VudCIsImN1cnJlbnRQYXRobmFtZSI6Ii8iLCJzb2NpYWxJZGVudGl0eVByb3ZpZGVyIjoiZmFuaWQiLCJrZWVwTG9nZ2VkSW4iOnRydWV9&page_mode=account_create",
+      "name": "Attention Required! | Cloudflare",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.283336",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "2442d843",
+      "url": "https://www.quay.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c QUAY",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.322781",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "890da035",
+      "url": "https://venture.angellist.com/v/login",
+      "name": "AngelList",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.379751",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c8a604d1",
+      "url": "https://ca.jollibeefoods.com/create-account",
+      "name": "Create an Account | Jollibee USA",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.429595",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "76022e7d",
+      "url": "https://auth.tourradar.com/signup?response_type=code&lang=en&client_id=60kq61eke3abogbrlqt6mtm2ru&redirect_uri=https%3A%2F%2Fwww.tourradar.com%2Fapi%2Fcentral%2Fauth%2Flogin%2Fcallback&scope=openid+email&state=eyJzdWJzY3JpYmUiOnRydWUsImN1cnJlbmN5IjoiVVNEIiwic3RhdGUiOiI2NjRkMjU3Nzg1YjE2NjBhZjgyNjliYmRiZTg1YzM2ZCJ9&nonce=17aa1a52323cf62f12cee0554a594e14",
+      "name": "Sign up",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.462429",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "74100b11",
+      "url": "https://www.goodreads.com/ap/register?language=en_US&openid.assoc_handle=amzn_goodreads_web_na&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.return_to=https%3A%2F%2Fwww.goodreads.com%2Fap-handler%2Fregister&siteState=eyJyZXR1cm5fdXJsIjoiaHR0cHM6Ly93d3cuZ29vZHJlYWRzLmNvbS8ifQ%3D%3D",
+      "name": "Goodreads Registration",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.495875",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5648601a",
+      "url": "https://www.goodvibes.com/register",
+      "name": "Register | Good Vibrations",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.527673",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "bc016fae",
+      "url": "https://login.chicos.com/u/login?state=hKFo2SB6N2k4UU8ydnU3NUUzM2ZOa3FVTVppb3BnMWJ5NHgxSqFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIE5tN0RNVUVVWWVRQTNkbjhrYUtmWXd0MkI2d2ZTOC1xo2NpZNkgTW1zcFZ3a1lCenFtQkd4M3RvNDh1bkxEZ0JJaDVnalU",
+      "name": "Log in | chicos",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.558984",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "bc7e6f59",
+      "url": "https://www.dominospizza.ph/pages/customer/#!/customer/profile/new",
+      "name": "History of Domino's Pizza in the Pizza Restaurant Industry",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.607184",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "16b5716a",
+      "url": "https://www.borderfree.com/account/register/",
+      "name": "Borderfree",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.649263",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ba746e9a",
+      "url": "https://www.billiards.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201d Billiards.com, Inc",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.685968",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "25e9124d",
+      "url": "https://cam.britannica.com/registration",
+      "name": "Britannica Merriam-Webster Account Manager | Sign Up",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.724720",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "48ebfb9e",
+      "url": "https://www.lta.org.uk/register/",
+      "name": "Register for Advantage",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.758571",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ffa20389",
+      "url": "https://www.victoriassecret.com/us/account/create",
+      "name": "Create Account -- Victoria's Secret",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.782127",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d3d13972",
+      "url": "https://www.patagonia.com/account/login/?action=register&rurl=18",
+      "name": "Hang Tight! Routing to checkout...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.823315",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ea2424c7",
+      "url": "https://themountain.com/login.php?action=create_account",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.841111",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8237a68c",
+      "url": "https://www.cricbuzz.com/premium-subscription/user/sign-up",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.886592",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "73bddb69",
+      "url": "https://id.condenast.com/interaction/oEI1sttfQrAZy8XrUVx2R/email?xid=53278a13-15f0-42d7-95e2-affafb6a726c&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2F%22%7D&prompt=select_account%20consent&source=VERSO_NAVIGATION&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.bd96ef0e8186fcea33396720bc76b8b9&redirect_uri=https%3A%2F%2Fwww.epicurious.com%2Fauth%2Fcomplete&response_type=code",
+      "name": "Sign in or create an account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.907943",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "82c2dcac",
+      "url": "https://ph.shein.com/user/auth/login?direction=nav",
+      "name": "Sign In",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.957628",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e1a4d0e2",
+      "url": "https://www.cinemavillage.com/members/create-an-account/",
+      "name": "Create an Account - Cinema Village",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:55.991695",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "94822e3d",
+      "url": "https://www.hellofresh.com/login",
+      "name": "Sign In to Your HelloFresh Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.029981",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "7281b2b0",
+      "url": "https://store.steampowered.com/join",
+      "name": "Create Your Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.057972",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4b86a390",
+      "url": "https://www.mcdonalds.com/us/en-us/mcdonalds-email-signup.html",
+      "name": "McDonald\u00e2\u20ac\u2122s Email Signup: Deals & More | McDonald\u00e2\u20ac\u2122s",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.091693",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "62171fa1",
+      "url": "https://us.romwe.com/user/auth/login?direction=nav&from=navTop&ref=www&rep=dir&ret=us",
+      "name": "Sign In",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.127975",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "30e60183",
+      "url": "https://www.givepulse.com/register",
+      "name": "Human Verification",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.141663",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "acc1df57",
+      "url": "https://www.aa.com/web/loyalty/profile/enrollment?from=comp_nav",
+      "name": "American Airlines - Airline tickets and low fares at aa.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.195850",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4b0793d7",
+      "url": "https://engage.pointsoflight.org/login",
+      "name": "Sign In - Points of Light Engage",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.235350",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b02db77d",
+      "url": "https://www.talbots.com/login?original=%2Faccount",
+      "name": "Access to this page has been denied.",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.262557",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3458a92a",
+      "url": "https://horizoncinemas.com/register",
+      "name": "Horizon Cinemas",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.311796",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "fd324d57",
+      "url": "https://www.off---white.com/en-ph/",
+      "name": "Off-White\u00e2\u201e\u00a2 Official Website",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.374094",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "7db216f5",
+      "url": "https://shopakira.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c AKIRA",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.422117",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "87bd9cb9",
+      "url": "https://shop.qrp-labs.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.464431",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a989e647",
+      "url": "https://www.ae.com/us/en/myaccount/create-account",
+      "name": "American Eagle Outfitters",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.499648",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3e4ba4f6",
+      "url": "https://ims.bentley.com/as/jJtMh/resume/as/authorization.ping",
+      "name": "Page Expired",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.523508",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "630e5429",
+      "url": "https://scrantonculturalcenter.org/opencart/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.558561",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9acee3dc",
+      "url": "https://us.motelrocks.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c motelrocks-com-us",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.603936",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "60b360c6",
+      "url": "https://accounts.outsideonline.com/oidc-frontend/signup?next=https://velo.outsideonline.com/featured&analytics_domain=VeloNews",
+      "name": "Signup with Outside",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.641772",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "efe06e5b",
+      "url": "https://www.loverslane.com/account/login",
+      "name": "Account Login | Lover's Lane",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.676061",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "225e8697",
+      "url": "https://www.mlbshop.com/register?nextPathname=/account",
+      "name": "https://www.mlbshop.com/register?nextPathname=/account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.699562",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "7fab8474",
+      "url": "https://parksend.sg/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.758692",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "824c2e36",
+      "url": "https://www.starlightcinemas.com/sign-up/",
+      "name": "Rewards Sign Up \u00e2\u20ac\u201d Starlight Cinemas",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.795982",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4dd39317",
+      "url": "https://lavishalice.com/account/register",
+      "name": "Create Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.843033",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "27d4a48a",
+      "url": "https://shopify.com/authentication/64320241896/login?client_id=45a461a0-5460-469f-a321-d1d55d1fc58e&locale=en&redirect_uri=%2Fauthentication%2F64320241896%2Foauth%2Fauthorize%3Fclient_id%3D45a461a0-5460-469f-a321-d1d55d1fc58e%26locale%3Den%26nonce%3De5ea48d5-8d49-4bf0-bc32-e7826850f09d%26redirect_uri%3Dhttps%253A%252F%252Fshopify.com%252F64320241896%252Faccount%252Fcallback%253Fsource%253Dcore%26region_country%3DUS%26response_type%3Dcode%26scope%3Dopenid%2Bemail%2Bcustomer-account-api%253Afull%26state%3DhWN4b5NM9Rs2TOUAQGKmyplp&region_country=US",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.874426",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5f5bde83",
+      "url": "https://www.aeropostale.com/register/",
+      "name": "Sites-aeropostale-Site",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.913068",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "388c8c79",
+      "url": "https://go-britain.nl/my-account/orders/",
+      "name": "My account - Go-Britain",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:56.960649",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "89c62e9a",
+      "url": "https://ivoryella.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Ivory Ella",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.005812",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "92b8cca2",
+      "url": "https://www.frenchconnection.com/account/register",
+      "name": "Create Account | French Connection UK",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.036808",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "45fbb15f",
+      "url": "https://www.dice.com/register/new-profile",
+      "name": "Registration | Dice.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.091223",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d8899fc2",
+      "url": "https://my.asos.com/account/login?store=COM&country=GB&lang=en-GB&keyStoreDataversion=mhabj1f-41&defaultTab=register&returnUrl=https%3A%2F%2Fmy.asos.com%2Fauth%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dwww%26scope%3Dopenid%20profile%20offline_access%20sensitive%26redirect_uri%3Dhttps%253A%252F%252Fwww.asos.com%252F%26client-request-id%3D0193841b-3ed8-7b55-a83e-08c42ad0495e%26response_mode%3Dfragment%26response_type%3Dcode%26x-client-SKU%3Dmsal.js.browser%26x-client-VER%3D3.17.0%26client_info%3D1%26code_challenge%3DiXZN9A21m7kjTnORFprREHI4H6MhKaQ1Ipg8xEIVqcU%26code_challenge_method%3DS256%26nonce%3D0193841b-3eda-7fe0-88f6-1e691d1e3e18%26state%3DeyJpZCI6IjAxOTM4NDFiLTNlZDktNzI5Yy1iNWU4LTNkOGIxZTUyYjk2MiIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%253D%26store%3DCOM%26keyStoreDataversion%3Dmhabj1f-41%26lang%3Den-GB%26country%3DGB%26defaultTab%3Dregister",
+      "name": "ASOS | Welcome",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.122355",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8be7b653",
+      "url": "https://auth.tasteofhome.com/oauth2/register?client_id=2dfc66ec-2722-46dd-af5d-047eb8101264&response_type=code&redirect_uri=https://www.tasteofhome.com/",
+      "name": "Login | Taste of Home",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.137560",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "485ae927",
+      "url": "https://sea.ign.com/",
+      "name": "IGN Southeast Asia",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.174650",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "75cca2df",
+      "url": "https://www.moynat.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c MOYNAT PARIS",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.207793",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "91f81af3",
+      "url": "https://thoughtsocks.com/account/register",
+      "name": "Create Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.242466",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "1ac0b53b",
+      "url": "https://www.hanes.com/customer/account/create/",
+      "name": "hanes.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.283637",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "aaeb559e",
+      "url": "https://www.virginvoyages.com/auth/v1/signup",
+      "name": "My Account | Virgin Voyages",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.330409",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "2ea2ca74",
+      "url": "https://istanbulsuarmaturleri.com.tr/index.php?route=account/register",
+      "name": "Hesap Olu\u00c5\u0178tur",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.361717",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "59514cac",
+      "url": "https://www.ghost.co.uk/account/register",
+      "name": "Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.396140",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3ff62b46",
+      "url": "https://www.rainbarrelsintl.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.436230",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b54611dd",
+      "url": "https://auth.littlecaesars.com/oauth2/register?client_id=0e77472d-aa37-4578-b675-c96dfcbe1cb8&code_challenge=a2V7QhdpqSew0bHDYO2pzy5F86VdekRZJqhxVB2_2Zc&code_challenge_method=S256&redirect_uri=%2Fapp%2Fcallback&response_type=code&scope=openid+email+profile+offline_access&state=eyJjIjoiMGU3NzQ3MmQtYWEzNy00NTc4LWI2NzUtYzk2ZGZjYmUxY2I4IiwiciI6Imh0dHBzOi8vbGl0dGxlY2Flc2Fycy5jb20vZW4tdXMvb2F1dGgvY2FsbGJhY2siLCJzIjoie30ifQ%3D%3D&tenantId=8610aebe-d6af-4451-8c2e-955480bbf63c",
+      "name": "Create Account\u00c2\u00a0- Little Caesars\u00c2\u00ae Pizza",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.470773",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "db1339a4",
+      "url": "https://www.otterbox.com/en-us/account-login?action=register",
+      "name": "OtterBox Login | Access your OtteBox.com account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.502757",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5dbb1cff",
+      "url": "https://www.loveshackfancy.com/account/register",
+      "name": "Create Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.534578",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5038cc66",
+      "url": "https://www.catchafire.org/account/register/?type=0",
+      "name": "Catchafire \u00e2\u20ac\u201c Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.566279",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8d423712",
+      "url": "https://authn.edx.org/register",
+      "name": "Register | edX",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.598446",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "79d5bb57",
+      "url": "https://users.wix.com/signin/signup/password?view=sign-up&sendEmail=true&loginCompName=SignUp_H&referralInfo=SignUp_H&postSignUp=https%3A%2F%2Fwww.wix.com%2Fnew%2Fintro%2F&postLogin=https%3A%2F%2Fmanage.wix.com%2Faccount%2Froute&loginDialogContext=signup&originUrl=https%3A%2F%2Fwww.wix.com%2F%3Futm_campaign%3Dvir_error_page&forceRender=true",
+      "name": "Log In to Your Wix Account - Wix.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.640522",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "74875cf7",
+      "url": "https://www.journeys.com/account/login",
+      "name": "Account Login | Journeys",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.678852",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "8c7dc15a",
+      "url": "https://login.soma.com/u/signup?state=hKFo2SBBbF9ZWVpmbWllejFvMFR3bWw4T3Y1TjNGaWV2UkZvU6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDhmNXJpWHZjQzA4RHB1ZmxpWDNvbEJUOHVCaFJmZGJko2NpZNkgeXQ1WGVEbEhWV2htOXlDcUdrS0dwM2pVTU91ajhkV0Y",
+      "name": "Log in | soma-intimates",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.715834",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b2fedfb9",
+      "url": "https://www.nflshop.com/register?nextPathname=/account",
+      "name": "https://www.nflshop.com/register?nextPathname=/account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.754922",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "eb0d0b84",
+      "url": "https://goodr.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201d goodr sunglasses",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.795884",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "791f4cf9",
+      "url": "https://auth.eatingwell.com/realms/etg/login-actions/registration?client_id=etg&tab_id=vvx3L7CNvkQ&client_data=eyJydSI6Imh0dHBzOi8vd3d3LmVhdGluZ3dlbGwuY29tL2F1dGhlbnRpY2F0aW9uL2NvZGUtZXhjaGFuZ2UiLCJydCI6ImNvZGUiLCJzdCI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSnFUSEIzV0dRdmVWWllkMnB5T1dwWWNYVlJhekJ5VlRWeE1VdEdabTgwVFZJMVVIWjFXSGxNT0dwalBTSXNJbkpsWkdseVpXTjBWWEpzSWpvaWFIUjBjSE02THk5M2QzY3VaV0YwYVc1bmQyVnNiQzVqYjIwdklpd2lhWE56SWpvaVJHOTBaR0Z6YUNCTlpYSmxaR2wwYUNJc0ltVjRjQ0k2TVRjMk1UVTJOVE15Tnl3aWFXRjBJam94TnpZeE5UWXlOakkzTENKb2FXUmxRMjl1Wm1seWJXRjBhVzl1UW1GdWJtVnlJanBtWVd4elpYMC5EaW05LXh3TnFYa3lwSFRSQ3djZnRFZXJ1UUNiaGllY05rV2dpYU1vV2pJIn0",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.816899",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "813a82f9",
+      "url": "https://kith.com/account/register?return_url=%2Faccount",
+      "name": "Create Account \u00e2\u20ac\u201c Kith",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.864724",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6e95832f",
+      "url": "https://www.napaonline.com/en/login/accountCreation",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.886756",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "12e28167",
+      "url": "https://myaccount.nytimes.com/auth/login?response_type=cookie&client_id=vi&redirect_uri=https%3A%2F%2Fwww.nytimes.com%2Fsubscription%2Fonboarding-offer%3FcampaignId%3D7JFJX%26EXIT_URI%3Dhttps%253A%252F%252Fwww.nytimes.com%252F&asset=masthead",
+      "name": "nytimes.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.925239",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "70c6c97d",
+      "url": "https://www.newfrescos.com/register.asp?cg=0",
+      "name": "Welcome to NewFrescos.com - You are the reason we are here!",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.941115",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4a99d42a",
+      "url": "https://www.aimeleondore.com/account/register?pb=0",
+      "name": "Create Account \u00e2\u20ac\u201c Aim\u00c3\u00a9 Leon Dore",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:57.979733",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5ab2f63d",
+      "url": "https://www.khanacademy.org/signup",
+      "name": "Khan Academy",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.017286",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a54efb42",
+      "url": "https://store.nba.com/register?nextPathname=/account",
+      "name": "https://store.nba.com/register?nextPathname=/account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.049706",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "76ac3fb6",
+      "url": "https://www.express.com/register",
+      "name": "Sign Up | Express",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.087769",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "0d067945",
+      "url": "https://www.finder.com/user-profile/sign-up",
+      "name": "Sign up - finder.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.135638",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5701f3f8",
+      "url": "https://hq.ssrn.com/login/pubsigninjoin.cfm",
+      "name": "SSRN Sign in Join",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.165825",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "1cbdb99f",
+      "url": "https://www.thebathroomstoreus.com/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.204451",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "bb8c6d22",
+      "url": "https://www.dorothyperkins.com/sign-up",
+      "name": "Sign Up",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.236577",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "be772b27",
+      "url": "https://www.hushpuppies.com/create-account",
+      "name": "Hush Puppies Shoes | Comfortable Casual Shoes, Sandals, Loafers, Sneakers & More | Hush Puppies",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.283241",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3e5d82db",
+      "url": "https://www.reuters.com/account/register/signup-options/?redirect=https%3A%2F%2Fwww.reuters.com%2F&referrer=registration_button&journeyStart=navigation",
+      "name": "Reuters",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.342163",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4b8c0470",
+      "url": "https://www.ap.com/login/registration",
+      "name": "Registration | Audio Precision | The Global Leader",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.391245",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "e4ca5f31",
+      "url": "https://www.marriott.com/en-gb/loyalty/createAccount/createAccountPage1.mi",
+      "name": "Join Marriott Bonvoy",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.428557",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "27b5069b",
+      "url": "https://profile.theguardian.com/signin?INTCMP=DOTCOM_NEWHEADER_SIGNIN&ABCMP=ab-sign-in&componentEventParams=componentType%3Didentityauthentication%26componentId%3Dguardian_signin_header",
+      "name": "Sign in | The Guardian",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.476256",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "15616b07",
+      "url": "https://www.pacsun.com/login",
+      "name": "Attention Required! | Cloudflare",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.519652",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3a405823",
+      "url": "https://www.fantasticfiction.com/users/signup/",
+      "name": "Fantastic Fiction - Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.561509",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c378ed26",
+      "url": "https://www.fantasypros.com/accounts/signup/",
+      "name": "Sign Up | FantasyPros",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.627093",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3b8b936a",
+      "url": "https://www.eddiebauer.com/signup",
+      "name": "https://www.eddiebauer.com/signup",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.668971",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9029120c",
+      "url": "https://auth.allrecipes.com/realms/alrcom/login-actions/registration?client_id=alrcom&tab_id=52DmsapTXbo&client_data=eyJydSI6Imh0dHBzOi8vd3d3LmFsbHJlY2lwZXMuY29tL2F1dGhlbnRpY2F0aW9uL2NvZGUtZXhjaGFuZ2UiLCJydCI6ImNvZGUiLCJzdCI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSjBOVzk2YWpKT01GaDFObkIxTTA5elEyRnhkbnAwVmtaelJHUmFSakJGTnpaTE5pOVNaVFY2UTIxblBTSXNJbkpsWkdseVpXTjBWWEpzSWpvaWFIUjBjSE02THk5M2QzY3VZV3hzY21WamFYQmxjeTVqYjIwdklpd2lhWE56SWpvaVJHOTBaR0Z6YUNCTlpYSmxaR2wwYUNJc0ltVjRjQ0k2TVRjMk1UVTJOalkxTkN3aWFXRjBJam94TnpZeE5UWXpPVFUwTENKb2FXUmxRMjl1Wm1seWJXRjBhVzl1UW1GdWJtVnlJanBtWVd4elpYMC5qbThBdVpYaUUyaVNLVWVmQzNZTzBTLXYzSTctS1kxUE00dWFWeXEyYmJBIn0",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.702905",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "34069297",
+      "url": "https://www.moviepass.io/",
+      "name": "Moviepass",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.733355",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "ad3f8e39",
+      "url": "https://chocolate.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Chocolate.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.773787",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b8458ec9",
+      "url": "https://www.pepboys.com/registration",
+      "name": "Access to this page has been denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.816070",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "f4dcf089",
+      "url": "https://www.noah.com.sg/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.858538",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "75d36323",
+      "url": "https://standardsandpractices.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c StandardandPractices",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.887016",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4e7febe8",
+      "url": "https://secure.login.gov/sign_up/enter_email",
+      "name": "Create an account | Login.gov",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.925244",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "f18377aa",
+      "url": "https://www.apmex.com/account/register",
+      "name": "Register | APMEX\u00c2\u00ae",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:58.971034",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "144ac04b",
+      "url": "https://www.jollibeefoods.com/create-account",
+      "name": "Create an Account | Jollibee USA",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.014464",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5de38b9c",
+      "url": "https://www.midwestnice.com/login.php?action=create_account",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.053778",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c5d40072",
+      "url": "https://www.oreillyauto.com/create-account",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.086635",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "abbf2f4f",
+      "url": "https://www.ganni.com/on/demandware.store/Sites-ganni_us-Site/en_US/Account-StartRegistration",
+      "name": "Registration page",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.124019",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "47623ce8",
+      "url": "https://www.clarks.com/en-us/register",
+      "name": "Clarks Shoes & Footwear | Registration Page",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.180214",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4e4d9eb5",
+      "url": "https://shop.forksoverknives.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Forks Over Knives",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.220882",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "bdeaf198",
+      "url": "https://frockandfrill.com/en-us/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Frock and Frill",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.278807",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "7c1f02fb",
+      "url": "https://www.michaelkors.global/ph/en/account/createAccount/",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.313683",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "23df2dfd",
+      "url": "https://id.shld.net/realms/rlmprd/protocol/openid-connect/registrations?client_id=igssears&redirect_uri=https%3A%2F%2Fwww.sears.com%2F&state=23a95203-da4a-45e1-87d2-4e3f12c3d460&response_mode=query&response_type=code&scope=openid&nonce=13bb39a1-ea59-4b3d-84c3-7ca045bd4d53&code_challenge=u53ic-QChsU06zArKOUnF6PQGLOxbssuseqbKY0_coQ&code_challenge_method=S256",
+      "name": "Attention Required! | Cloudflare",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.329140",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "f9d3cb28",
+      "url": "https://www.americanvintage-store.com/us/en/login",
+      "name": "Log in - Create an account | American Vintage United States",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.383230",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "fd594a4e",
+      "url": "https://account.battle.net/creation/flow/creation-full",
+      "name": "Battle.net Account Creation",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.433218",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "c49ad58e",
+      "url": "https://www.theoutnet.com/en-ph/account/register",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.475561",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "82c47c7b",
+      "url": "https://www.3sisters.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c 3sisters.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.487441",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a1125796",
+      "url": "https://www.crocs.com/on/demandware.store/Sites-crocs_us-Site/default/Login-Show",
+      "name": "Just a moment...",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.531563",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "667d04c8",
+      "url": "https://login.publicmediasignin.org/f29e2df8-7cf0-4741-939b-dc9e9555f527/auth-ui/v2/login?__aic_csrf=k85PubduZ6nRfKIt&client_id=00ac4575-e809-4694-bb71-93b9d9ebb2f3&code_challenge=XiwsbOCTpcAHDDP11m2CmJKCcpF2mbQMp-wQa1FD60U&code_challenge_method=S256&redirect_uri=https%3A%2F%2Fauthorization.api.npr.org%2Fv2%2Flogin%2Fsuccess&response_type=code&scope=openid+email+profile&state=849566365%3A1903919139",
+      "name": "NPR",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.569578",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "abad845a",
+      "url": "https://login.chicos.com/u/signup?state=hKFo2SBFRHJnRDN3QUt4LU5wRVhYbXpyckNhX1VwcFFPUEdaa6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIF9BMUduekhfYmNVRmtORW0yWF9CazI3MFRJY1Z1MnFJo2NpZNkgTW1zcFZ3a1lCenFtQkd4M3RvNDh1bkxEZ0JJaDVnalU",
+      "name": "Log in | chicos",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.625131",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "3c4b86c0",
+      "url": "https://soundcloud.com/signin/forgot",
+      "name": "SoundCloud \u00e2\u20ac\u201d Register, sign-in or access our Homepage",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.689983",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "f3412ed7",
+      "url": "https://login.usatoday.com/authenticate/?requested-state=create-account&reg_source=CPNAVBAR&reg_medium=ONSITE&reg_campaign=signin&reg_delivery=ux&from-state=returning-user-get-redirect&cookies=",
+      "name": "Create an account - USA TODAY",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.729461",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "d61aa9c6",
+      "url": "https://usa.tommy.com/en/createaccount",
+      "name": "Tommy Hilfiger | Error",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.755265",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "96731730",
+      "url": "https://www.dropbox.com/register",
+      "name": "Login or Sign Up - Dropbox",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.781180",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "602b02fa",
+      "url": "https://www.swimmingworldmagazine.com/news/login/?action=register",
+      "name": "Swimming World Login & Join",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.833489",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "4bf906ef",
+      "url": "https://auth.gymshark.com/u/signup?state=hKFo2SBiZktwVmdmQnJaSzFFa0gtdlRsT2RiRkltNW5FeWlTUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIFlVWWVZREtZMUV6UkJRak1KTU1yT0ZadW1EZGNJc1lVo2NpZNkgMndiQ3lIVm0xRGRJWDJFd2RFN20wcVZJYlhqT0NUWGo",
+      "name": "Log in | Gymshark",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.884364",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "5f235bdf",
+      "url": "https://www.truereligion.com/account?lang=default&dwcont=C750922198",
+      "name": "Access to this page has been denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.916763",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "55a797b8",
+      "url": "https://www.artrabbit.com/register",
+      "name": "Register",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.960541",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "9c1c0ca6",
+      "url": "https://caviar.com/account/register",
+      "name": "Create Account \u00e2\u20ac\u201c Seattle Caviar Co.",
+      "enabled": true,
+      "created_at": "2025-12-28T15:09:59.978552",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "f1a739e4",
+      "url": "https://www.ryderwear.com/account/register",
+      "name": "Create Account - Ryderwear",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.016812",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "bd1b274a",
+      "url": "https://www.gamespot.com/login-signup/",
+      "name": "Login or Signup",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.053100",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "42367372",
+      "url": "https://podcam.supplies/index.php?route=account/register",
+      "name": "Register Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.087003",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "778205c1",
+      "url": "https://profile.theartnewspaper.com/sign-up?redirect_url=https%3A%2F%2Fwww.theartnewspaper.com",
+      "name": "https://profile.theartnewspaper.com/sign-up?redirect_url=https%3A%2F%2Fwww.theartnewspaper.com",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.123384",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "67f4c26f",
+      "url": "https://www.earthboundtrading.com/customer/account/create/",
+      "name": "Create New Customer Account",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.176149",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "1ad857f6",
+      "url": "https://www.versace.com/ph/en/registration/",
+      "name": "Access Denied",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.216755",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "b4e202ec",
+      "url": "https://id.condenast.com/interaction/n-anesN9rQ3ldqVT-igL-/email?_sp=da7486bc-7c00-43f9-9756-4daae928f1ab.1733100268719&xid=e45a96c4-7ef5-4f04-9f25-9e2a11fc661c&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2Fnewsletter%3F_sp%3Dda7486bc-7c00-43f9-9756-4daae928f1ab.1733100268719%22%7D&prompt=select_account%20consent&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.d20cfbd5094f2301a2e26c9742c9da92&redirect_uri=https%3A%2F%2Fwww.glamour.com%2Fauth%2Fcomplete&response_type=code",
+      "name": "403 Forbidden",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.241067",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "6d6cf463",
+      "url": "https://taprootfoundation.org/signup/nonprofit",
+      "name": "https://taprootfoundation.org/signup/nonprofit",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.279440",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    },
+    {
+      "id": "a7880242",
+      "url": "https://example.com/signup",
+      "name": "https://example.com/signup",
+      "enabled": true,
+      "created_at": "2025-12-28T15:10:00.330593",
+      "last_run": null,
+      "last_status": null,
+      "fields_filled": 0
+    }
+  ]
+}

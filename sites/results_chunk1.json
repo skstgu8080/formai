@@ -1,0 +1,459 @@
+{
+  "working": [],
+  "captcha": [
+    {
+      "url": "https://reebok.ph/account/register",
+      "domain": "reebok.ph",
+      "fields": 6,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.forever21.com/account/register",
+      "domain": "www.forever21.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://ph.shein.com/user/auth/login?direction=nav",
+      "domain": "ph.shein.com",
+      "fields": 10,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://account.everlane.com/authentication/login?client_id=55c41b48-1540-4a24-bb1c-dfbe745d6d5e&locale=en&redirect_uri=%2Fauthentication%2Foauth%2Fauthorize%3Fclient_id%3D55c41b48-1540-4a24-bb1c-dfbe745d6d5e%26locale%3Den%26nonce%3Dc70348cf-bbfd-44f5-bcec-4fa270826bb9%26redirect_uri%3Dhttps%253A%252F%252Faccount.everlane.com%252Fcallback%253Fsource%253Dcore%26region_country%3DPH%26response_type%3Dcode%26scope%3Dopenid%2Bemail%2Bcustomer-account-api%253Afull%26state%3DhWN4ZVKrMeT82NWNFjMMdSQU&region_country=PH",
+      "domain": "account.everlane.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://auth.gymshark.com/u/signup?state=hKFo2SBiZktwVmdmQnJaSzFFa0gtdlRsT2RiRkltNW5FeWlTUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIFlVWWVZREtZMUV6UkJRak1KTU1yT0ZadW1EZGNJc1lVo2NpZNkgMndiQ3lIVm0xRGRJWDJFd2RFN20wcVZJYlhqT0NUWGo",
+      "domain": "auth.gymshark.com",
+      "fields": 2,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://auth.flannels.com/account/register?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dac38364727a948749cccabbc2c94669f%26response_type%3Dcode%26scope%3Dopenid%2520offline_access%2520email%2520email%26redirect_uri%3Dhttps%253A%252F%252Fwww.flannels.com%252Fauth-callback%26state%3DeyJhIjoiMCIsIm4iOiJ2U2QtTzJlNCIsInIiOiJodHRwczovL3d3dy5mbGFubmVscy5jb20vIn0%253D%26prompt%3Dlogin%26route%3Dregister%26anonymous_id%3Deef01446-9c91-4a9a-ad91-095dae034e7a%26suppressed_prompt%3Dlogin",
+      "domain": "auth.flannels.com",
+      "fields": 9,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.romwe.com/user/auth/login?direction=nav&from=navTop",
+      "domain": "www.romwe.com",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://cottonon.com/AU/account/register/",
+      "domain": "cottonon.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.crocs.com/on/demandware.store/Sites-crocs_us-Site/default/Login-Show",
+      "domain": "www.crocs.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.drmartens.com/us/en/login",
+      "domain": "www.drmartens.com",
+      "fields": 1,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.clarks.com/en-us/register",
+      "domain": "www.clarks.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.borderfree.com/account/register/",
+      "domain": "www.borderfree.com",
+      "fields": 7,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://easyspirit.com/account/register",
+      "domain": "easyspirit.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://ninewest.com/account/register",
+      "domain": "ninewest.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.dsw.com/create-account",
+      "domain": "www.dsw.com",
+      "fields": 0,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.pacsun.com/login",
+      "domain": "www.pacsun.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://shop.tillamook.com/account/register",
+      "domain": "shop.tillamook.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://login.chicos.com/u/signup?state=hKFo2SBFRHJnRDN3QUt4LU5wRVhYbXpyckNhX1VwcFFPUEdaa6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIF9BMUduekhfYmNVRmtORW0yWF9CazI3MFRJY1Z1MnFJo2NpZNkgTW1zcFZ3a1lCenFtQkd4M3RvNDh1bkxEZ0JJaDVnalU",
+      "domain": "login.chicos.com",
+      "fields": 2,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.talbots.com/login?original=%2Faccount",
+      "domain": "www.talbots.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://login.soma.com/u/signup?state=hKFo2SBBbF9ZWVpmbWllejFvMFR3bWw4T3Y1TjNGaWV2UkZvU6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDhmNXJpWHZjQzA4RHB1ZmxpWDNvbEJUOHVCaFJmZGJko2NpZNkgeXQ1WGVEbEhWV2htOXlDcUdrS0dwM2pVTU91ajhkV0Y",
+      "domain": "login.soma.com",
+      "fields": 2,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://login.whitehouseblackmarket.com/u/signup?state=hKFo2SA3a25FbERPNzU0TEtkT0pvVVpGYUgwNldQYnRHZUtodaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDhPUEhHaEpxMzEtM1NSaGdZSk9pSjcxMUNQc0tuRC01o2NpZNkgVzNrTHBYb0hTNGhheDIxY3dOSHI0dkdjU2dlVE5WcU4",
+      "domain": "login.whitehouseblackmarket.com",
+      "fields": 2,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://circuitcity.com/customer/account/create/",
+      "domain": "circuitcity.com",
+      "fields": 0,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.tobi.com/login",
+      "domain": "www.tobi.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://younger.com/account/register",
+      "domain": "younger.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://app.squareup.com/signup/en-us?app=weebly&return_to=https%3A%2F%2Fwww.weebly.com%2Fapp%2Ffront-door%2Flogin%2Fsquare%3Fsso_intent%3Dsignup&v=weebly-sso&weebly_sso_enabled=true",
+      "domain": "app.squareup.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://gw.lightinthebox.com/signin?src=mainLoginLink&targetUrl=https%3A%2F%2Fwww.lightinthebox.com%2F",
+      "domain": "gw.lightinthebox.com",
+      "fields": 3,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.modanisa.com/en/membership/login/?showRegister=true&return=%2F",
+      "domain": "www.modanisa.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://auth.jackwills.com/account/register?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dbc8b834a58a143f3a73d164e9418b0cb%26response_type%3Dcode%26scope%3Dopenid%2520offline_access%2520email%2520email%26redirect_uri%3Dhttps%253A%252F%252Fwww.jackwills.com%252Fauth-callback%26state%3DeyJhIjoiMCIsIm4iOiJRTDRNaTRaaCIsInIiOiJodHRwczovL3d3dy5qYWNrd2lsbHMuY29tLyJ9%26prompt%3Dlogin%26suppressed_prompt%3Dlogin",
+      "domain": "auth.jackwills.com",
+      "fields": 9,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://bonobos.com/sign-in?redirect_to=%2F",
+      "domain": "bonobos.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.coursera.org/?authMode=signup",
+      "domain": "www.coursera.org",
+      "fields": 3,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://verabradley.com/account/register",
+      "domain": "verabradley.com",
+      "fields": 7,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.finder.com/user-profile/sign-up",
+      "domain": "www.finder.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.hushpuppies.com/create-account",
+      "domain": "www.hushpuppies.com",
+      "fields": 1,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.aeropostale.com/register/",
+      "domain": "www.aeropostale.com",
+      "fields": 1,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.ysl.com/en-us/signup",
+      "domain": "www.ysl.com",
+      "fields": 7,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.ganni.com/on/demandware.store/Sites-ganni_us-Site/en_US/Account-StartRegistration",
+      "domain": "www.ganni.com",
+      "fields": 6,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.moynat.com/account/register",
+      "domain": "www.moynat.com",
+      "fields": 6,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.truereligion.com/account?lang=default&dwcont=C750922198",
+      "domain": "www.truereligion.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://ph.diesel.com/en/signup",
+      "domain": "ph.diesel.com",
+      "fields": 9,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.jamesperse.com/account/register",
+      "domain": "www.jamesperse.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://fashion.rabanne.com/account/register",
+      "domain": "fashion.rabanne.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.morphe.com/account/register",
+      "domain": "www.morphe.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://kith.com/account/register?return_url=%2Faccount",
+      "domain": "kith.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://users.wix.com/signin/signup/password?view=sign-up&sendEmail=true&loginCompName=SignUp_H&referralInfo=SignUp_H&postSignUp=https%3A%2F%2Fwww.wix.com%2Fnew%2Fintro%2F&postLogin=https%3A%2F%2Fmanage.wix.com%2Faccount%2Froute&loginDialogContext=signup&originUrl=https%3A%2F%2Fwww.wix.com%2F%3Futm_campaign%3Dvir_error_page&forceRender=true",
+      "domain": "users.wix.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://auth.bhg.com/realms/bhg/login-actions/registration?client_id=bhg&tab_id=LF3DwJbE6JE&client_data=eyJydSI6Imh0dHBzOi8vd3d3LmJoZy5jb20vYXV0aGVudGljYXRpb24vY29kZS1leGNoYW5nZSIsInJ0IjoiY29kZSIsInN0IjoiZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkV0lpT2lKakswTTFObEZSTW5wb1ZrRnBZVXBHYTJOU1MxTTBaVk55VmpCV1pubFVSa0ZEV0daVU5YaE9TV280UFNJc0luSmxaR2x5WldOMFZYSnNJam9pYUhSMGNITTZMeTkzZDNjdVltaG5MbU52YlM4aUxDSnBjM01pT2lKRWIzUmtZWE5vSUUxbGNtVmthWFJvSWl3aVpYaHdJam94TnpNek1qQTFOVE15TENKcFlYUWlPakUzTXpNeU1ESTRNeklzSW1ocFpHVkRiMjVtYVhKdFlYUnBiMjVDWVc1dVpYSWlPbVpoYkhObGZRLkRPWWhUWUZocjV2a0dNcXVhMmlBSHRRUnd1WXpwa2tWcEpwNmhhVUFWbkkifQ",
+      "domain": "auth.bhg.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.merrell.com/US/en/account?dwcont=C1790298967",
+      "domain": "www.merrell.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://themountain.com/login.php?action=create_account",
+      "domain": "themountain.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    }
+  ],
+  "error": [
+    {
+      "url": "https://signin.costco.com/e0714dd4-784d-46d6-a278-3e29553483eb/B2C_1A_SSO_WCS_signup_signin_180/api/CombinedSigninAndSignup/unified?local=signup&csrf_token=R3pYT0hlMFVsdDJYWkZ0NXlmdVV6bHI1VmI3WFdjRWt0NE5NUm9weExISEI1N0toSVhHSDA4TUFIM1pockNIbmpaYkpubWVCaHVST2sxdUdrL2ZGd0E9PTsyMDI1LTEwLTI2VDE5OjExOjAxLjQ4MjE0MzZaO1kzZWNDNHVHc0hYOGtGaSt0T2czc1E9PTt7Ik9yY2hlc3RyYXRpb25TdGVwIjo0fQ==&tx=StateProperties=eyJUSUQiOiI4YWJiZTE2Yi04MTMyLTRjNWQtOTc0My1iNDM3MTMxYjIzMzIifQ&p=B2C_1A_SSO_WCS_signup_signin_180",
+      "domain": "signin.costco.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.staples.com/idm/com/createaccount?jumpUrl=%252F",
+      "domain": "www.staples.com",
+      "fields": 0,
+      "captcha": ""
+    }
+  ],
+  "analyzed": [
+    {
+      "url": "https://login.shop.underarmour.com/oauth2/default/v1/authorize?client_id=3da6dbce-ce3f-4ce3-8b9c-e2424d64da49&code_challenge=s3Uu6Qg90crtBw-npbCfF39JHD2y5yHT7qUp_UGwT-A&code_challenge_method=S256&locale=en-us&redirect_uri=https%3A%2F%2Fwww.underarmour.com%2Fapi%2Fauth%2Fv2%2Flogin%2F&response_type=code&scope=openid+offline_access&state=20a5c3dc-e05e-409a-8519-e4be82b98fed&flow=register",
+      "domain": "login.shop.underarmour.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.zara.com/us/en/signup",
+      "domain": "www.zara.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://my.asos.com/account/login?store=COM&country=GB&lang=en-GB&keyStoreDataversion=mhabj1f-41&defaultTab=register&returnUrl=https%3A%2F%2Fmy.asos.com%2Fauth%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dwww%26scope%3Dopenid%20profile%20offline_access%20sensitive%26redirect_uri%3Dhttps%253A%252F%252Fwww.asos.com%252F%26client-request-id%3D0193841b-3ed8-7b55-a83e-08c42ad0495e%26response_mode%3Dfragment%26response_type%3Dcode%26x-client-SKU%3Dmsal.js.browser%26x-client-VER%3D3.17.0%26client_info%3D1%26code_challenge%3DiXZN9A21m7kjTnORFprREHI4H6MhKaQ1Ipg8xEIVqcU%26code_challenge_method%3DS256%26nonce%3D0193841b-3eda-7fe0-88f6-1e691d1e3e18%26state%3DeyJpZCI6IjAxOTM4NDFiLTNlZDktNzI5Yy1iNWU4LTNkOGIxZTUyYjk2MiIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%253D%26store%3DCOM%26keyStoreDataversion%3Dmhabj1f-41%26lang%3Den-GB%26country%3DGB%26defaultTab%3Dregister",
+      "domain": "my.asos.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.nordstrom.com/signin?cm_sp=SI_SP_A-_-SI_SP_B-_-SI_SP_C&origin=tab&ReturnURL=https%3A%2F%2Fwww.nordstrom.com%2F%3Forigin%3Dsign-out",
+      "domain": "www.nordstrom.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.amazon.com/ap/register?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3F_encoding%3DUTF8%26ref_%3Dnav_newcust&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "domain": "www.amazon.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.boohoo.com/sign-up?registrationPage=true",
+      "domain": "www.boohoo.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.victoriassecret.com/us/account/create",
+      "domain": "www.victoriassecret.com",
+      "fields": 4,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.shopbop.com/ap/register?showRememberMe=true&openid.return_to=https%3A%2F%2Fwww.shopbop.com%3A443%2Fauth%2Fafter%2Fauthportal%3Fnoul%3Dtrue&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=shopbop_us_aui&openid.mode=checkid_setup&siteState=g9%2BoLb2qE0kTbKxEMvAW6397trTmt6BfrEUwvh3lcDkYAAAAAQAAAABnTNWxcmF3AAAAAD1aGrfyIF6IE%2BJ7i%2Fa6ow%3D%3D%7Chttps%3A%2F%2Fwww.shopbop.com%3A443%2F%3Fnoul%3Dtrue%7C3&marketPlaceId=A2817T8MKXE20N&language=en_US&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&pageId=shopbop-desktop&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "domain": "www.shopbop.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.net-a-porter.com/en-ph/account/register?redirect=%2Fen-ph%2F",
+      "domain": "www.net-a-porter.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.ssense.com/en-ph/account/login",
+      "domain": "www.ssense.com",
+      "fields": 4,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.theoutnet.com/en-ph/account/register",
+      "domain": "www.theoutnet.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.pullandbear.com/wy/login.html",
+      "domain": "www.pullandbear.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.express.com/register",
+      "domain": "www.express.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://ims.bentley.com/as/jJtMh/resume/as/authorization.ping",
+      "domain": "ims.bentley.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://ph.banggood.com/register.html",
+      "domain": "ph.banggood.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://login.dresslily.com/m-users-a-sign.htm?ref=https%3A%2F%2Fuser.dresslily.com%2Fm-users.htm",
+      "domain": "login.dresslily.com",
+      "fields": 3,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.hanes.com/customer/account/create/",
+      "domain": "www.hanes.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.sundayswim.com/users/signup",
+      "domain": "www.sundayswim.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.landsend.com/co/account/register?cTest=y",
+      "domain": "www.landsend.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.brooksrunning.com/en_us/brooks-run-club/",
+      "domain": "www.brooksrunning.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.michaelkors.global/ph/en/account/createAccount/",
+      "domain": "www.michaelkors.global",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://account.louisvuitton.com/eng-us/mylv/registration?response-code=code&register-url=https%3A%2F%2Faccount.louisvuitton.com%2Feng-us%2Fmylv%2Fregistration&reset-password-url=https%3A%2F%2Faccount.louisvuitton.com%2Feng-us%2Fmylv%2Fforgot-password&google=https%3A%2F%2Faccount.louisvuitton.com%2Feng-us%2Fmylv%2Fgoogle&line=https%3A%2F%2F%2Feng-us%2F&client-id=3MVG9A2kN3Bn17hvoqxK.akVTLUK1CtKpvdV2sbka7X4qecgMbRWXoXSWJ12evrTNYvAXbVbuVnC1QT36uOfu&state=OTc5MDIwNzQzMjI3NDM3NmE5MDdiNzcwZGI1ZDZkOTg0ZTcxNTc1NjJjNzQ0YjJmOGE4YTUxZDU5NzYwOTFjNy9lbmctdXM%3D&code-challenge=rg5AhC0uq6jwMb_nYh1AXAsQ5HNOEzd04UYLFToW48o&redirect-uri=https%3A%2F%2Fapi.louisvuitton.com%2Feco-us%2Flvcom-tkn-handlr-eapi%2Fv1%2Fcallback&error_redirect_url=https%3A%2F%2Fapi.louisvuitton.com%2Feng-us%2Fmylv%2Ferror",
+      "domain": "account.louisvuitton.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.tiffany.com/Customer/Account/CreateAccount.aspx",
+      "domain": "www.tiffany.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.versace.com/ph/en/registration/",
+      "domain": "www.versace.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.katespade.com/account-login",
+      "domain": "www.katespade.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.amazon.com/ap/register?clientContext=130-5036023-2089249&showRememberMe=true&openid.pape.max_auth_age=15780000&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&marketPlaceId=A1QRSCDALJFUQ9&language=en_US&pageId=amzn_wfm_web_us&openid.return_to=https%3A%2F%2Fwww.wholefoodsmarket.com%2Faccount&prevRID=QX98G9HK7B0D8K6BDVZE&openid.assoc_handle=amzn_wfm_web_us&openid.mode=checkid_setup&prepopulatedLoginId=&failedSignInCount=0&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "domain": "www.amazon.com",
+      "fields": 4,
+      "captcha": ""
+    }
+  ]
+}

@@ -1,0 +1,459 @@
+{
+  "working": [],
+  "captcha": [
+    {
+      "url": "https://www.cbssports.com/registration?end=https%3A%2F%2Fwww.cbssports.com%2F%3Ftid%3D341263&login=confirmed",
+      "domain": "www.cbssports.com",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://identity.worldathletics.org/registration?source=waw&tag=waw",
+      "domain": "identity.worldathletics.org",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.nflshop.com/register?nextPathname=/account",
+      "domain": "www.nflshop.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.mlbshop.com/register?nextPathname=/account",
+      "domain": "www.mlbshop.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://id.golfdigest.com/id/?stage=international&response_type=code&screen=login&redirect_uri=https:%2F%2Fwww.golfdigest.com%2Fapps%2Fapi%2Foauth2%2Fauthorize&state=a99b4772-4f7d-4fcc-bbe9-6b744f3252f0&client_id=zUkajvWJ04",
+      "domain": "id.golfdigest.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://profile.theguardian.com/register/email?componentEventParams=componentType%3Didentityauthentication%26componentId%3Dguardian_signin_header&returnUrl=https%3A%2F%2Fwww.theguardian.com%2Fus%2Fsport",
+      "domain": "profile.theguardian.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://login.usatoday.com/authenticate/?requested-state=create-account&reg_source=CPNAVBAR&reg_medium=ONSITE&reg_campaign=signin&reg_delivery=ux&from-state=returning-user-get-redirect&cookies=",
+      "domain": "login.usatoday.com",
+      "fields": 6,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.lta.org.uk/register/",
+      "domain": "www.lta.org.uk",
+      "fields": 10,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://accounts.outsideonline.com/oidc-frontend/signup?next=https://velo.outsideonline.com/featured&analytics_domain=VeloNews",
+      "domain": "accounts.outsideonline.com",
+      "fields": 6,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.fantasypros.com/accounts/signup/",
+      "domain": "www.fantasypros.com",
+      "fields": 3,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://bjjfanatics.com/account/register",
+      "domain": "bjjfanatics.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://account.ironman.com/wtcsso.onmicrosoft.com/b2c_1a_profile_signup_signin/oauth2/v2.0/authorize?client_id=c4f3cbf9-a0e2-4d54-b79e-48e45cdc5c8c&scope=offline_access%20openid&response_type=code%20id_token&redirect_uri=https%3A%2F%2Fmy.ironman.com%2Fapi%2Fauth%2Fcallback%2Fazureb2c&prompt=login&response_mode=form_post&client_secret=WWO8Q%7E9S%7E9bb6JHRNSxVrHn18T.zsUpQD.4Q-amY&brand=ironman&code_challenge=ffl0NoNFej8Gy6wA2SXahawnT6p2xJolphxOJ6cdl3U&code_challenge_method=S256",
+      "domain": "account.ironman.com",
+      "fields": 1,
+      "captcha": "hCaptcha"
+    },
+    {
+      "url": "https://www.hockeyworld.com/index/page/static/subpage/new_account_page",
+      "domain": "www.hockeyworld.com",
+      "fields": 12,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://store.steampowered.com/join",
+      "domain": "store.steampowered.com",
+      "fields": 8,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://nextgenerationgaming.com/m/create-account",
+      "domain": "nextgenerationgaming.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.billiards.com/account/register",
+      "domain": "www.billiards.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.shiekh.com/customer/account/create/",
+      "domain": "www.shiekh.com",
+      "fields": 6,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.jimmyjohns.com/my-account/create-an-account",
+      "domain": "www.jimmyjohns.com",
+      "fields": 6,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://soundcloud.com/signin/forgot",
+      "domain": "soundcloud.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.pepboys.com/registration",
+      "domain": "www.pepboys.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://www.dice.com/register/new-profile",
+      "domain": "www.dice.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.ziprecruiter.ie/profiles/sign_up",
+      "domain": "www.ziprecruiter.ie",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://venture.angellist.com/v/login",
+      "domain": "venture.angellist.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.virginvoyages.com/auth/v1/signup",
+      "domain": "www.virginvoyages.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.midwestnice.com/login.php?action=create_account",
+      "domain": "www.midwestnice.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.ulta.com/u/signup?state=hKFo2SBzTTNvZEZIQXBMVXBpU1lqQzBPb3BGTHpmdHlLRG95V6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIG5CVG43OFNzZjh6MWFYQ2dkc0VOaFotZ3Z2UVhzaDdBo2NpZNkgZFlGeEhweVM3Tmc0cklwMXBES1pjVEttWmRIMnZ2S1E",
+      "domain": "www.ulta.com",
+      "fields": 2,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.bestbuy.com/identity/newAccount?token=tid%3Ac2393614-b320-11f0-bf28-06428e341d35",
+      "domain": "www.bestbuy.com",
+      "fields": 0,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.buckle.com/register",
+      "domain": "www.buckle.com",
+      "fields": 1,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://myaccount.economist.com/s/login/SelfRegister?startURL=%2Fsetup%2Fsecur%2FRemoteAccessAuthorizationPage.apexp%3Fsource%3DCAAAAZoqZMCQMDAwMDAwMDAwMDAwMDAwAAABAmq0mHrMuqswM1uYw16nNFa8mImquhw5lUJY9SNh-gD6a_ST3IEHHZOSRoAWXYwfjTO3tMGA7Tb6ys9bltaDTjtc6kucrqKqxnLSoZqKmrs0LpwRz-OlON9Y_B0Voij0lHoOPWMOTsQJkAcGO1IPLg3gNOJSaLh3Dpi4BaRnttHtxHMeELJ9qCE20cDK8socllWA1XkIvx-Xa0t8Hxwghd0tnJkQi4sYpdCUoAMQNuQn-yV-tzHS73C4MZZN9UhdYUPZZLlouXmmHCvliXP_DoXb12f-WwB0MUt7VevyxECTKA8tJGUPlGMXXRK4biRE7_1VAIXeuJhiX_87JvzeTDYCZIxoK_HZD2xBXwzs1jZHohGE11D5dYMnSSRofYYADJx2rt-8yCHTwgsQz4XrfijyTOgwgUoXH4XgKyWhtFxoSY_9sbWzj76SVcdzrkfCywrfmmKCZdlTw6ru5kqvpSy7FgsHJeqqSFhx-uGVrfPDHYKv4TAST-iFH1ftwFJQb00fHZ8T_HdR0NBxlVKbg_TKw9Jy81Zg6Ju4nrJQeiwe2cMbqrPpw-xV7wuARZcqASULQFlOWDEhgFcTWFOhGSRWwsBihdIc2j3SIqOk8k9UbUq-W-I_yhufdK-Fq6qu_56cWVXqmorJmcefRRnHV7vSj0_CMEO-UGVLIjJth71jwLKdwxUbWH8HUMGxjtYcNjI7sts8hTuPSGczisR8Qkh_77FRBbQUzYaRCCUQKDdloBqv2l2xIrvC_EYVoT4o-g%3D%3D",
+      "domain": "myaccount.economist.com",
+      "fields": 0,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.napaonline.com/en/login/accountCreation",
+      "domain": "www.napaonline.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://profile.theguardian.com/register/email?componentEventParams=componentType%3Didentityauthentication%26componentId%3Dguardian_signin_header&returnUrl=https%3A%2F%2Ftheguardian.com",
+      "domain": "profile.theguardian.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://edition.cnn.com/account/register?redirect=https%3A%2F%2Fedition.cnn.com%2F",
+      "domain": "edition.cnn.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.spotify.com/ph-en/signup?forward_url=https%3A%2F%2Fopen.spotify.com%2F",
+      "domain": "www.spotify.com",
+      "fields": 3,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.dropbox.com/register",
+      "domain": "www.dropbox.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://taprootfoundation.org/signup/nonprofit",
+      "domain": "taprootfoundation.org",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://secure.aarp.org/applications/user/register?response_type=code&scope=bui+em&client_id=0oa44q7u6j2kfGSsu2p7&redirect_uri=https%3A%2F%2Fcreatethegood.aarp.org%2Fauth%2Fcallback&state=https%3A%2F%2Fcreatethegood.aarp.org%2F&promo=CTG",
+      "domain": "secure.aarp.org",
+      "fields": 10,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://secure.indeed.com/auth?continue=https%3A%2F%2Fsecure.indeed.com%2Foauth%2Fv2%2Fauthorize%3Fclient_id%3Db025a88942faa43ac7cce9a2f2fc1866302ca38a22bf45b27ad806268d8193ca%26scope%3Demail%2Boffline_access%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fwww.simplyhired.com%252Fapi%252Fauth%252Fverifier%26state%3DeyJjc3JmVG9rZW4iOiJqZjFyQXpGR0ZLZWFDY055SW5XaFdhT1hqdUhLZEltcG4xU0h1VUpfM0tjUmk3MGhwV1pWNjJqYnRLWENpS3RNcW9BREgwUXNnU3B4dXNZdXNwdEsiLCJyZWRpcmVjdFVybCI6Imh0dHBzOi8vd3d3LnNpbXBseWhpcmVkLmNvbS8iLCJyZWRpcmVjdERvbWFpbiI6Imh0dHBzOi8vd3d3LnNpbXBseWhpcmVkLmNvbSJ9%26from%3DSimplyHired&from=SimplyHired",
+      "domain": "secure.indeed.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.buydig.com/shop/Register.aspx?email=&confirmEmail=&np=Profile.aspx&sku=",
+      "domain": "www.buydig.com",
+      "fields": 8,
+      "captcha": "Unknown CAPTCHA"
+    }
+  ],
+  "error": [
+    {
+      "url": "https://www.sportsdirect.com/registration?returnUrl=%2f",
+      "domain": "www.sportsdirect.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.journeys.com/account/login",
+      "domain": "www.journeys.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.united.com/en/us/account/join-now/about-me",
+      "domain": "www.united.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.rei.com/yaRegistration?toUrl=/",
+      "domain": "www.rei.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://secure.login.gov/sign_up/enter_email",
+      "domain": "secure.login.gov",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.washingtonpost.com/subscribe/signin/?next_url=https%3A%2F%2Fwww.washingtonpost.com%2F&nid=top_pb_signin&arcId=&account_location=ONSITE_HEADER_HOMEPAGE&itid=nav_sign_in",
+      "domain": "www.washingtonpost.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://accounts.fantasticservices.com/auth/create-account?wa_sr=0&redirect_uri=https:%2F%2Fwww.fantasticservices.com%2F&int_src=ref-login",
+      "domain": "accounts.fantasticservices.com",
+      "fields": 0,
+      "captcha": ""
+    }
+  ],
+  "analyzed": [
+    {
+      "url": "https://id.nbcuni.com/websdk/v2/authenticate/?defaultPage=signUp&brandData=eyJzb3VyY2VVcmwiOiJodHRwczovL3d3dy5uYmNzcG9ydHMuY29tLyIsInJlZGlyZWN0VXJsIjoiIn0%3D&version=2&configLocationHost=https%3A%2F%2Fid.nbcuni.com%2Fwebsdk%2Fconfig&env=production&redirectUrl=https%3A%2F%2Fwww.nbcsports.com%2Flogin&language=en&key=nbcsports&mParticleDeviceID=61006c9c-2fe9-4f79-9b65-c053de104855&crossDomain=true&codeChallenge=F0_XdcmnJ6lUmZ4kUawd_5iwk_5GEuf4oJMNxEyxyrI",
+      "domain": "id.nbcuni.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://auth.fifa.com/as/authorize?response_type=code&response_mode=form_post&client_id=35072598-fc20-4142-a469-1b940db47e6f&scope=openid+profile+marketing+email+address+phone+p1%3Aupdate%3Auser%3Asafe-only+p1%3Areset%3AuserPassword&lang=en&flow=register&redirect_uri=https%3A%2F%2Fwww.fifa.com%2Fauth&state=%2Fen&campaign=Fifacom-Web",
+      "domain": "auth.fifa.com",
+      "fields": 9,
+      "captcha": ""
+    },
+    {
+      "url": "https://auth.tennis.com/login?state=hKFo2SB4R2w5NGRNTFIxMEhqbGxISEpHQUphTGNkb1E1aGY0daFupWxvZ2luo3RpZNkgNlRoa0NyRmxMTU1xWGRQMnRFRmNyRGVTV0M5d29ZY0GjY2lk2SBBdlhHWEhkdVA0eHhSbkowWm1ZN2Vya0Jva2VnaTBTdg&client=AvXGXHduP4xxRnJ0ZmY7erkBokegi0Sv&protocol=oauth2&audience=https%3A%2F%2Fuser-management.tennis.com%2F&scope=openid%20profile%20email%20offline_access&response_type=code&response_mode=query&nonce=RmtZNkliMUp0U01yS3FFaUM4TVNLeFo3elJENklzaDZtM0tkTGdxaDlILg%3D%3D&redirect_uri=https%3A%2F%2Fwww.tennis.com&code_challenge=RAbs__m0ZSiKUlPVnOsJsVo1zcI3YcDsi-iwlLjBgV0&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtc3BhLWpzIiwidmVyc2lvbiI6IjEuMjIuNiJ9",
+      "domain": "auth.tennis.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://account.formula1.com/#/en/register?redirect=https%3A%2F%2Fwww.formula1.com%2F&lead_source=web_f1core",
+      "domain": "account.formula1.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.cricbuzz.com/premium-subscription/user/sign-up",
+      "domain": "www.cricbuzz.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://id.fanatics.com/account/create?client_id=ficioNoQAkuuYP2UOJBkc784bo_FNmyEFKfHln9Jam0whIkF&response_type=code&scope=openid+account:read&redirect_uri=https://www.fanatics.com/api/account/oauth/oidcreturn&state=eyJuZXh0UGF0aG5hbWUiOiIvYWNjb3VudCIsImN1cnJlbnRQYXRobmFtZSI6Ii8iLCJzb2NpYWxJZGVudGl0eVByb3ZpZGVyIjoiZmFuaWQiLCJrZWVwTG9nZ2VkSW4iOnRydWV9&page_mode=account_create",
+      "domain": "id.fanatics.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.swimmingworldmagazine.com/news/login/?action=register",
+      "domain": "www.swimmingworldmagazine.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.newbalance.com/login/#",
+      "domain": "www.newbalance.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://boxrec.com/en/register_user",
+      "domain": "boxrec.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://account.battle.net/creation/flow/creation-full",
+      "domain": "account.battle.net",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.fortnite.com/id/register/date-of-birth?redirect_uri=http%3A%2F%2Fwww.fortnite.com%2F%3Flang%3Den-US&client_id=a485a2fde2e343dfb7559d5efeaf35d9&lang=en-US",
+      "domain": "www.fortnite.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://account.volleyballworld.com/volleyballworld.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_SIGNUP_SIGNIN_DYNAMIC&client_id=9d086c90-823a-47bb-a3c0-9711adc6ddee&nonce=defaultNonce&redirect_uri=https://login.volleyballworld.com/api/azureb2c/loginsuccess&scope=9d086c90-823a-47bb-a3c0-9711adc6ddee%20openid%20offline_access%20profile&response_type=id_token&response_mode=query&nonce=defaultNonce&prompt=login&state=https://www.volleyballworld.com",
+      "domain": "account.volleyballworld.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.amazon.ca/ap/register?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.ca%2Fshop%2Ffoodmeanderings%2F%3F_encoding%3DUTF8%26ref_%3Dnav_newcust&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=caflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "domain": "www.amazon.ca",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.oreillyauto.com/create-account",
+      "domain": "www.oreillyauto.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.ncl.com/in/en/shorex/register?SAMLRequest=jZFBb8IwDIX%2FSuR72jQFAREtYpvQkJhWjbLDbmkxUKlNIE6Bn78KVo3TtKPl9%2Fzsz9PZtanZGR1V1iQQBQIYmtJuK7NPYJMv%2BBhm6ZR0Ux%2FVvPUH84GnFsmzzmdI3RoJtM4oq6kiZXSDpHyp1vO3lZKBUEdnvS1tDWxOhM53Qc%2FWUNugW6M7VyVuPlYJHLw%2FkgrDy%2BUSmLIOStuEdLAOr2Ft95UBtrCuxNsOCex0TQhs%2BZKAKDAu5KDghRgjHwxxxItID7icxGIsRztRTLadkjJNVJ3x10vU4tKQ18YnIIUc8khwOcojoWKpYhGISH4By372f6rMncpfxxZ3EanXPM949r7OgX32dDsB9Cxv6e7%2FFHXPDtKe1ElzItvDmoaPg9O%2BfPxZ%2Bg0%3D",
+      "domain": "www.ncl.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.delta.com/joinskymiles/",
+      "domain": "www.delta.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.marriott.com/en-gb/loyalty/createAccount/createAccountPage1.mi",
+      "domain": "www.marriott.com",
+      "fields": 3,
+      "captcha": ""
+    },
+    {
+      "url": "https://id.shld.net/realms/rlmprd/protocol/openid-connect/registrations?client_id=igssears&redirect_uri=https%3A%2F%2Fwww.sears.com%2F&state=23a95203-da4a-45e1-87d2-4e3f12c3d460&response_mode=query&response_type=code&scope=openid&nonce=13bb39a1-ea59-4b3d-84c3-7ca045bd4d53&code_challenge=u53ic-QChsU06zArKOUnF6PQGLOxbssuseqbKY0_coQ&code_challenge_method=S256",
+      "domain": "id.shld.net",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.reuters.com/account/register/signup-options/?redirect=https%3A%2F%2Fwww.reuters.com%2F&referrer=registration_button&journeyStart=navigation",
+      "domain": "www.reuters.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.aa.com/web/loyalty/profile/enrollment?from=comp_nav",
+      "domain": "www.aa.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.kohls.com/myaccount/signin.jsp",
+      "domain": "www.kohls.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.aljazeera.com/account/sign-up",
+      "domain": "www.aljazeera.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.walgreens.com/register/regpersonalinfo?ru=%2Fyouraccount%2Fdefault.jsp",
+      "domain": "www.walgreens.com",
+      "fields": 4,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.timberland.com/en-us/false/poslogon?langId=1&storeId=7101",
+      "domain": "www.timberland.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://account.bbc.com/auth/identifier/signin?realm=%2F&clientId=Account&action=register&ptrt=https%3A%2F%2Fwww.bbc.com%2Fnews&userOrigin=BBCS_BBC&purpose=free&isCasso=false&redirectUri=https%3A%2F%2Fsession.bbc.com%2Fsession%2Fcallback%3Frealm%3D%2F&service=IdRegisterService&nonce=Dy951HHL-_6n3UdvSXvTAVeBuXTRlhR7xYL8",
+      "domain": "account.bbc.com",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.khanacademy.org/signup",
+      "domain": "www.khanacademy.org",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://engage.pointsoflight.org/login",
+      "domain": "engage.pointsoflight.org",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://myaccount.nytimes.com/auth/login?response_type=cookie&client_id=vi&redirect_uri=https%3A%2F%2Fwww.nytimes.com%2Fsubscription%2Fonboarding-offer%3FcampaignId%3D7JFJX%26EXIT_URI%3Dhttps%253A%252F%252Fwww.nytimes.com%252F&asset=masthead",
+      "domain": "myaccount.nytimes.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.royalcaribbean.com/account/signin",
+      "domain": "www.royalcaribbean.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.princess.com/my-princess/register/",
+      "domain": "www.princess.com",
+      "fields": 15,
+      "captcha": ""
+    }
+  ]
+}

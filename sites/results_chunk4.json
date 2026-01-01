@@ -1,0 +1,459 @@
+{
+  "working": [],
+  "captcha": [
+    {
+      "url": "https://www.catchafire.org/account/register/?type=0",
+      "domain": "www.catchafire.org",
+      "fields": 10,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.readers.com/account/register",
+      "domain": "www.readers.com",
+      "fields": 9,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.pushsquare.com/register",
+      "domain": "www.pushsquare.com",
+      "fields": 3,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.givepulse.com/register",
+      "domain": "www.givepulse.com",
+      "fields": 1,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://cam.britannica.com/registration",
+      "domain": "cam.britannica.com",
+      "fields": 5,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.flicks.co.nz/member/login/",
+      "domain": "www.flicks.co.nz",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://auth.eatingwell.com/realms/etg/login-actions/registration?client_id=etg&tab_id=vvx3L7CNvkQ&client_data=eyJydSI6Imh0dHBzOi8vd3d3LmVhdGluZ3dlbGwuY29tL2F1dGhlbnRpY2F0aW9uL2NvZGUtZXhjaGFuZ2UiLCJydCI6ImNvZGUiLCJzdCI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSnFUSEIzV0dRdmVWWllkMnB5T1dwWWNYVlJhekJ5VlRWeE1VdEdabTgwVFZJMVVIWjFXSGxNT0dwalBTSXNJbkpsWkdseVpXTjBWWEpzSWpvaWFIUjBjSE02THk5M2QzY3VaV0YwYVc1bmQyVnNiQzVqYjIwdklpd2lhWE56SWpvaVJHOTBaR0Z6YUNCTlpYSmxaR2wwYUNJc0ltVjRjQ0k2TVRjMk1UVTJOVE15Tnl3aWFXRjBJam94TnpZeE5UWXlOakkzTENKb2FXUmxRMjl1Wm1seWJXRjBhVzl1UW1GdWJtVnlJanBtWVd4elpYMC5EaW05LXh3TnFYa3lwSFRSQ3djZnRFZXJ1UUNiaGllY05rV2dpYU1vV2pJIn0",
+      "domain": "auth.eatingwell.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://id.condenast.com/interaction/wffDZSf675hs3bpM1e5qU/email?xid=53278a13-15f0-42d7-95e2-affafb6a726c&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2F%22%7D&prompt=select_account%20consent&source=VERSO_NAVIGATION&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.bd96ef0e8186fcea33396720bc76b8b9&redirect_uri=https%3A%2F%2Fwww.epicurious.com%2Fauth%2Fcomplete&response_type=code",
+      "domain": "id.condenast.com",
+      "fields": 1,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://shop.forksoverknives.com/account/register",
+      "domain": "shop.forksoverknives.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://auth.olivemagazine.com/u/signup?state=hKFo2SB3YnRxeEY3NXBKZUl6MVBPSUg4ampuVFpvY2tDWWRfcqFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIHJLVVVjVmZkMlllVkctM19zMHU1SHZzRUwwQjdHb3Bao2NpZNkgbmlNMTlWVkk4VnZnVDNVYnBFTHhsRWpQRjNSemVJV2Y",
+      "domain": "auth.olivemagazine.com",
+      "fields": 2,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.librarything.com/",
+      "domain": "www.librarything.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.twopeasandtheirpod.com/register/",
+      "domain": "www.twopeasandtheirpod.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA, Cloudflare"
+    },
+    {
+      "url": "https://www.frenchconnection.com/account/register",
+      "domain": "www.frenchconnection.com",
+      "fields": 9,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.ap.com/login/registration",
+      "domain": "www.ap.com",
+      "fields": 12,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.americanvintage-store.com/us/en/login",
+      "domain": "www.americanvintage-store.com",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.ryderwear.com/account/register",
+      "domain": "www.ryderwear.com",
+      "fields": 11,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.ghost.co.uk/account/register",
+      "domain": "www.ghost.co.uk",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://reactormag.com/register",
+      "domain": "reactormag.com",
+      "fields": 9,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://id.condenast.com/interaction/XH0Q7en4k6Ju0PV4y937V/email?_sp=a5c8b233-0b56-42a1-8d12-eeeefe7deea5.1761563932223&xid=40ce2fb0-6c40-4e12-b845-12a099530725&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2F%3F_sp%3Da5c8b233-0b56-42a1-8d12-eeeefe7deea5.1761563932223%22%7D&prompt=select_account%20consent&source=VERSO_NAVIGATION&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.608744bd5ce61191247151e9c4b3fc76&redirect_uri=https%3A%2F%2Fwww.bonappetit.com%2Fauth%2Fcomplete&response_type=code",
+      "domain": "id.condenast.com",
+      "fields": 1,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://auth.allrecipes.com/realms/alrcom/login-actions/registration?client_id=alrcom&tab_id=52DmsapTXbo&client_data=eyJydSI6Imh0dHBzOi8vd3d3LmFsbHJlY2lwZXMuY29tL2F1dGhlbnRpY2F0aW9uL2NvZGUtZXhjaGFuZ2UiLCJydCI6ImNvZGUiLCJzdCI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSjBOVzk2YWpKT01GaDFObkIxTTA5elEyRnhkbnAwVmtaelJHUmFSakJGTnpaTE5pOVNaVFY2UTIxblBTSXNJbkpsWkdseVpXTjBWWEpzSWpvaWFIUjBjSE02THk5M2QzY3VZV3hzY21WamFYQmxjeTVqYjIwdklpd2lhWE56SWpvaVJHOTBaR0Z6YUNCTlpYSmxaR2wwYUNJc0ltVjRjQ0k2TVRjMk1UVTJOalkxTkN3aWFXRjBJam94TnpZeE5UWXpPVFUwTENKb2FXUmxRMjl1Wm1seWJXRjBhVzl1UW1GdWJtVnlJanBtWVd4elpYMC5qbThBdVpYaUUyaVNLVWVmQzNZTzBTLXYzSTctS1kxUE00dWFWeXEyYmJBIn0",
+      "domain": "auth.allrecipes.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.biblio.com/login?location=%2F",
+      "domain": "www.biblio.com",
+      "fields": 3,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://profile.theguardian.com/signin?INTCMP=DOTCOM_NEWHEADER_SIGNIN&ABCMP=ab-sign-in&componentEventParams=componentType%3Didentityauthentication%26componentId%3Dguardian_signin_header",
+      "domain": "profile.theguardian.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://login.publicmediasignin.org/f29e2df8-7cf0-4741-939b-dc9e9555f527/auth-ui/v2/login?__aic_csrf=k85PubduZ6nRfKIt&client_id=00ac4575-e809-4694-bb71-93b9d9ebb2f3&code_challenge=XiwsbOCTpcAHDDP11m2CmJKCcpF2mbQMp-wQa1FD60U&code_challenge_method=S256&redirect_uri=https%3A%2F%2Fauthorization.api.npr.org%2Fv2%2Flogin%2Fsuccess&response_type=code&scope=openid+email+profile&state=849566365%3A1903919139",
+      "domain": "login.publicmediasignin.org",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://orcid.org/register",
+      "domain": "orcid.org",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://thoughtsocks.com/account/register",
+      "domain": "thoughtsocks.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://shopify.com/authentication/64320241896/login?client_id=45a461a0-5460-469f-a321-d1d55d1fc58e&locale=en&redirect_uri=%2Fauthentication%2F64320241896%2Foauth%2Fauthorize%3Fclient_id%3D45a461a0-5460-469f-a321-d1d55d1fc58e%26locale%3Den%26nonce%3De5ea48d5-8d49-4bf0-bc32-e7826850f09d%26redirect_uri%3Dhttps%253A%252F%252Fshopify.com%252F64320241896%252Faccount%252Fcallback%253Fsource%253Dcore%26region_country%3DUS%26response_type%3Dcode%26scope%3Dopenid%2Bemail%2Bcustomer-account-api%253Afull%26state%3DhWN4b5NM9Rs2TOUAQGKmyplp&region_country=US",
+      "domain": "shopify.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.jasonsdeli.com/account/signup",
+      "domain": "www.jasonsdeli.com",
+      "fields": 7,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.apmex.com/account/register",
+      "domain": "www.apmex.com",
+      "fields": 6,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://podcam.supplies/index.php?route=account/register",
+      "domain": "podcam.supplies",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.rainbarrelsintl.com/index.php?route=account/register",
+      "domain": "www.rainbarrelsintl.com",
+      "fields": 7,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.suncountryvb.org/scvb-cart/?route=account/register",
+      "domain": "www.suncountryvb.org",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.badgergraphic.com/index.php?route=account/register",
+      "domain": "www.badgergraphic.com",
+      "fields": 7,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.pentagon-tactical.com/index.php?route=account/register",
+      "domain": "www.pentagon-tactical.com",
+      "fields": 0,
+      "captcha": "Cloudflare"
+    },
+    {
+      "url": "https://www.superdroidrobots.com/store/index.php?route=account/register",
+      "domain": "www.superdroidrobots.com",
+      "fields": 7,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.wassismeatmarket.com/index.php?route=account/register",
+      "domain": "www.wassismeatmarket.com",
+      "fields": 7,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://go-britain.nl/my-account/orders/",
+      "domain": "go-britain.nl",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    }
+  ],
+  "error": [
+    {
+      "url": "https://secure.login.gov/sign_up/enter_email",
+      "domain": "secure.login.gov",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.booksamillion.com/sitelogin",
+      "domain": "www.booksamillion.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://ph.hotels.com/signup?&uurl=e3id%3Dredr%26rurl%3D%2F%3Flocale%3Den_PH%26pos%3DHCOM_PH%26siteid%3D300000044",
+      "domain": "ph.hotels.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.edtm.com/index.php?route=account/register",
+      "domain": "www.edtm.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://istanbulsuarmaturleri.com.tr/index.php?route=account/register",
+      "domain": "istanbulsuarmaturleri.com.tr",
+      "fields": 6,
+      "captcha": ""
+    }
+  ],
+  "analyzed": [
+    {
+      "url": "https://www.justserve.org/register",
+      "domain": "www.justserve.org",
+      "fields": 8,
+      "captcha": ""
+    },
+    {
+      "url": "https://dosomething.org/onboarding/registration?step=1",
+      "domain": "dosomething.org",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://auth.tourradar.com/signup?response_type=code&lang=en&client_id=60kq61eke3abogbrlqt6mtm2ru&redirect_uri=https%3A%2F%2Fwww.tourradar.com%2Fapi%2Fcentral%2Fauth%2Flogin%2Fcallback&scope=openid+email&state=eyJzdWJzY3JpYmUiOnRydWUsImN1cnJlbmN5IjoiVVNEIiwic3RhdGUiOiI2NjRkMjU3Nzg1YjE2NjBhZjgyNjliYmRiZTg1YzM2ZCJ9&nonce=17aa1a52323cf62f12cee0554a594e14",
+      "domain": "auth.tourradar.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://auth.trivago.com/en-PH",
+      "domain": "auth.trivago.com",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://sea.ign.com/",
+      "domain": "sea.ign.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.childrensplace.com/us/home/register",
+      "domain": "www.childrensplace.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.amazon.com/ap/register?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Famz-books%2Fstore%2F%3F_encoding%3DUTF8%26ou%3Dpsf%26ref_%3Dnav_newcust&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "domain": "www.amazon.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.dorothyperkins.com/sign-up",
+      "domain": "www.dorothyperkins.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://secure.penguinrandomhouse.com/as/authorize?response_type=code&client_id=f4bf523c-6833-4ecd-8306-c0b8162cbb49&redirect_uri=https%3A%2F%2Fwww.penguinrandomhouse.com%2Fsignin-reply%2F&scope=openid+email+profile+prh&state=6a633e0da52c8a00badf86a0f9dfc70f&nonce=4f61d001d141af3b33db00925594187d&acr_values=b5e71954b718f6db564a9bd5c5c6f1bb&ip=136.239.180.59&refurl=https%3A%2F%2Fwww.penguinrandomhouse.com%2F&loc=hdr-nav-banner",
+      "domain": "secure.penguinrandomhouse.com",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.goodreads.com/ap/register?language=en_US&openid.assoc_handle=amzn_goodreads_web_na&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.return_to=https%3A%2F%2Fwww.goodreads.com%2Fap-handler%2Fregister&siteState=eyJyZXR1cm5fdXJsIjoiaHR0cHM6Ly93d3cuZ29vZHJlYWRzLmNvbS8ifQ%3D%3D",
+      "domain": "www.goodreads.com",
+      "fields": 4,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.fantasticfiction.com/users/signup/",
+      "domain": "www.fantasticfiction.com",
+      "fields": 4,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.amazon.com/ap/register?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Famz-books%2Fstore%2F%3F_encoding%3DUTF8%26ou%3Dpsf%26ref_%3Dnav_newcust&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "domain": "www.amazon.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://auth.www.abebooks.com/ap/register?showRememberMe=true&openid.pape.max_auth_age=899&openid.identity=http%3A%2F%2Fwww.amazon.com%2Fap%2Fspecs%2Fauth%2Fconfirm_credentials&pageId=abe_site_us&openid.return_to=https%3A%2F%2Fwww.abebooks.com%2Fservlet%2FSignInCompletion%3Fgoto%3DMembersMainMenu&prevRID=R1DBDVSK5YE0RP6HSV1W&openid.assoc_handle=abe_site_us&openid.mode=checkid_setup&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&prepopulatedLoginId=&failedSignInCount=0&openid.claimed_id=http%3A%2F%2Fwww.amazon.com%2Fap%2Fspecs%2Fauth%2Fconfirm_credentials&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0",
+      "domain": "auth.www.abebooks.com",
+      "fields": 4,
+      "captcha": ""
+    },
+    {
+      "url": "https://auth.reedsy.com/sign_up",
+      "domain": "auth.reedsy.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.off---white.com/en-ph/",
+      "domain": "www.off---white.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://usa.tommy.com/en/createaccount",
+      "domain": "usa.tommy.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.torrid.com/account",
+      "domain": "www.torrid.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.southwest.com/",
+      "domain": "www.southwest.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.katespade.co.uk/account-login",
+      "domain": "www.katespade.co.uk",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://tutorialsninja.com/demo/index.php?route=account/register",
+      "domain": "tutorialsninja.com",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://naveenautomationlabs.com/opencart/index.php?route=account/register",
+      "domain": "naveenautomationlabs.com",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.thatsweatshop.com/index.php?route=account/register",
+      "domain": "www.thatsweatshop.com",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://scrantonculturalcenter.org/opencart/index.php?route=account/register",
+      "domain": "scrantonculturalcenter.org",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://zshadeusa.com/index.php?route=account/register",
+      "domain": "zshadeusa.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.hiddeneurope.eu/shop/index.php?route=account/register",
+      "domain": "www.hiddeneurope.eu",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.noah.com.sg/index.php?route=account/register",
+      "domain": "www.noah.com.sg",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://insteelstore.com/index.php?route=account/register",
+      "domain": "insteelstore.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.ourfriday.co.uk/index.php?route=account/register",
+      "domain": "www.ourfriday.co.uk",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://parksend.sg/index.php?route=account/register",
+      "domain": "parksend.sg",
+      "fields": 16,
+      "captcha": ""
+    },
+    {
+      "url": "https://j316ministries.com/shop/index.php?route=account/register",
+      "domain": "j316ministries.com",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.thebathroomstoreus.com/index.php?route=account/register",
+      "domain": "www.thebathroomstoreus.com",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://shop.qrp-labs.com/index.php?route=account/register",
+      "domain": "shop.qrp-labs.com",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://kotamasmall.com/index.php?route=account/register",
+      "domain": "kotamasmall.com",
+      "fields": 6,
+      "captcha": ""
+    },
+    {
+      "url": "https://join.ribamundotecnologia.es/Account/Register",
+      "domain": "join.ribamundotecnologia.es",
+      "fields": 3,
+      "captcha": ""
+    }
+  ]
+}

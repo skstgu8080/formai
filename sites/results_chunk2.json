@@ -1,0 +1,459 @@
+{
+  "working": [],
+  "captcha": [
+    {
+      "url": "https://id.condenast.com/interaction/n-anesN9rQ3ldqVT-igL-/email?_sp=da7486bc-7c00-43f9-9756-4daae928f1ab.1733100268719&xid=e45a96c4-7ef5-4f04-9f25-9e2a11fc661c&scope=openid%20offline_access&state=%7B%22redirectURL%22%3A%22%2Fnewsletter%3F_sp%3Dda7486bc-7c00-43f9-9756-4daae928f1ab.1733100268719%22%7D&prompt=select_account%20consent&resource=https%3A%2F%2Fid.condenast.com&client_id=condenast.identity.d20cfbd5094f2301a2e26c9742c9da92&redirect_uri=https%3A%2F%2Fwww.glamour.com%2Fauth%2Fcomplete&response_type=code",
+      "domain": "id.condenast.com",
+      "fields": 1,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://unity.hardrock.com/sign-up",
+      "domain": "unity.hardrock.com",
+      "fields": 17,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://profile.theartnewspaper.com/sign-up?redirect_url=https%3A%2F%2Fwww.theartnewspaper.com",
+      "domain": "profile.theartnewspaper.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://lavishalice.com/account/register",
+      "domain": "lavishalice.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.hellofresh.com/login",
+      "domain": "www.hellofresh.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.otterbox.com/en-us/account-login?action=register",
+      "domain": "www.otterbox.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.artrabbit.com/register",
+      "domain": "www.artrabbit.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA, Cloudflare"
+    },
+    {
+      "url": "https://www.earthboundtrading.com/customer/account/create/",
+      "domain": "www.earthboundtrading.com",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://frockandfrill.com/en-us/account/register",
+      "domain": "frockandfrill.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://goodr.com/account/register",
+      "domain": "goodr.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://caviar.com/account/register",
+      "domain": "caviar.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://betseyjohnson.com/account/register",
+      "domain": "betseyjohnson.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.shoebacca.com/account/register",
+      "domain": "www.shoebacca.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.shoebacca.com/account/register",
+      "domain": "www.shoebacca.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://us.motelrocks.com/account/register",
+      "domain": "us.motelrocks.com",
+      "fields": 6,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://us.dockers.com/account/register",
+      "domain": "us.dockers.com",
+      "fields": 3,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.windsorstore.com/account/register",
+      "domain": "www.windsorstore.com",
+      "fields": 6,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://ivoryella.com/account/register",
+      "domain": "ivoryella.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.aimeleondore.com/account/register?pb=0",
+      "domain": "www.aimeleondore.com",
+      "fields": 7,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://shopakira.com/account/register",
+      "domain": "shopakira.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://frockandfrill.com/en-us/account/register",
+      "domain": "frockandfrill.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.loveshackfancy.com/account/register",
+      "domain": "www.loveshackfancy.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://skims.com/en-gb/account/register",
+      "domain": "skims.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.quay.com/account/register",
+      "domain": "www.quay.com",
+      "fields": 4,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.3sisters.com/account/register",
+      "domain": "www.3sisters.com",
+      "fields": 2,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.patpat.com/account/login?return_url=%2Faccount",
+      "domain": "www.patpat.com",
+      "fields": 1,
+      "captcha": "hCaptcha, reCAPTCHA, Cloudflare"
+    },
+    {
+      "url": "https://www.tinycottons.com/usd_en/customer/account/create/",
+      "domain": "www.tinycottons.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://standardsandpractices.com/account/register",
+      "domain": "standardsandpractices.com",
+      "fields": 1,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://lemonadefashion.com/sign-up",
+      "domain": "lemonadefashion.com",
+      "fields": 4,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://ca.jollibeefoods.com/create-account",
+      "domain": "ca.jollibeefoods.com",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.chickensaladchick.com/account/signup/",
+      "domain": "www.chickensaladchick.com",
+      "fields": 10,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://api.punchh.com/customers/sign_up.iframe?slug=cinnabon&sso=1",
+      "domain": "api.punchh.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://api.punchh.com/customers/sign_up.iframe?slug=auntieannes&sso=1",
+      "domain": "api.punchh.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://www.gamespot.com/login-signup/",
+      "domain": "www.gamespot.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://api.punchh.com/customers/sign_up.iframe?slug=schlotzskys&sso=1",
+      "domain": "api.punchh.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://id.gamer.network/account/create",
+      "domain": "id.gamer.network",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://yogurtland.com/register",
+      "domain": "yogurtland.com",
+      "fields": 15,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://api.punchh.com/customers/sign_up.iframe?slug=pancheros&sso=1",
+      "domain": "api.punchh.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://api.punchh.com/customers/sign_up.iframe?slug=honeygrow&sso=1",
+      "domain": "api.punchh.com",
+      "fields": 0,
+      "captcha": "Unknown CAPTCHA"
+    },
+    {
+      "url": "https://www.newfrescos.com/register.asp?cg=0",
+      "domain": "www.newfrescos.com",
+      "fields": 16,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://store.nba.com/register?nextPathname=/account",
+      "domain": "store.nba.com",
+      "fields": 5,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.travelocity.com/signup?ckoflag=0&challengeReferer=docs.google.com",
+      "domain": "www.travelocity.com",
+      "fields": 0,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://chocolate.com/account/register",
+      "domain": "chocolate.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://auth.tasteofhome.com/oauth2/register?client_id=2dfc66ec-2722-46dd-af5d-047eb8101264&response_type=code&redirect_uri=https://www.tasteofhome.com/",
+      "domain": "auth.tasteofhome.com",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://chefschoice.com/account/register",
+      "domain": "chefschoice.com",
+      "fields": 5,
+      "captcha": "hCaptcha, reCAPTCHA"
+    },
+    {
+      "url": "https://www.mylo.id/signup?client_id=3hg9ll11hfau7l10ofmt2kh36t&redirect_uri=https%3A%2F%2Fwww.delish.com%2Fauth%2Flogin&state=HxI4WVVb-E-mxQyOWmLT_aULJRBgbUfrRSAk",
+      "domain": "www.mylo.id",
+      "fields": 2,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.starlightcinemas.com/sign-up/",
+      "domain": "www.starlightcinemas.com",
+      "fields": 8,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.cinemavillage.com/members/create-an-account/",
+      "domain": "www.cinemavillage.com",
+      "fields": 13,
+      "captcha": "reCAPTCHA"
+    },
+    {
+      "url": "https://www.moviepass.io/",
+      "domain": "www.moviepass.io",
+      "fields": 6,
+      "captcha": "reCAPTCHA"
+    }
+  ],
+  "error": [
+    {
+      "url": "https://www.roots.com/on/demandware.store/Sites-RootsUS-Site/en_US/Register-Show",
+      "domain": "www.roots.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.revolve.com/r/SignIn.jsp?page=%2Fr%2FHomepage.jsp",
+      "domain": "www.revolve.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://cuenta.elcorteingles.es/es/registro/?response_type=code&scope=openid%20profile%20plans&client_id=rjx5snOWlh40SgcE0dg2guk4YnXhECYd&redirect_uri=https%3A%2F%2Fwww.elcorteingles.es%2Fecivuestore%2Fsession%2Fcallback%3Fto%3D%252F&back_to=https%3A%2F%2Fwww.elcorteingles.es%252F&_gl=1*irznd2*_ga*MzU1NzQ3NDk5LjE3MzMxMDM3MTM.*_ga_XG9L1L3E0D*MTczMzEwNzU3MS4yLjAuMTczMzEwNzU3MS42MC4wLjA.*_gcl_au*MTAwNTk5NTc2NS4xNzMzMTA3NTcx",
+      "domain": "cuenta.elcorteingles.es",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.mcdonalds.com/us/en-us/mcdonalds-email-signup.html",
+      "domain": "www.mcdonalds.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://account.peets.com/Registration?target=home",
+      "domain": "account.peets.com",
+      "fields": 0,
+      "captcha": ""
+    }
+  ],
+  "analyzed": [
+    {
+      "url": "https://www.jackjones.com/en-us/login?view=signup",
+      "domain": "www.jackjones.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://engage.metmuseum.org/account/login/register/?returnUrl=https://engage.metmuseum.org/members/membership/?promocode=56373",
+      "domain": "engage.metmuseum.org",
+      "fields": 12,
+      "captcha": ""
+    },
+    {
+      "url": "https://hq.ssrn.com/login/pubsigninjoin.cfm",
+      "domain": "hq.ssrn.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.sneakerdistrict.com/customer/account/create",
+      "domain": "www.sneakerdistrict.com",
+      "fields": 12,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.ae.com/us/en/myaccount/create-account",
+      "domain": "www.ae.com",
+      "fields": 11,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.patagonia.com/account/login/?action=register&rurl=18",
+      "domain": "www.patagonia.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.eddiebauer.com/signup",
+      "domain": "www.eddiebauer.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.aritzia.com/us/en/my-account/create-account",
+      "domain": "www.aritzia.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.crateandbarrel.com/account/create-account",
+      "domain": "www.crateandbarrel.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.dominospizza.ph/pages/customer/#!/customer/profile/new",
+      "domain": "www.dominospizza.ph",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.wafflehouse.com/regulars-club/",
+      "domain": "www.wafflehouse.com",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://knowledgexpert.bearcreek.com/login",
+      "domain": "knowledgexpert.bearcreek.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://auth.littlecaesars.com/oauth2/register?client_id=0e77472d-aa37-4578-b675-c96dfcbe1cb8&code_challenge=a2V7QhdpqSew0bHDYO2pzy5F86VdekRZJqhxVB2_2Zc&code_challenge_method=S256&redirect_uri=%2Fapp%2Fcallback&response_type=code&scope=openid+email+profile+offline_access&state=eyJjIjoiMGU3NzQ3MmQtYWEzNy00NTc4LWI2NzUtYzk2ZGZjYmUxY2I4IiwiciI6Imh0dHBzOi8vbGl0dGxlY2Flc2Fycy5jb20vZW4tdXMvb2F1dGgvY2FsbGJhY2siLCJzIjoie30ifQ%3D%3D&tenantId=8610aebe-d6af-4451-8c2e-955480bbf63c",
+      "domain": "auth.littlecaesars.com",
+      "fields": 2,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.loverslane.com/account/login",
+      "domain": "www.loverslane.com",
+      "fields": 3,
+      "captcha": ""
+    },
+    {
+      "url": "https://secure.mealpal.com/signup?utm_content=HDcsQhSZVnAcbcAv&market=New%20York%20City&_gl=1*1mgtr4u*_ga*Njc1NDU2NjIwLjE3NDA2ODY5MjI.*_ga_H8TEJV29FZ*MTc0MDY4NjkyMS4xLjAuMTc0MDY4Njk1MC42MC4wLjA.*_gcl_au*NDc3MzQ4MDQwLjE3NDA2ODY5NTA.",
+      "domain": "secure.mealpal.com",
+      "fields": 3,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.goodvibes.com/register",
+      "domain": "www.goodvibes.com",
+      "fields": 3,
+      "captcha": ""
+    },
+    {
+      "url": "https://seasalt.com/customer/user/registration",
+      "domain": "seasalt.com",
+      "fields": 1,
+      "captcha": ""
+    },
+    {
+      "url": "https://www.fandango.com/accounts/join-now?from=https%3A%2F%2Fwww.fandango.com%2F",
+      "domain": "www.fandango.com",
+      "fields": 5,
+      "captcha": ""
+    },
+    {
+      "url": "https://authn.edx.org/register",
+      "domain": "authn.edx.org",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://grandcinema.com/register",
+      "domain": "grandcinema.com",
+      "fields": 0,
+      "captcha": ""
+    },
+    {
+      "url": "https://horizoncinemas.com/register",
+      "domain": "horizoncinemas.com",
+      "fields": 0,
+      "captcha": ""
+    }
+  ]
+}
