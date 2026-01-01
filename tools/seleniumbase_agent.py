@@ -592,7 +592,20 @@ class SeleniumBaseAgent:
             sb_kwargs = {
                 "uc": True,
                 "headless": self.headless,
+                "uc_subprocess": True,  # Better PyInstaller compatibility
             }
+
+            # Use persistent user data dir for better Cloudflare bypass
+            # (consistent fingerprint + cookies from previous bypasses)
+            try:
+                from pyinstaller_utils import get_data_path
+                user_data_dir = get_data_path() / "chrome_profile"
+                print(f"[Chrome] Data path: {get_data_path()}")
+            except ImportError:
+                user_data_dir = Path("data") / "chrome_profile"
+            user_data_dir.mkdir(parents=True, exist_ok=True)
+            sb_kwargs["user_data_dir"] = str(user_data_dir)
+            print(f"[Chrome] Using persistent profile: {user_data_dir}")
 
             if DEBLOAT_AVAILABLE and self.debloat:
                 # Add Chrome args to block images at browser level
@@ -642,30 +655,50 @@ class SeleniumBaseAgent:
                 # ==================== PHASE 1: NAVIGATE ====================
                 print("\n[Phase 1] NAVIGATE - Opening URL with UC Mode...")
                 try:
-                    sb.uc_open_with_reconnect(url, reconnect_time=4)
-                    sb.sleep(2)
+                    # Use longer reconnect time for more reliable Cloudflare bypass
+                    sb.uc_open_with_reconnect(url, reconnect_time=6)
+                    sb.sleep(3)
 
                     # Handle Cloudflare with multiple retry attempts
                     cf_bypassed = False
-                    for attempt in range(3):
+                    for attempt in range(5):  # More attempts
                         title = sb.get_title().lower()
-                        if 'just a moment' in title or 'checking' in title or 'cloudflare' in title:
-                            print(f"[Phase 1] Cloudflare detected - attempt {attempt + 1}/3...")
+                        page_source = sb.get_page_source().lower() if attempt > 0 else ""
+
+                        is_cf = ('just a moment' in title or
+                                 'checking' in title or
+                                 'cloudflare' in title or
+                                 'ray id' in page_source)
+
+                        if is_cf:
+                            print(f"[Phase 1] Cloudflare detected (title: {title[:30]}) - attempt {attempt + 1}/5...")
                             try:
                                 # Try different bypass methods
                                 if attempt == 0:
                                     sb.uc_gui_handle_cf()
                                 elif attempt == 1:
                                     sb.uc_click("body")
-                                    sb.sleep(1)
+                                    sb.sleep(2)
+                                    sb.uc_gui_handle_cf()
+                                elif attempt == 2:
+                                    # Try clicking the checkbox directly
+                                    try:
+                                        sb.uc_gui_click_cf()
+                                    except:
+                                        sb.uc_gui_handle_cf()
+                                elif attempt == 3:
+                                    # Refresh and try again
+                                    sb.refresh()
+                                    sb.sleep(3)
                                     sb.uc_gui_handle_cf()
                                 else:
-                                    # Last resort - wait longer
-                                    sb.sleep(5)
+                                    # Last resort - wait much longer
+                                    sb.sleep(8)
                                     sb.uc_gui_handle_cf()
-                                sb.sleep(3)
+                                sb.sleep(4)
                             except Exception as cf_err:
                                 print(f"[Phase 1] CF bypass attempt {attempt + 1} error: {cf_err}")
+                                sb.sleep(2)
                         else:
                             cf_bypassed = True
                             break
@@ -673,7 +706,7 @@ class SeleniumBaseAgent:
                     # Final check
                     title = sb.get_title().lower()
                     if 'just a moment' in title or 'checking' in title:
-                        result["error"] = "Could not bypass Cloudflare after 3 attempts"
+                        result["error"] = "Could not bypass Cloudflare after 5 attempts"
                         return result
 
                     if cf_bypassed or 'just a moment' not in title:
