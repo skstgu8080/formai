@@ -2460,7 +2460,18 @@ async def ai_agent_fill_batch(request: AIAgentBatchRequest, background_tasks: Ba
 
         async def run_batch():
             global ai_agent_state
-            from tools.seleniumbase_agent import SeleniumBaseAgent
+            logger.info("[AI Agent] Starting batch run...")
+
+            try:
+                from tools.seleniumbase_agent import SeleniumBaseAgent
+                logger.info("[AI Agent] SeleniumBaseAgent imported successfully")
+            except Exception as import_err:
+                logger.error(f"[AI Agent] Failed to import SeleniumBaseAgent: {import_err}")
+                await broadcast_message({
+                    "type": "ai_agent_error",
+                    "data": {"error": f"Import error: {import_err}"}
+                })
+                return
 
             ai_agent_state["running"] = True
             ai_agent_state["progress"] = {
@@ -2471,11 +2482,13 @@ async def ai_agent_fill_batch(request: AIAgentBatchRequest, background_tasks: Ba
             }
 
             try:
+                logger.info(f"[AI Agent] Creating SeleniumBaseAgent (headless={request.headless})...")
                 agent = SeleniumBaseAgent(
                     headless=request.headless,
                     hold_open=5,
                     isolate_form=request.isolate_form
                 )
+                logger.info("[AI Agent] Agent created, starting fill_sites...")
 
                 async def on_progress(info):
                     if info["type"] == "site_complete":

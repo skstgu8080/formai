@@ -645,21 +645,38 @@ class SeleniumBaseAgent:
                     sb.uc_open_with_reconnect(url, reconnect_time=4)
                     sb.sleep(2)
 
-                    # Handle Cloudflare if present
+                    # Handle Cloudflare with multiple retry attempts
+                    cf_bypassed = False
+                    for attempt in range(3):
+                        title = sb.get_title().lower()
+                        if 'just a moment' in title or 'checking' in title or 'cloudflare' in title:
+                            print(f"[Phase 1] Cloudflare detected - attempt {attempt + 1}/3...")
+                            try:
+                                # Try different bypass methods
+                                if attempt == 0:
+                                    sb.uc_gui_handle_cf()
+                                elif attempt == 1:
+                                    sb.uc_click("body")
+                                    sb.sleep(1)
+                                    sb.uc_gui_handle_cf()
+                                else:
+                                    # Last resort - wait longer
+                                    sb.sleep(5)
+                                    sb.uc_gui_handle_cf()
+                                sb.sleep(3)
+                            except Exception as cf_err:
+                                print(f"[Phase 1] CF bypass attempt {attempt + 1} error: {cf_err}")
+                        else:
+                            cf_bypassed = True
+                            break
+
+                    # Final check
                     title = sb.get_title().lower()
                     if 'just a moment' in title or 'checking' in title:
-                        print("[Phase 1] Cloudflare detected - handling...")
-                        try:
-                            sb.uc_gui_handle_cf()
-                            sb.sleep(3)
-                        except:
-                            pass
+                        result["error"] = "Could not bypass Cloudflare after 3 attempts"
+                        return result
 
-                        # Check again
-                        title = sb.get_title().lower()
-                        if 'just a moment' in title:
-                            result["error"] = "Could not bypass Cloudflare"
-                            return result
+                    if cf_bypassed or 'just a moment' not in title:
                         print("[Phase 1] Cloudflare bypassed!")
 
                     result["phases_completed"].append("navigate")

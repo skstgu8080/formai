@@ -12,10 +12,17 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional
 
+# Get data path for PyInstaller compatibility (user data next to exe)
+try:
+    from pyinstaller_utils import get_data_path
+    DATA_BASE_PATH = get_data_path()
+except ImportError:
+    DATA_BASE_PATH = Path(".")
+
 logger = logging.getLogger("formai-db")
 
-# Database location
-DB_PATH = Path("data/formai.db")
+# Database location - use data path for PyInstaller compatibility
+DB_PATH = DATA_BASE_PATH / "data" / "formai.db"
 
 # Schema version for migrations
 SCHEMA_VERSION = 1
@@ -247,7 +254,7 @@ def migrate_json_to_sqlite() -> dict:
             stats["errors"].append(f"Sites: {e}")
 
     # Migrate learned fields
-    learned_file = Path("data/learned_fields.json")
+    learned_file = DATA_BASE_PATH / "data" / "learned_fields.json"
     if learned_file.exists():
         try:
             with open(learned_file, 'r', encoding='utf-8') as f:

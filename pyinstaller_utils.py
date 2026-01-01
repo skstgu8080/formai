@@ -9,7 +9,7 @@ from pathlib import Path
 
 def get_base_path() -> Path:
     """
-    Get the base path for the application.
+    Get the base path for bundled assets (web, static, tools).
 
     Works correctly in both:
     - Development mode (running from Python)
@@ -22,6 +22,23 @@ def get_base_path() -> Path:
         # Running in PyInstaller bundle
         # sys._MEIPASS is the temporary folder where PyInstaller extracts files
         return Path(sys._MEIPASS)
+    else:
+        # Running in normal Python environment
+        return Path(__file__).parent.resolve()
+
+
+def get_data_path() -> Path:
+    """
+    Get the path for user data (database, profiles, etc.).
+
+    User data should be stored next to the executable, NOT in the temp folder.
+
+    Returns:
+        Path object pointing to the user data directory
+    """
+    if getattr(sys, 'frozen', False):
+        # Running as bundled exe - use exe's directory
+        return Path(sys.executable).parent.resolve()
     else:
         # Running in normal Python environment
         return Path(__file__).parent.resolve()
