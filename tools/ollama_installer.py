@@ -320,24 +320,32 @@ class OllamaInstaller:
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             startupinfo.wShowWindow = subprocess.SW_HIDE
 
+            # Check if model already exists
+            if model_name in status.get("models_available", []):
+                self._report_progress("downloading_model", 100, f"Model {model_name} already installed")
+                return True
+
             process = subprocess.Popen(
                 [status["executable_path"], "pull", model_name],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1,
                 startupinfo=startupinfo,
                 creationflags=subprocess.CREATE_NO_WINDOW
             )
 
-            # Monitor progress
-            for line in iter(process.stdout.readline, ""):
-                if line:
-                    # Parse progress from output
+            # Monitor progress (read as bytes to avoid encoding issues)
+            while True:
+                chunk = process.stdout.read(1024)
+                if not chunk:
+                    break
+                try:
+                    line = chunk.decode('utf-8', errors='replace')
                     if "pulling" in line.lower():
                         self._report_progress("downloading_model", 80, f"Pulling {model_name}...")
                     elif "success" in line.lower():
                         self._report_progress("downloading_model", 95, f"Model {model_name} downloaded")
+                except Exception:
+                    pass
 
             process.wait(timeout=600)  # 10 minute timeout for model download
 
